@@ -25,13 +25,16 @@ def get_model_and_tokenizer(model_name: str, device: str = "cuda"):
 
 
 def get_text_data(n_tokens: int = 2_000_000, seq_len: int = 512, tokenizer=None):
-    """Load and tokenize text data from OpenWebText."""
+    """Load and tokenize text data."""
     print(f"Loading dataset for {n_tokens} tokens...")
-    dataset = load_dataset("stas/openwebtext-10k", split="train")
+    dataset = load_dataset("wikitext", "wikitext-103-raw-v1", split="train")
 
     all_tokens = []
     for example in dataset:
-        tokens = tokenizer(example["text"], return_tensors="pt", truncation=True,
+        text = example["text"]
+        if len(text.strip()) < 50:
+            continue
+        tokens = tokenizer(text, return_tensors="pt", truncation=True,
                           max_length=seq_len)["input_ids"][0]
         all_tokens.append(tokens)
         if sum(len(t) for t in all_tokens) >= n_tokens:

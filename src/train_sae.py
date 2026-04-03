@@ -44,10 +44,12 @@ def train_sae(activations: torch.Tensor, d_hidden: int, l1_coeff: float,
         sae.normalize_decoder()
 
         if (step + 1) % log_interval == 0:
+            import sys
             elapsed = time.time() - start_time
             eta = (elapsed / (step + 1)) * (n_steps - step - 1)
             print(f"  Step {step+1}/{n_steps} | recon={metrics['recon_loss']:.6f} | "
-                  f"l1={metrics['l1_loss']:.4f} | L0={metrics['l0']:.1f} | ETA={eta/60:.1f}min")
+                  f"l1={metrics['l1_loss']:.4f} | L0={metrics['l0']:.1f} | ETA={eta/60:.1f}min",
+                  flush=True)
             for k, v in metrics.items():
                 history[k].append({"step": step + 1, "value": v})
 

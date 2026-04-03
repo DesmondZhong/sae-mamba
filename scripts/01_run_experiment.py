@@ -27,11 +27,15 @@ MODELS = {
 }
 
 # SAE config
-N_TOKENS = 1_000_000  # 1M tokens
+import os, sys
+# Force unbuffered output
+os.environ["PYTHONUNBUFFERED"] = "1"
+
+N_TOKENS = 500_000  # 500K tokens (enough for SAE training)
 SEQ_LEN = 512
 SAE_EXPANSION = 4  # d_hidden = 4 * d_model
 L1_COEFFS = [5e-4, 1e-3, 3e-3]
-SAE_STEPS = 25000
+SAE_STEPS = 20000
 SAE_BATCH = 4096
 
 all_results = {}
@@ -70,28 +74,15 @@ for model_key, model_name in MODELS.items():
     residual_acts = extract_residual_stream(model, sequences, layer_indices,
                                             DEVICE, batch_size=16)
 
-    # Extract post-SSM activations (Mamba only)
-    post_ssm_acts = {}
-    if "mamba" in model_key:
-        print("\n--- Extracting post-SSM activations ---")
-        try:
-            post_ssm_acts = extract_post_ssm(model, sequences, layer_indices,
-                                             DEVICE, batch_size=16)
-        except Exception as e:
-            print(f"Post-SSM extraction failed: {e}")
-            print("Continuing with residual stream only.")
-
-    # Free model memory
+    # Free model memory before SAE training
     del model
     torch.cuda.empty_cache()
 
-    # Train SAEs
+    # Train SAEs on residual stream only (post-SSM skipped to save memory)
     model_results = {"model": model_key, "d_model": d_model, "n_layers": n_layers,
                      "layer_indices": layer_indices, "saes": {}}
 
     extraction_points = [("residual", residual_acts)]
-    if post_ssm_acts:
-        extraction_points.append(("post_ssm", post_ssm_acts))
 
     for ext_name, ext_acts in extraction_points:
         for layer_idx in layer_indices:
