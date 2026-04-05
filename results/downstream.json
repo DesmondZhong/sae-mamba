@@ -1,0 +1,14 @@
+{
+  "mamba_130m": {
+    "baseline_ppl": 28.51722728407,
+    "sae_ppl": 28.515728008851756,
+    "ppl_increase_ratio": 0.9999474256314154,
+    "layer": 12
+  },
+  "pythia_160m": {
+    "baseline_ppl": 38.50908173447644,
+    "sae_ppl": 38.51513245170156,
+    "ppl_increase_ratio": 1.0001571244224114,
+    "layer": 6
+  }
+}

@@ -1,0 +1,203 @@
+{
+  "mamba_sae": "mamba_130m_residual_L12",
+  "pythia_sae": "pythia_160m_residual_L6",
+  "matches": [
+    {
+      "mamba_feature": 0,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 1,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        ".... As coin collecting became a widespread pastime in the early 20th century, gold... [>ime<]",
+        "... and to her subsequent lifetime of celibacy and emotional trauma. Agust\u00edn '... [>acy<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 2,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... the story and can either help or impede a character, and \" Battle Potentials... [>ede<]",
+        "... lithium with greater solvation allowing more facile rotation in the betaine intermediate, loweri",
+        "... of a sulfoxonium allows more facile preparation of the reagent using weaker bases as... [>ile<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 3,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... Press voted Fey the AP Entertainer of the Year as the performer who had... [>ainer<]",
+        "... temperate regions of the Northern Hemisphere. It is found in Europe, Turkey... [>here<]",
+        "... Groundsel. \n Barker was a devout Christian, and produced religious @-@... [>out<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 4,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "...astic Period, Ra rose to preeminence in the Old Kingdom, Amun was... [>ence<]",
+        "... the house. The family lived frugally and attended both St. Edmund's... [>ally<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 5,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... Before any of these rumors came to fruition, the St. Louis Blues asked Columbus... [>ition<]",
+        "... project took several years to come to fruition. After the creation of the IR8... [>ition<]",
+        "... an hour prior to the start of free agency, signing him to a six @-... [> agency<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 6,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... be coined. Pennsylvania Representative Joseph Ingersoll, a Whig, spoke against the... [>oll<]",
+        "... assassination of R\u00f3mulo Betancourt, president of Venezuela ) led to the... [>ourt<]",
+        "... Australian Ida Rentoul Outhwaite. Queen Mary made such themes even more... [>ite<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 7,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        ".... Its story was darker and more somber than that of its predecessor. \n The... [>ber<]",
+        "...astic Period, Ra rose to preeminence in the Old Kingdom, Amun was... [>ence<]",
+        "... \n Vargas Llosa interlaces fictional elements and historical events : the book... [>aces<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 8,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... Before any of these rumors came to fruition, the St. Louis Blues asked Columbus... [>ition<]",
+        "... project took several years to come to fruition. After the creation of the IR8... [>ition<]",
+        "... particular merengue that, by envisaging the dictator as an animal who could be... [>aging<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 9,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... a letter dated May 10, Pettit proposed an oval @-@ shaped hol... [>it<]",
+        "...ination Committee. He was occasionally at loggerheads with his naval counterpart, Captain E.... [",
+        "... the design \u2014 the three Southern branch mints especially had trouble with the piece. Many... [>in"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 10,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "...ton Memorial Trophy for dedication and perseverance, while the IHL renamed its Come... [>ance<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 11,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... Before any of these rumors came to fruition, the St. Louis Blues asked Columbus... [>ition<]",
+        "... played as well, their father never pressured them, preferring that they enjoy the... [>ured<]",
+        "...ill at the back, and hair curls dropping on either side of the shoulders.... [>ls<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 12,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "..., Erik Hornung published a study rebutting these views. He points out that in... [>ting<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 13,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        ".... \n Planning guidance on aircraft noise advises that \" in some circumstances the public perceive."
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 14,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... Repertorio Espa\u00f1ol ( www.repertorio.org / chivo... [>.<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 15,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "..., Erik Hornung published a study rebutting these views. He points out that in... [>ting<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 16,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... began putting together the next Devin Townsend Band record, with the working title Human... [>se"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 17,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 18,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "... Before any of these rumors came to fruition, the St. Louis Blues asked Columbus... [>ition<]",
+        "... project took several years to come to fruition. After the creation of the IR8... [>ition<]",
+        "... up residence, her health began to deteriorate. She was in and out of nursing... [>ate<]"
+      ],
+      "pythia_examples": []
+    },
+    {
+      "mamba_feature": 19,
+      "pythia_feature": -1,
+      "overlap_count": 0,
+      "mamba_examples": [
+        "...matian coast. Since coal was diverted to the newer Tegetthoff @... [>verted<]"
+      ],
+      "pythia_examples": []
+    }
+  ],
+  "avg_overlap": 0.0
+}
