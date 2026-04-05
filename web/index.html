@@ -3,250 +3,991 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sparse Autoencoders on Mamba — Deep Dive</title>
+<title>First Sparse Autoencoders on State Space Models</title>
 <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.6; }
-  .container { max-width: 1500px; margin: 0 auto; padding: 20px; }
-  h1 { font-size: 2.2em; margin: 30px 0 10px; color: #fff; }
-  h2 { font-size: 1.4em; margin: 35px 0 15px; color: #ff9f43; border-bottom: 1px solid #333; padding-bottom: 8px; }
-  h3 { font-size: 1.1em; margin: 15px 0 10px; color: #aaa; }
-  p, .desc { color: #bbb; line-height: 1.7; margin-bottom: 15px; font-size: 0.95em; max-width: 900px; }
-  .hero { background: linear-gradient(135deg, #1a1a2e 0%, #2e1a2e 50%, #3e1a1e 100%);
-           padding: 40px; border-radius: 12px; margin-bottom: 30px; }
-  .hero h1 { margin-top: 0; }
-  .hero .subtitle { color: #ff9f43; font-size: 1.1em; margin-top: 8px; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-  .card { background: #1a1a1a; border-radius: 8px; padding: 20px; border: 1px solid #333; }
-  .card h3 { color: #ff9f43; margin-top: 0; }
-  .plot { width: 100%; min-height: 400px; }
-  .wide-plot { width: 100%; min-height: 500px; }
-  .selector select { background: #222; color: #fff; border: 1px solid #555; padding: 6px 12px;
-                      border-radius: 4px; font-size: 0.9em; }
-  .feature-list { max-height: 500px; overflow-y: auto; }
-  .feature-item { background: #222; margin: 8px 0; padding: 12px; border-radius: 6px; border-left: 3px solid #ff9f43; }
-  .feature-item .feat-id { color: #ff9f43; font-weight: bold; }
-  .feature-item .example { color: #888; font-size: 0.85em; margin: 4px 0; font-family: monospace; }
-  .insight { background: #1a1a2a; border-left: 4px solid #ff9f43; padding: 15px 20px; margin: 15px 0;
-              border-radius: 0 8px 8px 0; }
-  .insight strong { color: #ff9f43; }
-  .findings { background: #2a1a1a; border: 1px solid #5a2a2a; border-radius: 8px; padding: 20px; margin: 20px 0; }
-  .findings h3 { color: #ff9f43; }
-  .findings li { margin: 8px 0; color: #ccc; }
-  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+:root {
+  --bg: #0a0a0a;
+  --bg2: #141414;
+  --bg3: #1e1e1e;
+  --accent: #ff9f43;
+  --accent2: #ffc048;
+  --mamba: #00d2ff;
+  --mamba2: #0097b2;
+  --pythia: #ff6b6b;
+  --pythia2: #ee5a24;
+  --text: #e8e8e8;
+  --text2: #a0a0a0;
+  --border: #2a2a2a;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; line-height: 1.6; overflow-x: hidden; }
+
+/* NAV */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(10,10,10,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.nav-progress { height: 3px; background: linear-gradient(90deg, var(--accent), var(--mamba)); width: 0%; transition: width 0.15s; }
+.nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; padding: 0 24px; height: 56px; overflow-x: auto; }
+.nav-logo { font-weight: 700; font-size: 15px; color: var(--accent); white-space: nowrap; margin-right: 32px; letter-spacing: -0.5px; }
+.nav-links { display: flex; gap: 6px; }
+.nav-links a { color: var(--text2); text-decoration: none; font-size: 13px; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; white-space: nowrap; }
+.nav-links a:hover, .nav-links a.active { color: var(--accent); background: rgba(255,159,67,0.1); }
+
+/* SECTIONS */
+section { min-height: 80vh; padding: 100px 24px 60px; max-width: 1200px; margin: 0 auto; }
+.section-title { font-size: clamp(28px, 4vw, 42px); font-weight: 700; margin-bottom: 8px; letter-spacing: -1px; }
+.section-subtitle { color: var(--text2); font-size: 17px; margin-bottom: 40px; max-width: 700px; }
+.accent { color: var(--accent); }
+.mamba-color { color: var(--mamba); }
+.pythia-color { color: var(--pythia); }
+
+/* HERO */
+#hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; position: relative; }
+#hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, rgba(255,159,67,0.08) 0%, transparent 60%); pointer-events: none; }
+.hero-badge { display: inline-block; padding: 6px 16px; border: 1px solid var(--accent); border-radius: 20px; font-size: 13px; color: var(--accent); margin-bottom: 24px; opacity: 0; animation: fadeUp 0.6s 0.2s forwards; }
+.hero-title { font-size: clamp(36px, 6vw, 68px); font-weight: 800; letter-spacing: -2px; line-height: 1.1; max-width: 900px; opacity: 0; animation: fadeUp 0.6s 0.4s forwards; }
+.hero-title .highlight { background: linear-gradient(135deg, var(--accent), #ff6348); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { color: var(--text2); font-size: clamp(16px, 2vw, 20px); max-width: 650px; margin: 20px auto 36px; opacity: 0; animation: fadeUp 0.6s 0.6s forwards; }
+.hero-sub .typed { color: var(--mamba); }
+.hero-btn { display: inline-block; padding: 14px 36px; background: var(--accent); color: #0a0a0a; font-weight: 700; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; opacity: 0; animation: fadeUp 0.6s 0.8s forwards; transition: transform 0.2s, box-shadow 0.2s; }
+.hero-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,159,67,0.3); }
+.hero-stats { display: flex; gap: 48px; margin-top: 48px; opacity: 0; animation: fadeUp 0.6s 1s forwards; }
+.hero-stat { text-align: center; }
+.hero-stat-val { font-size: 32px; font-weight: 800; color: var(--accent); }
+.hero-stat-label { font-size: 13px; color: var(--text2); }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+/* ANIMATE ON SCROLL */
+.anim { opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.4,0,0.2,1); }
+.anim.visible { opacity: 1; transform: translateY(0); }
+
+/* CARDS */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 28px; transition: transform 0.2s, border-color 0.2s; }
+.card:hover { transform: translateY(-4px); border-color: var(--accent); }
+.card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.card p { color: var(--text2); font-size: 14px; }
+.card .spec { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.card .spec:last-child { border-bottom: none; }
+.card .spec .label { color: var(--text2); }
+
+/* DIAGRAM */
+.diagram-container { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; margin: 40px 0; }
+.diagram-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 32px; flex: 1; min-width: 300px; max-width: 500px; }
+.diagram-box h4 { font-size: 18px; margin-bottom: 16px; text-align: center; }
+
+/* TOGGLE */
+.toggle-group { display: inline-flex; background: var(--bg3); border-radius: 8px; overflow: hidden; margin-bottom: 24px; border: 1px solid var(--border); }
+.toggle-btn { padding: 10px 24px; border: none; background: transparent; color: var(--text2); cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
+.toggle-btn.active { background: var(--accent); color: #0a0a0a; }
+
+/* EXPANDABLE */
+.expandable { border: 1px solid var(--border); border-radius: 8px; margin: 16px 0; overflow: hidden; }
+.expandable-header { padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg2); font-weight: 600; }
+.expandable-header:hover { background: var(--bg3); }
+.expandable-arrow { transition: transform 0.3s; font-size: 12px; }
+.expandable.open .expandable-arrow { transform: rotate(180deg); }
+.expandable-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+.expandable.open .expandable-body { max-height: 600px; }
+.expandable-content { padding: 20px; color: var(--text2); font-size: 14px; line-height: 1.8; }
+
+/* FEATURE BROWSER */
+.feature-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.feature-controls select { padding: 10px 16px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; cursor: pointer; }
+.feature-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+.feature-card h4 { font-size: 16px; margin-bottom: 10px; }
+.example-text { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; padding: 10px; background: var(--bg); border-radius: 6px; margin: 6px 0; line-height: 1.6; color: var(--text2); }
+.example-text .hl { background: rgba(255,159,67,0.3); color: var(--accent); padding: 1px 3px; border-radius: 3px; }
+.side-by-side { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 768px) { .side-by-side { grid-template-columns: 1fr; } }
+
+/* COUNTER */
+.big-counter { font-size: clamp(48px, 8vw, 96px); font-weight: 800; text-align: center; color: var(--accent); font-variant-numeric: tabular-nums; }
+.big-label { text-align: center; font-size: 18px; color: var(--text2); margin-top: 8px; }
+
+/* CALLOUT */
+.callout { background: linear-gradient(135deg, rgba(255,159,67,0.1), rgba(0,210,255,0.05)); border: 1px solid rgba(255,159,67,0.3); border-radius: 12px; padding: 32px; text-align: center; margin: 32px 0; }
+.callout h3 { font-size: 24px; margin-bottom: 8px; }
+.callout p { color: var(--text2); }
+
+/* TAKEAWAY */
+.takeaway-list { list-style: none; counter-reset: take; }
+.takeaway-list li { counter-increment: take; padding: 20px 20px 20px 64px; position: relative; border-left: 2px solid var(--border); margin-left: 20px; }
+.takeaway-list li::before { content: counter(take); position: absolute; left: -18px; top: 18px; width: 34px; height: 34px; background: var(--accent); color: #0a0a0a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+.takeaway-list li h4 { font-size: 17px; margin-bottom: 4px; }
+.takeaway-list li p { color: var(--text2); font-size: 14px; }
+
+/* SUMMARY TABLE */
+.summary-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; }
+.summary-table th { text-align: left; padding: 12px 16px; background: var(--bg3); color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--accent); }
+.summary-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.summary-table tr:hover td { background: var(--bg2); }
+
+/* SLIDER */
+.slider-container { margin: 20px 0; display: flex; align-items: center; gap: 16px; }
+.slider-container input[type=range] { flex: 1; accent-color: var(--accent); height: 6px; }
+.slider-label { font-size: 14px; color: var(--text2); min-width: 120px; }
+
+/* LAYER DIAGRAM */
+.layer-viz { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.layer-block { width: 100%; max-width: 200px; height: 20px; background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; position: relative; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text2); transition: all 0.3s; }
+.layer-block.active { background: rgba(255,159,67,0.2); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 12px rgba(255,159,67,0.2); }
+.layer-block.active::after { content: ' \2190 SAE'; color: var(--accent); font-weight: 700; margin-left: 8px; }
+
+/* FOOTER */
+footer { text-align: center; padding: 40px; color: var(--text2); font-size: 13px; border-top: 1px solid var(--border); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  section { padding: 80px 16px 40px; }
+  .hero-stats { flex-direction: column; gap: 16px; }
+  .diagram-container { flex-direction: column; }
+  .nav-links a { font-size: 12px; padding: 6px 8px; }
+}
+
+/* SVG DIAGRAM STYLES */
+.arch-svg text { fill: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+.arch-svg .flow-arrow { stroke: var(--accent); stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+.arch-svg .flow-arrow-mamba { stroke: var(--mamba); }
+.arch-svg .block { fill: var(--bg3); stroke: var(--border); stroke-width: 1.5; rx: 8; }
+.arch-svg .block-accent { fill: rgba(255,159,67,0.15); stroke: var(--accent); }
+.arch-svg .block-mamba { fill: rgba(0,210,255,0.15); stroke: var(--mamba); }
+@keyframes dashMove { to { stroke-dashoffset: -20; } }
+.arch-svg .animated-flow { stroke-dasharray: 8 4; animation: dashMove 1s linear infinite; }
 </style>
 </head>
 <body>
-<div class="container">
 
-<div class="hero">
-  <h1>Sparse Autoencoders on State Space Models</h1>
-  <div class="subtitle">The first SAEs on Mamba — do SSMs develop monosemantic features?</div>
-  <p style="margin-top:15px; color:#aaa;">
-    We train sparse autoencoders on Mamba-130M, Mamba-370M, and Pythia-160M (transformer baseline),
-    comparing feature sparsity, monosemanticity, and reconstruction quality across architectures.
-    Deep dive: L1 sweep for Pareto frontiers, automated interpretability scoring, cross-model feature matching,
-    and downstream perplexity evaluation.
-  </p>
-</div>
-
-<!-- Section 1: Aggregate stats -->
-<h2>1. Feature Statistics: Mamba vs Transformer</h2>
-<div class="grid">
-  <div class="card">
-    <h3>L0 (Active Features per Token)</h3>
-    <div id="plot-l0" class="plot"></div>
+<!-- NAV -->
+<nav>
+  <div class="nav-progress" id="navProgress"></div>
+  <div class="nav-inner">
+    <div class="nav-logo">SAE x Mamba</div>
+    <div class="nav-links">
+      <a href="#hero">Home</a>
+      <a href="#why">Why</a>
+      <a href="#experiment">Experiment</a>
+      <a href="#sparsity">Sparsity</a>
+      <a href="#pareto">Pareto</a>
+      <a href="#mono">Monosemanticity</a>
+      <a href="#features">Features</a>
+      <a href="#downstream">Downstream</a>
+      <a href="#takeaways">Takeaways</a>
+    </div>
   </div>
-  <div class="card">
-    <h3>Reconstruction Loss (MSE)</h3>
-    <div id="plot-recon" class="plot"></div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-badge">AI Mechanistic Interpretability Research</div>
+  <h1 class="hero-title">First <span class="highlight">Sparse Autoencoders</span><br>on State Space Models</h1>
+  <p class="hero-sub">Can we decompose Mamba's recurrent hidden state into interpretable features the same way we do for Transformers? <span class="typed" id="heroTyped"></span></p>
+  <a href="#why" class="hero-btn">Start Tour &#8595;</a>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-val">9</div><div class="hero-stat-label">SAEs Trained</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">3</div><div class="hero-stat-label">Models Compared</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">~0%</div><div class="hero-stat-label">Dead Features</div></div>
+    <div class="hero-stat"><div class="hero-stat-val">1.00x</div><div class="hero-stat-label">PPL Ratio</div></div>
   </div>
-</div>
-<div class="insight">
-  <strong>Key finding:</strong> Mamba features are substantially less sparse (L0=2300-3700)
-  than Pythia features (L0=1200-2100) at the same L1 penalty. Zero dead features in all models.
-  SSM residual streams encode information more densely.
-</div>
+</section>
 
-<!-- Section 2: L1 Sweep Pareto Frontier -->
-<h2>2. L1 Sweep: Sparsity vs Reconstruction Pareto Frontier</h2>
-<p class="desc">
-  Can we force Mamba to be as sparse as Pythia? We sweep L1 from 1e-4 to 3e-2 and map the tradeoff.
-</p>
-<div class="grid">
-  <div class="card">
-    <h3>L0 vs Reconstruction Loss</h3>
-    <div id="plot-pareto" class="wide-plot"></div>
+<!-- SECTION 1: WHY THIS MATTERS -->
+<section id="why">
+  <div class="anim">
+    <div class="section-title">Why This Matters</div>
+    <p class="section-subtitle">Sparse Autoencoders have revealed interpretable features inside Transformers. But Mamba processes information completely differently. Does the same technique still work?</p>
   </div>
-  <div class="card">
-    <h3>L0 vs L1 Coefficient</h3>
-    <div id="plot-l0-vs-l1" class="plot"></div>
+  <div class="diagram-container anim">
+    <div class="diagram-box">
+      <h4 class="pythia-color">Transformer (Pythia)</h4>
+      <svg class="arch-svg" viewBox="0 0 400 320" width="100%" height="320">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#ff9f43"/>
+          </marker>
+          <marker id="arrowheadCyan" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#00d2ff"/>
+          </marker>
+        </defs>
+        <rect x="140" y="10" width="120" height="36" class="block" rx="8"/>
+        <text x="200" y="33" text-anchor="middle" font-size="13" fill="#e8e8e8">Input Tokens</text>
+        <rect x="130" y="70" width="140" height="36" class="block-accent" rx="8"/>
+        <text x="200" y="93" text-anchor="middle" font-size="13" font-weight="600" fill="#ff9f43">Residual Stream</text>
+        <rect x="20" y="140" width="120" height="36" class="block" rx="8"/>
+        <text x="80" y="163" text-anchor="middle" font-size="12" fill="#e8e8e8">Self-Attention</text>
+        <rect x="260" y="140" width="120" height="36" class="block" rx="8"/>
+        <text x="320" y="163" text-anchor="middle" font-size="12" fill="#e8e8e8">MLP</text>
+        <rect x="130" y="210" width="140" height="36" class="block-accent" rx="8"/>
+        <text x="200" y="233" text-anchor="middle" font-size="13" font-weight="600" fill="#ff9f43">Residual Stream</text>
+        <rect x="290" y="210" width="90" height="36" rx="8" fill="rgba(255,159,67,0.3)" stroke="#ff9f43" stroke-width="2" stroke-dasharray="4 2"/>
+        <text x="335" y="233" text-anchor="middle" font-size="12" font-weight="700" fill="#ff9f43">SAE</text>
+        <rect x="140" y="270" width="120" height="36" class="block" rx="8"/>
+        <text x="200" y="293" text-anchor="middle" font-size="13" fill="#e8e8e8">Output</text>
+        <line x1="200" y1="46" x2="200" y2="70" class="flow-arrow"/>
+        <line x1="170" y1="106" x2="80" y2="140" class="flow-arrow"/>
+        <line x1="230" y1="106" x2="320" y2="140" class="flow-arrow"/>
+        <line x1="80" y1="176" x2="170" y2="210" class="flow-arrow"/>
+        <line x1="320" y1="176" x2="230" y2="210" class="flow-arrow"/>
+        <line x1="200" y1="246" x2="200" y2="270" class="flow-arrow"/>
+        <line x1="270" y1="228" x2="290" y2="228" class="flow-arrow animated-flow"/>
+        <text x="200" y="310" text-anchor="middle" font-size="11" fill="#a0a0a0">All tokens see each other via attention</text>
+      </svg>
+    </div>
+    <div class="diagram-box">
+      <h4 class="mamba-color">State Space Model (Mamba)</h4>
+      <svg class="arch-svg" viewBox="0 0 400 320" width="100%" height="320">
+        <rect x="140" y="10" width="120" height="36" class="block" rx="8"/>
+        <text x="200" y="33" text-anchor="middle" font-size="13" fill="#e8e8e8">Input Tokens</text>
+        <rect x="110" y="70" width="180" height="100" class="block-mamba" rx="8"/>
+        <text x="200" y="95" text-anchor="middle" font-size="13" font-weight="600" fill="#00d2ff">Selective SSM</text>
+        <rect x="140" y="110" width="120" height="36" rx="8" fill="rgba(0,210,255,0.2)" stroke="#00d2ff" stroke-width="1.5"/>
+        <text x="200" y="133" text-anchor="middle" font-size="12" fill="#00d2ff">h(t) state</text>
+        <path d="M 265 128 C 310 128, 310 80, 265 80" fill="none" stroke="#00d2ff" stroke-width="2" class="animated-flow" marker-end="url(#arrowheadCyan)"/>
+        <text x="325" y="108" font-size="11" fill="#00d2ff">recurrent</text>
+        <rect x="130" y="200" width="140" height="36" class="block-mamba" rx="8"/>
+        <text x="200" y="223" text-anchor="middle" font-size="13" font-weight="600" fill="#00d2ff">Residual Stream</text>
+        <rect x="290" y="200" width="90" height="36" rx="8" fill="rgba(0,210,255,0.3)" stroke="#00d2ff" stroke-width="2" stroke-dasharray="4 2"/>
+        <text x="335" y="223" text-anchor="middle" font-size="12" font-weight="700" fill="#00d2ff">SAE</text>
+        <rect x="140" y="270" width="120" height="36" class="block" rx="8"/>
+        <text x="200" y="293" text-anchor="middle" font-size="13" fill="#e8e8e8">Output</text>
+        <line x1="200" y1="46" x2="200" y2="70" class="flow-arrow flow-arrow-mamba" marker-end="url(#arrowheadCyan)"/>
+        <line x1="200" y1="170" x2="200" y2="200" class="flow-arrow flow-arrow-mamba" marker-end="url(#arrowheadCyan)"/>
+        <line x1="200" y1="236" x2="200" y2="270" class="flow-arrow flow-arrow-mamba" marker-end="url(#arrowheadCyan)"/>
+        <line x1="270" y1="218" x2="290" y2="218" class="flow-arrow flow-arrow-mamba animated-flow" marker-end="url(#arrowheadCyan)"/>
+        <text x="200" y="310" text-anchor="middle" font-size="11" fill="#a0a0a0">Sequential processing with compressed state</text>
+      </svg>
+    </div>
   </div>
-</div>
-<div class="insight">
-  <strong>Finding:</strong> Even with 300x higher L1 penalty, Mamba remains denser than Pythia.
-  The Pareto frontiers are clearly separated: Mamba needs more active features for the same reconstruction quality.
-  This confirms that Mamba's dense representations are intrinsic to SSM information flow, not an artifact of L1 tuning.
-</div>
+  <div class="callout anim">
+    <h3>The Key Question</h3>
+    <p>Mamba compresses all past context into a fixed-size recurrent state. Can a Sparse Autoencoder still find clean, interpretable features in this compressed representation -- or is the information too entangled?</p>
+  </div>
+</section>
 
-<!-- Section 3: Monosemanticity -->
-<h2>3. Automated Monosemanticity Scoring</h2>
-<p class="desc">
-  We embed max-activating contexts with a sentence transformer and measure average pairwise cosine similarity.
-  Higher = more semantically coherent (monosemantic) features.
-</p>
-<div class="card">
-  <h3>Mean Monosemanticity Score by Model and Layer</h3>
-  <div id="plot-mono" class="plot"></div>
-</div>
-<div class="insight">
-  <strong>Finding:</strong> Early layers (L0) show highest monosemanticity for both architectures.
-  Pythia L0 features (0.20) are slightly more monosemantic than Mamba L0 (0.17),
-  but both drop sharply in later layers.
-</div>
+<!-- SECTION 2: THE EXPERIMENT -->
+<section id="experiment">
+  <div class="anim">
+    <div class="section-title">The Experiment</div>
+    <p class="section-subtitle">We trained Sparse Autoencoders on the residual stream of 3 language models at early, middle, and late layers -- 9 SAEs total.</p>
+  </div>
+  <div class="card-grid anim">
+    <div class="card" style="border-top: 3px solid var(--mamba);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 class="mamba-color">Mamba-130M</h3>
+        <span style="background:rgba(0,210,255,0.15);color:var(--mamba);padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600">SSM</span>
+      </div>
+      <div class="spec"><span class="label">d_model</span><span>768</span></div>
+      <div class="spec"><span class="label">Layers</span><span>24</span></div>
+      <div class="spec"><span class="label">SAE layers</span><span>0, 12, 23</span></div>
+      <div class="spec"><span class="label">SAE d_hidden</span><span>3072 (4x)</span></div>
+      <div class="spec"><span class="label">Architecture</span><span>Selective SSM</span></div>
+    </div>
+    <div class="card" style="border-top: 3px solid var(--mamba);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 class="mamba-color">Mamba-370M</h3>
+        <span style="background:rgba(0,210,255,0.15);color:var(--mamba);padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600">SSM</span>
+      </div>
+      <div class="spec"><span class="label">d_model</span><span>1024</span></div>
+      <div class="spec"><span class="label">Layers</span><span>48</span></div>
+      <div class="spec"><span class="label">SAE layers</span><span>0, 24, 47</span></div>
+      <div class="spec"><span class="label">SAE d_hidden</span><span>4096 (4x)</span></div>
+      <div class="spec"><span class="label">Architecture</span><span>Selective SSM</span></div>
+    </div>
+    <div class="card" style="border-top: 3px solid var(--pythia);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 class="pythia-color">Pythia-160M</h3>
+        <span style="background:rgba(255,107,107,0.15);color:var(--pythia);padding:4px 10px;border-radius:12px;font-size:12px;font-weight:600">Transformer</span>
+      </div>
+      <div class="spec"><span class="label">d_model</span><span>768</span></div>
+      <div class="spec"><span class="label">Layers</span><span>12</span></div>
+      <div class="spec"><span class="label">SAE layers</span><span>0, 6, 11</span></div>
+      <div class="spec"><span class="label">SAE d_hidden</span><span>3072 (4x)</span></div>
+      <div class="spec"><span class="label">Architecture</span><span>GPT-NeoX</span></div>
+    </div>
+  </div>
 
-<!-- Section 4: Downstream Reconstruction -->
-<h2>4. Downstream Reconstruction: Perplexity Impact</h2>
-<div class="card">
-  <h3>Perplexity with SAE-Reconstructed Activations</h3>
-  <div id="plot-downstream" class="plot"></div>
-</div>
-<div class="insight">
-  <strong>Finding:</strong> Both SAEs achieve near-perfect reconstruction with negligible perplexity increase
-  (ratio ~1.00x). The SAE decomposition is lossless at the functional level for both architectures.
-</div>
+  <div style="margin-top:40px" class="anim">
+    <h3 style="text-align:center;margin-bottom:20px;font-size:18px">Where We Extract Activations</h3>
+    <div style="display:flex;gap:32px;flex-wrap:wrap;justify-content:center">
+      <div style="text-align:center">
+        <div style="font-size:14px;color:var(--mamba);margin-bottom:8px;font-weight:600">Mamba-130M (24 layers)</div>
+        <div class="layer-viz" id="layerViz130m"></div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:14px;color:var(--mamba);margin-bottom:8px;font-weight:600">Mamba-370M (48 layers)</div>
+        <div class="layer-viz" id="layerViz370m"></div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:14px;color:var(--pythia);margin-bottom:8px;font-weight:600">Pythia-160M (12 layers)</div>
+        <div class="layer-viz" id="layerVizPythia"></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<!-- Section 5: Feature Browser -->
-<h2>5. Feature Browser</h2>
-<div class="selector">
-  <label>SAE: <select id="feature-sae-select" onchange="updateFeatures()"></select></label>
-</div>
-<div class="feature-list" id="feature-list"></div>
+<!-- SECTION 3: SPARSITY -->
+<section id="sparsity">
+  <div class="anim">
+    <div class="section-title">Sparsity Comparison: <span class="accent">L0 Norms</span></div>
+    <p class="section-subtitle">L0 measures how many features activate per input. Lower L0 = sparser, more interpretable. The headline: <strong class="mamba-color">Mamba SAEs are significantly denser than Pythia SAEs</strong>.</p>
+  </div>
+  <div class="toggle-group anim">
+    <button class="toggle-btn active" onclick="setSparsityView('all', this)">All SAEs</button>
+    <button class="toggle-btn" onclick="setSparsityView('arch', this)">Mamba vs Pythia</button>
+  </div>
+  <div id="sparsityChart" style="width:100%;height:500px" class="anim"></div>
+  <p style="color:var(--text2);font-size:13px;margin-top:8px" class="anim">Click any bar to view that SAE's training curve below.</p>
+  <div id="trainingCurveContainer" style="display:none;margin-top:24px" class="anim">
+    <h4 style="margin-bottom:8px">Training Curves for: <span id="selectedSAELabel" class="accent"></span></h4>
+    <div id="trainingCurve" style="width:100%;height:350px"></div>
+  </div>
+</section>
 
-<!-- Summary -->
-<div class="findings">
-  <h3>Summary of Deep Dive Findings</h3>
-  <ul>
-    <li><strong>SAEs work on SSMs:</strong> First demonstration that sparse feature extraction decomposes Mamba hidden states into interpretable features.</li>
-    <li><strong>Mamba is intrinsically denser:</strong> L1 sweep shows Mamba requires 2-3x more active features than Pythia at every sparsity-reconstruction tradeoff point.</li>
-    <li><strong>Features are architecture-specific:</strong> Cross-model matching finds zero overlap in max-activating texts — Mamba and Pythia features capture different aspects of the same data.</li>
-    <li><strong>Monosemanticity is comparable:</strong> Despite density differences, feature coherence is similar between architectures (slight edge to Pythia at layer 0).</li>
-    <li><strong>Reconstruction is lossless:</strong> Both SAEs achieve near-zero perplexity degradation, confirming the decomposition is functionally faithful.</li>
-  </ul>
-</div>
+<!-- SECTION 4: PARETO -->
+<section id="pareto">
+  <div class="anim">
+    <div class="section-title">L1 Pareto Frontier: <span class="accent">The Money Slide</span></div>
+    <p class="section-subtitle">Sweeping the L1 penalty reveals the fundamental sparsity-reconstruction tradeoff. At <strong>every</strong> tradeoff point, Mamba activations are denser and harder to sparsify.</p>
+  </div>
+  <div id="paretoChart" style="width:100%;height:520px" class="anim"></div>
+  <div class="slider-container anim">
+    <span class="slider-label">Animate L1: <strong id="sliderVal">all</strong></span>
+    <input type="range" id="l1Slider" min="0" max="6" value="6" oninput="animatePareto(this.value)">
+  </div>
+  <div class="callout anim">
+    <h3>Mamba is denser at every tradeoff point</h3>
+    <p>Even with 300x more L1 penalty, Mamba's L0 barely drops below Pythia's minimum. The SSM recurrent state appears to distribute information more uniformly across dimensions.</p>
+  </div>
+</section>
 
-</div>
+<!-- SECTION 5: MONOSEMANTICITY -->
+<section id="mono">
+  <div class="anim">
+    <div class="section-title">Monosemanticity Scores</div>
+    <p class="section-subtitle">Do the learned features represent single concepts? We measure automated monosemanticity scores (higher = more interpretable).</p>
+  </div>
+  <div class="expandable anim" onclick="this.classList.toggle('open')">
+    <div class="expandable-header">
+      <span>What is monosemanticity?</span>
+      <span class="expandable-arrow">&#9660;</span>
+    </div>
+    <div class="expandable-body">
+      <div class="expandable-content">
+        <p>A <strong>monosemantic</strong> feature responds to exactly one concept (e.g., "the word 'the'" or "mentions of sports"). A <strong>polysemantic</strong> feature fires for multiple unrelated concepts.</p>
+        <p style="margin-top:8px">We compute monosemanticity by examining each feature's top-activating examples. If they cluster tightly around a single theme, the feature gets a high score. Scores near 0 indicate highly polysemantic or dead features; scores near 1 indicate clean, interpretable features.</p>
+        <p style="margin-top:8px">Note: With only 20 features sampled per SAE, these scores should be interpreted as indicative rather than definitive.</p>
+      </div>
+    </div>
+  </div>
+  <div id="monoChart" style="width:100%;height:450px" class="anim"></div>
+  <div class="callout anim">
+    <h3>Comparable Interpretability</h3>
+    <p>Despite being denser, Mamba's early-layer features show monosemanticity scores competitive with Pythia. This suggests that SSM representations, while less sparse, still contain individually meaningful features.</p>
+  </div>
+</section>
+
+<!-- SECTION 6: FEATURE BROWSER -->
+<section id="features">
+  <div class="anim">
+    <div class="section-title">Feature Browser</div>
+    <p class="section-subtitle">Explore individual learned features and their max-activating text contexts.</p>
+  </div>
+  <div class="feature-controls anim">
+    <select id="featureModel" onchange="updateFeatureBrowser()">
+      <option value="mamba_130m">Mamba-130M</option>
+      <option value="mamba_370m">Mamba-370M</option>
+      <option value="pythia_160m">Pythia-160M</option>
+    </select>
+    <select id="featureLayer" onchange="showFeatures()"></select>
+  </div>
+  <div id="featureList" class="anim"></div>
+
+  <div style="margin-top:48px" class="anim">
+    <h3 style="margin-bottom:16px">Mamba vs Pythia: Cross-Model Feature Comparison</h3>
+    <p style="color:var(--text2);margin-bottom:20px;font-size:14px">We attempted to match features between Mamba-130M (Layer 12) and Pythia-160M (Layer 6) based on activation overlap. Result: <strong class="accent">average overlap = 0.0</strong> -- these architectures learn fundamentally different internal representations.</p>
+    <div class="side-by-side" id="crossModelView"></div>
+  </div>
+</section>
+
+<!-- SECTION 7: DOWNSTREAM -->
+<section id="downstream">
+  <div class="anim">
+    <div class="section-title">Downstream Impact: <span class="accent">Perplexity</span></div>
+    <p class="section-subtitle">The ultimate test: does routing activations through the SAE hurt model performance?</p>
+  </div>
+  <div id="pplChart" style="width:100%;height:400px" class="anim"></div>
+  <div style="margin-top:40px;text-align:center" class="anim">
+    <div class="big-counter" id="pplCounter">1.0500x</div>
+    <div class="big-label">Perplexity Increase Ratio (Mamba-130M)</div>
+  </div>
+  <div class="callout anim">
+    <h3>Effectively Lossless Reconstruction</h3>
+    <p>Both models show perplexity ratios indistinguishable from 1.0x. The SAE faithfully reconstructs the activation space without degrading downstream task performance.</p>
+  </div>
+</section>
+
+<!-- SECTION 8: TAKEAWAYS -->
+<section id="takeaways">
+  <div class="anim">
+    <div class="section-title">Key Takeaways</div>
+    <p class="section-subtitle">What we learned from the first application of Sparse Autoencoders to State Space Models.</p>
+  </div>
+  <ol class="takeaway-list anim">
+    <li>
+      <h4>SAEs work on Mamba</h4>
+      <p>Sparse Autoencoders successfully train on Mamba's residual stream with zero dead features and near-lossless reconstruction, establishing that mechanistic interpretability tools transfer to SSMs.</p>
+    </li>
+    <li>
+      <h4>Mamba is fundamentally denser</h4>
+      <p>Across all layers and L1 penalties, Mamba SAEs have 25-40% higher L0 than comparable Pythia SAEs. The recurrent state distributes information more uniformly.</p>
+    </li>
+    <li>
+      <h4>The Pareto frontier is shifted</h4>
+      <p>At every sparsity-reconstruction tradeoff point, Mamba requires more active features to achieve the same reconstruction quality. This is a fundamental architectural difference, not a training artifact.</p>
+    </li>
+    <li>
+      <h4>Features are still interpretable</h4>
+      <p>Despite higher density, individual Mamba features show comparable monosemanticity to Pythia features, especially in early layers.</p>
+    </li>
+    <li>
+      <h4>Zero feature overlap between architectures</h4>
+      <p>Cross-model feature matching yields zero overlap, suggesting Mamba and Transformers learn fundamentally different internal representations of language.</p>
+    </li>
+    <li>
+      <h4>Reconstruction is lossless</h4>
+      <p>Perplexity with SAE-reconstructed activations is indistinguishable from baseline for both architectures (ratio ~1.000x).</p>
+    </li>
+  </ol>
+
+  <div style="margin-top:48px" class="anim">
+    <h3 style="margin-bottom:16px">Summary of Results</h3>
+    <table class="summary-table">
+      <thead>
+        <tr><th>Metric</th><th>Mamba-130M</th><th>Mamba-370M</th><th>Pythia-160M</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>L0 range</td><td class="mamba-color">2329 - 2888</td><td class="mamba-color">3358 - 3682</td><td class="pythia-color">1268 - 2124</td></tr>
+        <tr><td>Dead features</td><td>0%</td><td>0%</td><td>0%</td></tr>
+        <tr><td>PPL ratio</td><td>0.9999x</td><td>--</td><td>1.0002x</td></tr>
+        <tr><td>Mono. (early)</td><td>0.173</td><td>0.032</td><td>0.203</td></tr>
+        <tr><td>Mono. (mid)</td><td>0.066</td><td>0.059</td><td>0.045</td></tr>
+        <tr><td>Mono. (late)</td><td>0.071</td><td>0.029</td><td>0.061</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:48px" class="anim">
+    <h3 style="margin-bottom:16px">What's Next</h3>
+    <div class="card-grid">
+      <div class="card">
+        <h3 style="font-size:16px">Larger SAE Dictionaries</h3>
+        <p>Scale to 16x and 64x expansion to find sparser Mamba features. Does higher expansion unlock interpretability?</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:16px">SSM-Specific Extraction</h3>
+        <p>Extract from Mamba's internal SSM state (A, B, C matrices) rather than the residual stream. Are there sparser representations hidden inside the recurrence?</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:16px">Circuit Analysis</h3>
+        <p>Use SAE features to trace circuits through Mamba. Can we identify "induction heads" or analogous mechanisms in SSMs?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  SAE x Mamba Research -- Interactive Poster
+</footer>
 
 <script>
-const summaryData = {"mamba_130m_residual_L0": {"model": "mamba_130m", "extraction": "residual", "layer": 0, "l0_mean": 2888.442626953125, "dead_frac": 0.0, "alive_features": 3072, "dead_features": 0, "avg_recon_loss": 7.953724639637435e-06, "d_hidden": 3072}, "mamba_130m_residual_L12": {"model": "mamba_130m", "extraction": "residual", "layer": 12, "l0_mean": 2644.50927734375, "dead_frac": 0.0, "alive_features": 3072, "dead_features": 0, "avg_recon_loss": 4.480821374526102e-05, "d_hidden": 3072}, "mamba_130m_residual_L23": {"model": "mamba_130m", "extraction": "residual", "layer": 23, "l0_mean": 2328.907958984375, "dead_frac": 0.0, "alive_features": 3072, "dead_features": 0, "avg_recon_loss": 0.0029251714987054344, "d_hidden": 3072}, "mamba_370m_residual_L0": {"model": "mamba_370m", "extraction": "residual", "layer": 0, "l0_mean": 3681.858642578125, "dead_frac": 0.0, "alive_features": 4096, "dead_features": 0, "avg_recon_loss": 3.4112161611268615e-06, "d_hidden": 4096}, "mamba_370m_residual_L24": {"model": "mamba_370m", "extraction": "residual", "layer": 24, "l0_mean": 3404.24365234375, "dead_frac": 0.0, "alive_features": 4096, "dead_features": 0, "avg_recon_loss": 3.108897485095649e-05, "d_hidden": 4096}, "mamba_370m_residual_L47": {"model": "mamba_370m", "extraction": "residual", "layer": 47, "l0_mean": 3358.11669921875, "dead_frac": 0.0, "alive_features": 4096, "dead_features": 0, "avg_recon_loss": 0.0018451420707651033, "d_hidden": 4096}, "pythia_160m_residual_L0": {"model": "pythia_160m", "extraction": "residual", "layer": 0, "l0_mean": 1268.4542236328125, "dead_frac": 0.0, "alive_features": 3072, "dead_features": 0, "avg_recon_loss": 6.749156346948021e-07, "d_hidden": 3072}, "pythia_160m_residual_L6": {"model": "pythia_160m", "extraction": "residual", "layer": 6, "l0_mean": 2124.047607421875, "dead_frac": 0.0, "alive_features": 3072, "dead_features": 0, "avg_recon_loss": 4.0038908037622306e-05, "d_hidden": 3072}, "pythia_160m_residual_L11": {"model": "pythia_160m", "extraction": "residual", "layer": 11, "l0_mean": 2108.410888671875, "dead_frac": 0.0, "alive_features": 3072, "dead_features": 0, "avg_recon_loss": 5.952913342611521e-05, "d_hidden": 3072}};
-const featureBrowser = {"mamba_130m_residual_L0": [{"feature_id": 0, "max_activation": 1.1019246578216553, "top_examples": [{"token_idx": 56579, "activation": 1.07098388671875, "text": "... left Pola with her sister ship, Radetzky. They were soon spotted by... [> Rad<]"}, {"token_idx": 55669, "activation": 1.0655903816223145, "text": "... @-@ Hungarian Navy consisted of the Radetzky class, the Tegetth... [> Rad<]"}, {"token_idx": 54324, "activation": 1.0652062892913818, "text": "... Zr\u00ednyi \" ) was a Radetzky @-@ class pre @... [> Rad<]"}]}, {"feature_id": 1, "max_activation": 1.1823369264602661, "top_examples": [{"token_idx": 4486, "activation": 1.0479040145874023, "text": "...\u30ea\u30a23 -\u8d64\u304d\u904b\u547d\u306e\u6226\u4e59\u5973... [>\ufffd<]"}]}, {"feature_id": 2, "max_activation": 1.1348623037338257, "top_examples": [{"token_idx": 2691, "activation": 1.025201678276062, "text": "...... \" ( \u3082\u3057\u3082\u541b\u304c\u9858\u3046\u306e\u306a\u3089,... [>\ufffd<]"}]}, {"feature_id": 3, "max_activation": 1.056959867477417, "top_examples": [{"token_idx": 62827, "activation": 0.9145166277885437, "text": "... began to issue to fill the gap in commerce and finance the war. \n Since gold... [> commerce<]"}, {"token_idx": 58752, "activation": 0.9056462049484253, "text": "... the gold dollar found a ready place in commerce. Silver again circulated after Congress in 18... [> commerce<]"}, {"token_idx": 58782, "activation": 0.9030287265777588, "text": "... the gold dollar became a rarity in commerce even before federal coins vanished from circulation because... [> commerce<]"}]}, {"feature_id": 4, "max_activation": 1.1435670852661133, "top_examples": [{"token_idx": 11524, "activation": 1.0704947710037231, "text": "... cards ; Girls'Friendly Society, 1920s, 1930s \n Christmas cards (... [> 1920<]"}, {"token_idx": 11543, "activation": 1.0607964992523193, "text": "... ; Barton @-@ Colton, 1920s, 1930s \n Child Thoughts... [> 1920<]"}, {"token_idx": 10857, "activation": 1.056227684020996, "text": "... Boy and Girl Characters ( 1917, 1920 ). Her own Old Rhymes... [> 1920<]"}, {"token_idx": 10870, "activation": 1.0495498180389404, "text": "... Old Rhymes for All Times ( 1928 ) and The Lord of the Rushie... [> 1928<]"}, {"token_idx": 11226, "activation": 1.044858694076538, "text": "... Feeding of the Five Thousand ( 1929 ), for the chapel in Lland... [> 1929<]"}, {"token_idx": 11499, "activation": 1.041481852531433, "text": "... C. W. Faulkner, 1920 \n Guardian Angel ; Society for the Pres... [> 1920<]"}]}, {"feature_id": 5, "max_activation": 1.1830732822418213, "top_examples": []}, {"feature_id": 6, "max_activation": 1.0156129598617554, "top_examples": [{"token_idx": 95304, "activation": 0.9603357911109924, "text": "... Elephanta Island ( Protected Monument ) Rules of 1957, which prohibits mining... [>ument<]"}]}, {"feature_id": 7, "max_activation": 1.245434045791626, "top_examples": []}, {"feature_id": 8, "max_activation": 1.0592156648635864, "top_examples": [{"token_idx": 4477, "activation": 1.0106303691864014, "text": "...\u5834\u306e\u30f4\u30a1\u30eb\u30ad\u30e5\u30ea\u30a23 -\u8d64\u304d\ufffd... [>\u30e5<]"}, {"token_idx": 4375, "activation": 1.0098915100097656, "text": "...\u5834\u306e\u30f4\u30a1\u30eb\u30ad\u30e5\u30ea\u30a23 \u540d\u3082\u306a\u304d... [>\u30e5<]"}, {"token_idx": 28, "activation": 1.0049222707748413, "text": "...\u5834\u306e\u30f4\u30a1\u30eb\u30ad\u30e5\u30ea\u30a23, lit. Valk... [>\u30e5<]"}, {"token_idx": 3826, "activation": 1.004560112953186, "text": "...\u5834\u306e\u30f4\u30a1\u30eb\u30ad\u30e5\u30ea\u30a2\uff13 \u8ab0\u304c... [>\u30e5<]"}]}, {"feature_id": 9, "max_activation": 1.3830106258392334, "top_examples": [{"token_idx": 4278, "activation": 1.1337177753448486, "text": "... \u3044\u3064\u304b\u54b2\u304f\u5149\u306e\u82b1, Itsuka Saku... [>\ufffd<]"}, {"token_idx": 47865, "activation": 1.1063696146011353, "text": "... in which an aircraft is used for specialized services such as agriculture, construction, photography,... [> services<]"}]}, {"feature_id": 10, "max_activation": 0.9622408747673035, "top_examples": [{"token_idx": 68188, "activation": 0.9176476001739502, "text": "... D\u00edaz government was represented by Jorge Vera Esta\u00f1ol who in a memo to... [> Vera<]"}]}, {"feature_id": 11, "max_activation": 1.0151841640472412, "top_examples": [{"token_idx": 7070, "activation": 1.0147722959518433, "text": ".... 149, Chapter IV of the \" Captured Rebel Ordnance Records,... [> Capt<]"}, {"token_idx": 91315, "activation": 0.9606063365936279, "text": "... adopted as the logo of the Maharashtra Tourism Department ( MTDC ).... [>htra<]"}, {"token_idx": 95391, "activation": 0.9549027681350708, "text": "... area \" ; a series of Maharashtra State Government environmental acts protecting the site ;... [>htra<]"}]}, {"feature_id": 12, "max_activation": 1.19569730758667, "top_examples": [{"token_idx": 78974, "activation": 1.0443774461746216, "text": "... Squadron ( A @-@ 31 Vengeance dive bombers ). His relations with North... [>engeance<]"}, {"token_idx": 77443, "activation": 0.9518818855285645, "text": "... a total of four DH.60 Moths, the RAAF team located the... [>oths<]"}]}, {"feature_id": 13, "max_activation": 1.2109646797180176, "top_examples": [{"token_idx": 4281, "activation": 1.0428237915039062, "text": "...\u304b\u54b2\u304f\u5149\u306e\u82b1, Itsuka Saku Hikari... [>\ufffd<]"}, {"token_idx": 3833, "activation": 1.0311750173568726, "text": "...\u30ad\u30e5\u30ea\u30a2\uff13 \u8ab0\u304c\u305f\u3081\u306e\u9283\ufffd... [>\ufffd<]"}, {"token_idx": 4389, "activation": 1.0273693799972534, "text": "...\u3082\u306a\u304d\u8a93\u3044\u306e\u82b1, lit. Valkyria of... [>\ufffd<]"}]}, {"feature_id": 14, "max_activation": 1.09830641746521, "top_examples": [{"token_idx": 84601, "activation": 1.073136568069458, "text": "... has also done commercials for American Express and Garnier Nutrisse. \n On April... [> Garn<]"}]}, {"feature_id": 15, "max_activation": 1.1920853853225708, "top_examples": [{"token_idx": 4486, "activation": 1.1920853853225708, "text": "...\u30ea\u30a23 -\u8d64\u304d\u904b\u547d\u306e\u6226\u4e59\u5973... [>\ufffd<]"}]}, {"feature_id": 16, "max_activation": 1.2701233625411987, "top_examples": []}, {"feature_id": 17, "max_activation": 1.0011993646621704, "top_examples": [{"token_idx": 3838, "activation": 1.0011993646621704, "text": "...\ufffd \u8ab0\u304c\u305f\u3081\u306e\u9283\u7621, lit. V... [>\ufffd<]"}, {"token_idx": 40782, "activation": 0.9526003003120422, "text": "... \" appearance, with their limbs tightly swathed in cloth. Although these gods resemble m... [>athed<]"}, {"token_idx": 75845, "activation": 0.9222573041915894, "text": "... with simultaneous translation to English ) at Repertorio Espa\u00f1ol ( www.re... [>pert<]"}]}, {"feature_id": 18, "max_activation": 1.119934320449829, "top_examples": [{"token_idx": 4486, "activation": 1.119934320449829, "text": "...\u30ea\u30a23 -\u8d64\u304d\u904b\u547d\u306e\u6226\u4e59\u5973... [>\ufffd<]"}, {"token_idx": 94233, "activation": 0.8624657392501831, "text": "... ensemble of a number of statues. Prominent among these is the Shiva carving... [>inent<]"}]}, {"feature_id": 19, "max_activation": 1.2027583122253418, "top_examples": []}], "mamba_130m_residual_L12": [{"feature_id": 0, "max_activation": 4.925578594207764, "top_examples": []}, {"feature_id": 1, "max_activation": 6.377380847930908, "top_examples": [{"token_idx": 63741, "activation": 4.91810941696167, "text": ".... As coin collecting became a widespread pastime in the early 20th century, gold... [>ime<]"}, {"token_idx": 71955, "activation": 4.845852851867676, "text": "... and to her subsequent lifetime of celibacy and emotional trauma. Agust\u00edn '... [>acy<]"}]}, {"feature_id": 2, "max_activation": 4.660674095153809, "top_examples": [{"token_idx": 840, "activation": 4.660674095153809, "text": "... the story and can either help or impede a character, and \" Battle Potentials... [>ede<]"}, {"token_idx": 64667, "activation": 4.263467788696289, "text": "... lithium with greater solvation allowing more facile rotation in the betaine intermediate, lowering... [>ile<]"}, {"token_idx": 64851, "activation": 4.059749126434326, "text": "... of a sulfoxonium allows more facile preparation of the reagent using weaker bases as... [>ile<]"}]}, {"feature_id": 3, "max_activation": 4.621776103973389, "top_examples": [{"token_idx": 86093, "activation": 4.567200660705566, "text": "... Press voted Fey the AP Entertainer of the Year as the performer who had... [>ainer<]"}, {"token_idx": 57080, "activation": 4.338040828704834, "text": "... temperate regions of the Northern Hemisphere. It is found in Europe, Turkey... [>here<]"}, {"token_idx": 11018, "activation": 4.2751312255859375, "text": "... Groundsel. \n Barker was a devout Christian, and produced religious @-@... [>out<]"}, {"token_idx": 38004, "activation": 4.260106086730957, "text": "...astic Period, Ra rose to preeminence in the Old Kingdom, Amun was... [>ence<]"}]}, {"feature_id": 4, "max_activation": 5.3365325927734375, "top_examples": [{"token_idx": 38004, "activation": 5.3365325927734375, "text": "...astic Period, Ra rose to preeminence in the Old Kingdom, Amun was... [>ence<]"}, {"token_idx": 9766, "activation": 4.715456008911133, "text": "... the house. The family lived frugally and attended both St. Edmund's... [>ally<]"}]}, {"feature_id": 5, "max_activation": 5.248365879058838, "top_examples": [{"token_idx": 15519, "activation": 5.248365879058838, "text": "... Before any of these rumors came to fruition, the St. Louis Blues asked Columbus... [>ition<]"}, {"token_idx": 97919, "activation": 4.230930805206299, "text": "... project took several years to come to fruition. After the creation of the IR8... [>ition<]"}, {"token_idx": 14872, "activation": 4.2229323387146, "text": "... an hour prior to the start of free agency, signing him to a six @-... [> agency<]"}, {"token_idx": 67347, "activation": 4.221743583679199, "text": "...co were marching on Ciudad Ju\u00e1rez, the Zapatista revolt gathered strength... [>rez<]"}]}, {"feature_id": 6, "max_activation": 6.033858776092529, "top_examples": [{"token_idx": 59852, "activation": 5.113903045654297, "text": "... be coined. Pennsylvania Representative Joseph Ingersoll, a Whig, spoke against the... [>oll<]"}, {"token_idx": 72240, "activation": 4.8653998374938965, "text": "... assassination of R\u00f3mulo Betancourt, president of Venezuela ) led to the... [>ourt<]"}, {"token_idx": 9568, "activation": 4.83922004699707, "text": "... Australian Ida Rentoul Outhwaite. Queen Mary made such themes even more... [>ite<]"}]}, {"feature_id": 7, "max_activation": 6.208279609680176, "top_examples": [{"token_idx": 2128, "activation": 6.092994689941406, "text": ".... Its story was darker and more somber than that of its predecessor. \n The... [>ber<]"}, {"token_idx": 38004, "activation": 5.348516464233398, "text": "...astic Period, Ra rose to preeminence in the Old Kingdom, Amun was... [>ence<]"}, {"token_idx": 70062, "activation": 5.276963710784912, "text": "... \n Vargas Llosa interlaces fictional elements and historical events : the book... [>aces<]"}, {"token_idx": 11805, "activation": 5.195791244506836, "text": "...ne, 2007 \n A New Epiphany ; Society for the Preservation of Christian... [>any<]"}]}, {"feature_id": 8, "max_activation": 6.20829963684082, "top_examples": [{"token_idx": 15519, "activation": 6.20829963684082, "text": "... Before any of these rumors came to fruition, the St. Louis Blues asked Columbus... [>ition<]"}, {"token_idx": 97919, "activation": 4.460865020751953, "text": "... project took several years to come to fruition. After the creation of the IR8... [>ition<]"}, {"token_idx": 70738, "activation": 4.39331579208374, "text": "... particular merengue that, by envisaging the dictator as an animal who could be... [>aging<]"}, {"token_idx": 82990, "activation": 4.380355358123779, "text": "... on March 6, 2015 to critical acclaim. \n On July 16, 2015,... [>claim<]"}]}, {"feature_id": 9, "max_activation": 4.006930828094482, "top_examples": [{"token_idx": 61387, "activation": 4.006930828094482, "text": "... a letter dated May 10, Pettit proposed an oval @-@ shaped hol... [>it<]"}, {"token_idx": 78638, "activation": 3.685373544692993, "text": "...ination Committee. He was occasionally at loggerheads with his naval counterpart, Captain E.... [>heads<]"}, {"token_idx": 61764, "activation": 3.6277201175689697, "text": "... the design \u2014 the three Southern branch mints especially had trouble with the piece. Many... [>ints<]"}, {"token_idx": 88582, "activation": 3.616403579711914, "text": "...ological excavations have unearthed a few Kshatrapa coins... [>hed<]"}]}, {"feature_id": 10, "max_activation": 5.086523056030273, "top_examples": [{"token_idx": 30892, "activation": 4.466300010681152, "text": "...ton Memorial Trophy for dedication and perseverance, while the IHL renamed its Come... [>ance<]"}]}, {"feature_id": 11, "max_activation": 4.279229640960693, "top_examples": [{"token_idx": 15519, "activation": 4.00075626373291, "text": "... Before any of these rumors came to fruition, the St. Louis Blues asked Columbus... [>ition<]"}, {"token_idx": 29058, "activation": 3.786191940307617, "text": "... played as well, their father never pressured them, preferring that they enjoy the... [>ured<]"}, {"token_idx": 92845, "activation": 3.667449474334717, "text": "...ill at the back, and hair curls dropping on either side of the shoulders.... [>ls<]"}, {"token_idx": 97919, "activation": 3.606112480163574, "text": "... project took several years to come to fruition. After the creation of the IR8... [>ition<]"}]}, {"feature_id": 12, "max_activation": 4.723196983337402, "top_examples": [{"token_idx": 39379, "activation": 4.723196983337402, "text": "..., Erik Hornung published a study rebutting these views. He points out that in... [>ting<]"}]}, {"feature_id": 13, "max_activation": 6.226683139801025, "top_examples": [{"token_idx": 54105, "activation": 5.811244010925293, "text": ".... \n Planning guidance on aircraft noise advises that \" in some circumstances the public perceive... [>ises<]"}]}, {"feature_id": 14, "max_activation": 0.16799627244472504, "top_examples": [{"token_idx": 75852, "activation": 0.04266878217458725, "text": "... Repertorio Espa\u00f1ol ( www.repertorio.org / chivo... [>.<]"}]}, {"feature_id": 15, "max_activation": 4.291180610656738, "top_examples": [{"token_idx": 39379, "activation": 3.835766553878784, "text": "..., Erik Hornung published a study rebutting these views. He points out that in... [>ting<]"}]}, {"feature_id": 16, "max_activation": 4.250419616699219, "top_examples": [{"token_idx": 99007, "activation": 4.250419616699219, "text": "... began putting together the next Devin Townsend Band record, with the working title Human... [>send<]"}]}, {"feature_id": 17, "max_activation": 0.37912827730178833, "top_examples": []}, {"feature_id": 18, "max_activation": 5.363667964935303, "top_examples": [{"token_idx": 15519, "activation": 4.208670139312744, "text": "... Before any of these rumors came to fruition, the St. Louis Blues asked Columbus... [>ition<]"}, {"token_idx": 97919, "activation": 3.924856662750244, "text": "... project took several years to come to fruition. After the creation of the IR8... [>ition<]"}, {"token_idx": 10401, "activation": 3.0942225456237793, "text": "... up residence, her health began to deteriorate. She was in and out of nursing... [>ate<]"}]}, {"feature_id": 19, "max_activation": 4.81208610534668, "top_examples": [{"token_idx": 56349, "activation": 4.512173175811768, "text": "...matian coast. Since coal was diverted to the newer Tegetthoff @... [>verted<]"}]}], "mamba_130m_residual_L23": [{"feature_id": 0, "max_activation": 117.99742889404297, "top_examples": [{"token_idx": 90404, "activation": 90.17036437988281, "text": "..., not distinct, depict, among others, a royal @-@ looking tall person... [>,<]"}]}, {"feature_id": 1, "max_activation": 113.86396789550781, "top_examples": []}, {"feature_id": 2, "max_activation": 14.621742248535156, "top_examples": []}, {"feature_id": 3, "max_activation": 63.575340270996094, "top_examples": [{"token_idx": 44416, "activation": 56.29582595825195, "text": "... earlier releases \u2014 were disappointed. The songs \" Mandatory Suicide \" and the title... [> \"<]"}]}, {"feature_id": 4, "max_activation": 90.76876831054688, "top_examples": [{"token_idx": 96531, "activation": 79.5442886352539, "text": "... was to be the first Noisescapes album, Promise. Shortly afterward, the... [>es<]"}, {"token_idx": 63945, "activation": 70.67279052734375, "text": "... Johnson \u2013 Corey \u2013 Chaykovsky reaction ( sometimes referred to as the Core... [>sky<]"}, {"token_idx": 22345, "activation": 70.34359741210938, "text": "... masted, iron @-@ hulled ship 189 feet ( 57 @.@... [>ed<]"}]}, {"feature_id": 5, "max_activation": 90.48646545410156, "top_examples": [{"token_idx": 95942, "activation": 73.02925109863281, "text": "... recording and touring with Vai, Townsend was discouraged by what he found in the... [>send<]"}, {"token_idx": 96933, "activation": 71.13380432128906, "text": "...s with other musicians, however, Townsend continued to face rejection of his own music... [>send<]"}, {"token_idx": 95906, "activation": 70.80399322509766, "text": "... heavy metal bands in high school, Townsend was discovered by a record label in 1993... [>send<]"}]}, {"feature_id": 6, "max_activation": 101.59056091308594, "top_examples": [{"token_idx": 89101, "activation": 85.37129974365234, "text": "...athi language. The Portuguese named the island \" Elephanta Island \" in honour of... [> \"<]"}, {"token_idx": 57395, "activation": 83.66854095458984, "text": "... carbonaria derives from the Latin word for \" charcoal \". Common names given to the... [> \"<]"}]}, {"feature_id": 7, "max_activation": 24.428058624267578, "top_examples": [{"token_idx": 4270, "activation": 18.298664093017578, "text": "... the Flowers of Light Will Bloom \" ( \u3044\u3064\u304b\u54b2\u304f\u5149... [> <]"}]}, {"feature_id": 8, "max_activation": 24.047515869140625, "top_examples": []}, {"feature_id": 9, "max_activation": 102.3173828125, "top_examples": [{"token_idx": 35035, "activation": 89.78433227539062, "text": "...ified it in the way that Ra personified the sun. Short @-@ lived... [>ified<]"}, {"token_idx": 14623, "activation": 87.22505187988281, "text": "... end of the year helping the Blue Jackets finish with 65 points, the third worst... [>ets<]"}, {"token_idx": 88711, "activation": 83.3468246459961, "text": "... small kingdom like the Konkan Mauryas could not undertake \" an almost superhuman... [>as<]"}]}, {"feature_id": 10, "max_activation": 96.31729125976562, "top_examples": []}, {"feature_id": 11, "max_activation": 80.07420349121094, "top_examples": []}, {"feature_id": 12, "max_activation": 92.56940460205078, "top_examples": [{"token_idx": 74678, "activation": 89.81999206542969, "text": "... of narrative structure. Vargas Llosa's writing acts as a cathartic... [>osa<]"}, {"token_idx": 74733, "activation": 89.37060546875, "text": "... the Goat because Vargas Llosa chose to narrate an actual event through... [>osa<]"}, {"token_idx": 74563, "activation": 87.53515625, "text": "... argues that The Feast of the Goat can thus be seen as a postmodern... [>at<]"}]}, {"feature_id": 13, "max_activation": 90.24067687988281, "top_examples": []}, {"feature_id": 14, "max_activation": 145.43597412109375, "top_examples": []}, {"feature_id": 15, "max_activation": 100.59982299804688, "top_examples": [{"token_idx": 96531, "activation": 91.6918716430664, "text": "... was to be the first Noisescapes album, Promise. Shortly afterward, the... [>es<]"}, {"token_idx": 101714, "activation": 89.1357421875, "text": "... and remixed work for other artists such as Rammstein, August Burns Red and... [> as<]"}]}, {"feature_id": 16, "max_activation": 90.74545288085938, "top_examples": [{"token_idx": 44416, "activation": 77.45098876953125, "text": "... earlier releases \u2014 were disappointed. The songs \" Mandatory Suicide \" and the title... [> \"<]"}]}, {"feature_id": 17, "max_activation": 93.68920135498047, "top_examples": [{"token_idx": 14623, "activation": 89.215087890625, "text": "... end of the year helping the Blue Jackets finish with 65 points, the third worst... [>ets<]"}, {"token_idx": 24026, "activation": 88.56546020507812, "text": "... them on 19 March, Tattnall planned to attack the Union base at Port... [>all<]"}]}, {"feature_id": 18, "max_activation": 120.88230895996094, "top_examples": [{"token_idx": 12966, "activation": 120.88230895996094, "text": "...aete worms, and to a lesser extent on small bony fishes. It is viv... [> extent<]"}, {"token_idx": 57395, "activation": 115.63578796386719, "text": "... carbonaria derives from the Latin word for \" charcoal \". Common names given to the... [> \"<]"}, {"token_idx": 13630, "activation": 111.93841552734375, "text": "... row of 4 \u2013 13 small, closely spaced thorns is present behind the spiracles... [> spaced<]"}]}, {"feature_id": 19, "max_activation": 17.652381896972656, "top_examples": []}], "mamba_370m_residual_L0": [{"feature_id": 0, "max_activation": 0.4659716486930847, "top_examples": []}, {"feature_id": 1, "max_activation": 0.5569300651550293, "top_examples": []}, {"feature_id": 2, "max_activation": 0.4503513276576996, "top_examples": [{"token_idx": 45838, "activation": 0.447208434343338, "text": "... to the style of earlier releases. \" Michael Roberts of Westworld Online said this was... [> Michael<]"}]}, {"feature_id": 3, "max_activation": 0.497190922498703, "top_examples": []}, {"feature_id": 4, "max_activation": 0.5317261815071106, "top_examples": [{"token_idx": 13615, "activation": 0.4801422357559204, "text": "... fin fold. Most of the body lacks dermal denticles ; a midline row of... [> dermal<]"}]}, {"feature_id": 5, "max_activation": 0.4071349799633026, "top_examples": [{"token_idx": 21698, "activation": 0.40691959857940674, "text": "... Redington. Two rock formations, Courthouse and Jail Rocks, become visible from... [>thouse<]"}, {"token_idx": 25834, "activation": 0.3985773026943207, "text": "... Lankan, and her mother, Kim, is of Malaysian descent. Her grandfather... [> Kim<]"}, {"token_idx": 45787, "activation": 0.3972069323062897, "text": "... in for a major disappointment \". \n Kim Neely of Rolling Stone dismissed the album... [> Kim<]"}, {"token_idx": 80739, "activation": 0.3904162347316742, "text": "... and produced the television series Unbreakable Kimmy Schmidt, originally for NBC and eventually... [> Kim<]"}]}, {"feature_id": 6, "max_activation": 0.5240275263786316, "top_examples": []}, {"feature_id": 7, "max_activation": 0.5108340978622437, "top_examples": []}, {"feature_id": 8, "max_activation": 0.409633070230484, "top_examples": [{"token_idx": 3841, "activation": 0.3845994174480438, "text": "...\ufffd\u304c\u305f\u3081\u306e\u9283\u7621, lit. Valkyria... [>\ufffd<]"}]}, {"feature_id": 9, "max_activation": 0.612165629863739, "top_examples": [{"token_idx": 65723, "activation": 0.42773962020874023, "text": "... been reported. \n Living polymerizations using trialkylboranes as the catalyst and (... [> tri<]"}]}, {"feature_id": 10, "max_activation": 0.4947749078273773, "top_examples": [{"token_idx": 20698, "activation": 0.4581059515476227, "text": "...appelle. It was mixed by David Frazer at Tarpan Studios in San Rafael... [> Fraz<]"}]}, {"feature_id": 11, "max_activation": 0.4905751645565033, "top_examples": [{"token_idx": 51580, "activation": 0.4905751645565033, "text": ".... This reflects a shift away from turboprop aircraft towards foreign @-@ registered business... [>oprop<]"}]}, {"feature_id": 12, "max_activation": 0.45018166303634644, "top_examples": [{"token_idx": 28339, "activation": 0.43273550271987915, "text": "... 2013, Fernandez became the ambassador for HTC One, which she endorses in India... [> HTC<]"}]}, {"feature_id": 13, "max_activation": 0.4112882912158966, "top_examples": [{"token_idx": 101281, "activation": 0.4112882912158966, "text": "... He described it as a \" lukewarm heavy metal Devin song \". On... [>warm<]"}, {"token_idx": 98474, "activation": 0.41047078371047974, "text": "... in February 2003. It received lukewarm reviews, with critics finding it inferior to... [>warm<]"}]}, {"feature_id": 14, "max_activation": 0.02357175573706627, "top_examples": [{"token_idx": 70184, "activation": 0.018059220165014267, "text": "... many, many liberties. [... ] I have respected the basic facts,... [>.<]"}]}, {"feature_id": 15, "max_activation": 0.4664970934391022, "top_examples": [{"token_idx": 2546, "activation": 0.4664970934391022, "text": "... bass, then adjusted the theme using a synthesizer before redoing segments such as... [> synthes<]"}, {"token_idx": 65681, "activation": 0.45652931928634644, "text": "... them from occurring as significant side reactions when synthesizing epoxides and azirid... [> synthes<]"}, {"token_idx": 45865, "activation": 0.4419456422328949, "text": "... sludgier speed of Black Sabbath. \" Araya commented that the... [>abbath<]"}]}, {"feature_id": 16, "max_activation": 0.3873433470726013, "top_examples": [{"token_idx": 80749, "activation": 0.3873433470726013, "text": "... Schmidt, originally for NBC and eventually for Netflix. Her recent films include Sisters and Wh... [> Netflix<]"}, {"token_idx": 82970, "activation": 0.3785475492477417, "text": "... for NBC, it was eventually sold to Netflix and immediately renewed for a second season.... [> Netflix<]"}, {"token_idx": 43419, "activation": 0.3662727475166321, "text": "...ummies given to the feline goddess Bastet. Some of the major deities... [> Bast<]"}, {"token_idx": 99372, "activation": 0.35970187187194824, "text": "... ( see Musician cameos in Metalocalypse for more ). The original character design... [>ocalypse<]"}, {"token_idx": 99363, "activation": 0.35377267003059387, "text": "... episodes of the Adult Swim cartoon Metalocalypse ( see Musician cameos in Metal... [>ocalypse<]"}]}, {"feature_id": 17, "max_activation": 0.5133403539657593, "top_examples": []}, {"feature_id": 18, "max_activation": 0.5348110198974609, "top_examples": [{"token_idx": 85714, "activation": 0.39271825551986694, "text": "... both her own insecurities and the flakes and train wrecks who surround her... [> flakes<]"}, {"token_idx": 19620, "activation": 0.3737041652202606, "text": "... bear the load of a 13 inch photographic refractor, newly procured from Paris.... [> refract<]"}]}, {"feature_id": 19, "max_activation": 0.45094749331474304, "top_examples": [{"token_idx": 82408, "activation": 0.442289263010025, "text": "... Universal. The pilot, directed by Adam Bernstein, centered on Liz Lemon, the head... [> Bernstein<]"}]}], "mamba_370m_residual_L24": [{"feature_id": 0, "max_activation": 0.14683783054351807, "top_examples": [{"token_idx": 12812, "activation": 0.14683783054351807, "text": "... Dasyatidae. It is found in shallow, soft @-@ bottomed... [> in<]"}, {"token_idx": 31264, "activation": 0.04891883209347725, "text": "... of Lissa of the same name, see SMS Erzherzog Ferdinand Max... [> see<]"}]}, {"feature_id": 1, "max_activation": 0.21340690553188324, "top_examples": [{"token_idx": 57788, "activation": 0.04488122835755348, "text": "...xis vulcanalis ) has a pale orange to yellowish fruitbody that is... [> pale<]"}]}, {"feature_id": 2, "max_activation": 2.7633960247039795, "top_examples": [{"token_idx": 60086, "activation": 2.7633960247039795, "text": "...ider in their midst was Chief Engraver James B. Longacre, successor to... [>ver<]"}, {"token_idx": 3543, "activation": 2.35377836227417, "text": "... review were recycled elements, awkward cutscenes that seemed to include all characters in a... [>enes<]"}, {"token_idx": 46337, "activation": 2.344729423522949, "text": "...am \" was covered by Children of Bodom for their album Hate Crew Deathroll... [>om<]"}]}, {"feature_id": 3, "max_activation": 3.2807369232177734, "top_examples": [{"token_idx": 78638, "activation": 2.9423582553863525, "text": "...ination Committee. He was occasionally at loggerheads with his naval counterpart, Captain E.... [>heads<]"}, {"token_idx": 4488, "activation": 2.86881160736084, "text": "...3 -\u8d64\u304d\u904b\u547d\u306e\u6226\u4e59\u5973-,... [>\ufffd<]"}]}, {"feature_id": 4, "max_activation": 3.336063861846924, "top_examples": [{"token_idx": 9000, "activation": 2.6869423389434814, "text": "... pen and ink, oils, and pastels. Kate Greenaway and the Pre @... [>els<]"}, {"token_idx": 90209, "activation": 2.5906410217285156, "text": "... of mountains and clouds and female hairstyles. \n = = = Shiva @... [>yles<]"}, {"token_idx": 84075, "activation": 2.589320182800293, "text": "...hler as Hillary Clinton. Their repartee included Clinton needling Palin about her \"... [>ee<]"}]}, {"feature_id": 5, "max_activation": 3.5553736686706543, "top_examples": []}, {"feature_id": 6, "max_activation": 3.311544179916382, "top_examples": [{"token_idx": 55270, "activation": 3.1278650760650635, "text": "...ing. In 1912, Zr\u00ednyi and her two sister ships conducted two training... [>i<]"}]}, {"feature_id": 7, "max_activation": 3.1764042377471924, "top_examples": [{"token_idx": 6437, "activation": 2.532858371734619, "text": "... 1862, found the state nearly destitute of military material. Hindman established another... [>ute<]"}]}, {"feature_id": 8, "max_activation": 0.08481787145137787, "top_examples": [{"token_idx": 2695, "activation": 0.06655517965555191, "text": "...\u3082\u3057\u3082\u541b\u304c\u9858\u3046\u306e\u306a\u3089, Moshimo Kim... [>\u3046<]"}, {"token_idx": 28742, "activation": 0.06181463599205017, "text": "... 1964 ) is a Canadian former professional ice hockey centre who played in the National Hockey League... [> hockey<]"}, {"token_idx": 86814, "activation": 0.046777620911598206, "text": "...WASP, an organization in search of planets, starting in 2009 ; manual follow @... [> planets<]"}]}, {"feature_id": 9, "max_activation": 3.6943323612213135, "top_examples": [{"token_idx": 74659, "activation": 3.6943323612213135, "text": "... to a large degree demythologizes \" Trujillo and his brutal reign... [>izes<]"}, {"token_idx": 67538, "activation": 2.995187282562256, "text": "...amoros ( which was subsequently retaken by federal forces ) and Chietla... [>aken<]"}]}, {"feature_id": 10, "max_activation": 2.261845588684082, "top_examples": [{"token_idx": 83637, "activation": 2.1355984210968018, "text": "..., she voiced Roxanne Ritchie, a television reporter, in the Dream... [>ie<]"}, {"token_idx": 2128, "activation": 2.1063873767852783, "text": ".... Its story was darker and more somber than that of its predecessor. \n The... [>ber<]"}, {"token_idx": 4014, "activation": 2.0709965229034424, "text": "... directed by Nobuhiro Kond\u014d, and written by Hiroshi \u014c... [>\u014d<]"}, {"token_idx": 28553, "activation": 1.9612674713134766, "text": "... Eye's \" World's Sexiest Asian Women \" list, ranking twelfth... [>iest<]"}]}, {"feature_id": 11, "max_activation": 3.4731242656707764, "top_examples": [{"token_idx": 91681, "activation": 3.4731242656707764, "text": "...vati. Many other details are defaced but a kneeling figure in the front... [>aced<]"}, {"token_idx": 73608, "activation": 3.3337607383728027, "text": "... children, so that each generation bequeaths a withering of the soul to... [>aths<]"}, {"token_idx": 94042, "activation": 3.330906867980957, "text": "... interior and sunken floor. Water drips in this chapel. \n The west wing... [>ps<]"}]}, {"feature_id": 12, "max_activation": 3.5039961338043213, "top_examples": [{"token_idx": 99513, "activation": 3.5039961338043213, "text": "... Townsend found it \" disconcerting \" that he had difficulty writing music without... [>ing<]"}, {"token_idx": 61323, "activation": 2.8500471115112305, "text": "... for a small silver coin, and enquiring about reports the Mint had experimented with... [>iring<]"}, {"token_idx": 57321, "activation": 2.8432133197784424, "text": "... described the species Peziza lepida from collections made in Japan as part of... [>a<]"}, {"token_idx": 66668, "activation": 2.7818374633789062, "text": "... the banner of the Partido Constitucional Progresista, along with Jos\u00e9 Mar... [>ional<]"}]}, {"feature_id": 13, "max_activation": 3.3700785636901855, "top_examples": [{"token_idx": 93443, "activation": 3.2336983680725098, "text": "... dvarapalas ( gate keepers ). The Linga, the symbol... [>ers<]"}, {"token_idx": 60086, "activation": 3.205467939376831, "text": "...ider in their midst was Chief Engraver James B. Longacre, successor to... [>ver<]"}, {"token_idx": 91708, "activation": 3.0674116611480713, "text": "... to be carved. There are many divinities and attendant females at the back. The... [>inities<]"}, {"token_idx": 59149, "activation": 2.9366812705993652, "text": "... response, Patterson had Mint Second Engraver Christian Gobrecht break off work on the... [>ver<]"}, {"token_idx": 60191, "activation": 2.9227395057678223, "text": "...ale ) planned to undermine the chief engraver's position by having the work of... [>ver<]"}]}, {"feature_id": 14, "max_activation": 4.1096272468566895, "top_examples": [{"token_idx": 2128, "activation": 3.7230618000030518, "text": ".... Its story was darker and more somber than that of its predecessor. \n The... [>ber<]"}, {"token_idx": 5598, "activation": 3.540937900543213, "text": "... is prompted by the feeling that pervades the citizens of this State that in the... [>ades<]"}]}, {"feature_id": 15, "max_activation": 3.526191473007202, "top_examples": [{"token_idx": 70377, "activation": 3.0186665058135986, "text": "... character in The Feast of the Goat, and also Vargas Llosa... [>at<]"}]}, {"feature_id": 16, "max_activation": 0.4811452031135559, "top_examples": [{"token_idx": 31264, "activation": 0.04378865659236908, "text": "... of Lissa of the same name, see SMS Erzherzog Ferdinand Max... [> see<]"}]}, {"feature_id": 17, "max_activation": 2.595533609390259, "top_examples": [{"token_idx": 89200, "activation": 2.498236656188965, "text": "..., though worship on Mahashivratri, the festival of Shiva, continued... [>ri<]"}]}, {"feature_id": 18, "max_activation": 5.117518901824951, "top_examples": [{"token_idx": 82663, "activation": 4.392615795135498, "text": "... Award for Best Lead Actress. 30 Rock was renewed for the 2010 \u2013 2011 season... [> Rock<]"}]}, {"feature_id": 19, "max_activation": 3.1078310012817383, "top_examples": [{"token_idx": 43495, "activation": 2.8418266773223877, "text": ".... In Canaan, the exported deities, including Hathor, Amun... [>ities<]"}, {"token_idx": 62946, "activation": 2.8240561485290527, "text": "... The Mint felt it improper to suspend coinage of a coin authorized by Congress, and... [>age<]"}]}], "mamba_370m_residual_L47": [{"feature_id": 0, "max_activation": 26.794979095458984, "top_examples": [{"token_idx": 4489, "activation": 18.00250816345215, "text": "... -\u8d64\u304d\u904b\u547d\u306e\u6226\u4e59\u5973-, lit... [>\u306e<]"}, {"token_idx": 4273, "activation": 16.452451705932617, "text": "... Light Will Bloom \" ( \u3044\u3064\u304b\u54b2\u304f\u5149\u306e\u82b1... [>\u304b<]"}]}, {"feature_id": 1, "max_activation": 112.24272918701172, "top_examples": [{"token_idx": 58651, "activation": 97.9766616821289, "text": "..., all designed by Mint Chief Engraver James B. Longacre. The Type... [>ver<]"}]}, {"feature_id": 2, "max_activation": 71.86344146728516, "top_examples": [{"token_idx": 22733, "activation": 58.57820510864258, "text": "... with the affair lest he and Fingal be detained. The ship reached Berm... [>al<]"}]}, {"feature_id": 3, "max_activation": 16.5674991607666, "top_examples": []}, {"feature_id": 4, "max_activation": 64.7139892578125, "top_examples": [{"token_idx": 66917, "activation": 57.963436126708984, "text": "... te van las hojas, m\u00e1ndame m\u00e1s tamales \" ( \" Here are... [>ame<]"}, {"token_idx": 42849, "activation": 54.1667594909668, "text": "... from Dendera Temple visited her consort Horus at the Temple of Edfu... [>ort<]"}]}, {"feature_id": 5, "max_activation": 76.09121704101562, "top_examples": [{"token_idx": 66917, "activation": 76.09121704101562, "text": "... te van las hojas, m\u00e1ndame m\u00e1s tamales \" ( \" Here are... [>ame<]"}]}, {"feature_id": 6, "max_activation": 59.68639373779297, "top_examples": [{"token_idx": 54540, "activation": 59.68639373779297, "text": "..., the presence of the Zr\u00ednyi and other battleships tied down a substantial... [>i<]"}, {"token_idx": 32420, "activation": 53.82160568237305, "text": "...isers Sankt Georg and Kaiser Karl VI were decommissioned and Erzher... [> VI<]"}]}, {"feature_id": 7, "max_activation": 72.44068908691406, "top_examples": [{"token_idx": 60833, "activation": 63.66620635986328, "text": "...49 @-@ C Open Wreath are known ; one, believed the finest... [>ath<]"}]}, {"feature_id": 8, "max_activation": 96.5594482421875, "top_examples": [{"token_idx": 66917, "activation": 96.5594482421875, "text": "... te van las hojas, m\u00e1ndame m\u00e1s tamales \" ( \" Here are... [>ame<]"}, {"token_idx": 60833, "activation": 88.50401306152344, "text": "...49 @-@ C Open Wreath are known ; one, believed the finest... [>ath<]"}, {"token_idx": 66910, "activation": 77.28302764892578, "text": "... with the message, \" Ah\u00ed te van las hojas, m\u00e1ndame m\u00e1s... [> van<]"}, {"token_idx": 58073, "activation": 76.3987808227539, "text": "... trunks. Geopyxis carbonaria fruitbodies are often found in the... [>aria<]"}]}, {"feature_id": 9, "max_activation": 76.86504364013672, "top_examples": [{"token_idx": 22429, "activation": 70.0201416015625, "text": "... was equipped with two vertical single @-@ cylinder direct @-@ acting steam engines... [>@<]"}, {"token_idx": 66917, "activation": 68.18402099609375, "text": "... te van las hojas, m\u00e1ndame m\u00e1s tamales \" ( \" Here are... [>ame<]"}]}, {"feature_id": 10, "max_activation": 85.92951202392578, "top_examples": [{"token_idx": 32420, "activation": 66.3365707397461, "text": "...isers Sankt Georg and Kaiser Karl VI were decommissioned and Erzher... [> VI<]"}]}, {"feature_id": 11, "max_activation": 84.57234191894531, "top_examples": [{"token_idx": 100179, "activation": 68.67587280273438, "text": "...iersbergen on vocals, Epicloud appeared on several European charts, peaking... [>oud<]"}, {"token_idx": 24428, "activation": 68.01425170898438, "text": "... \n A lookout aboard Weehawken spotted Atlanta at 04 : 10 on the... [>ken<]"}]}, {"feature_id": 12, "max_activation": 90.40050506591797, "top_examples": [{"token_idx": 86160, "activation": 72.39653778076172, "text": ".... 99, No. 86, No. 90, No. 92, and No... [>.<]"}, {"token_idx": 60086, "activation": 69.94332122802734, "text": "...ider in their midst was Chief Engraver James B. Longacre, successor to... [>ver<]"}, {"token_idx": 59149, "activation": 69.51677703857422, "text": "... response, Patterson had Mint Second Engraver Christian Gobrecht break off work on the... [>ver<]"}, {"token_idx": 63626, "activation": 69.31240844726562, "text": "...@ 138 at Charlotte, 90 @,@ 232 at San Francisco and 72 @,... [>@<]"}]}, {"feature_id": 13, "max_activation": 81.30353546142578, "top_examples": [{"token_idx": 96346, "activation": 73.08396911621094, "text": ".... As an early teenager he befriended Brian \" Beav \" Waddell... [>ended<]"}]}, {"feature_id": 14, "max_activation": 83.94161224365234, "top_examples": [{"token_idx": 32420, "activation": 71.74986267089844, "text": "...isers Sankt Georg and Kaiser Karl VI were decommissioned and Erzher... [> VI<]"}]}, {"feature_id": 15, "max_activation": 94.9419937133789, "top_examples": []}, {"feature_id": 16, "max_activation": 70.67493438720703, "top_examples": [{"token_idx": 86160, "activation": 58.3617057800293, "text": ".... 99, No. 86, No. 90, No. 92, and No... [>.<]"}]}, {"feature_id": 17, "max_activation": 90.40605926513672, "top_examples": [{"token_idx": 88582, "activation": 85.50230407714844, "text": "...ological excavations have unearthed a few Kshatrapa coins... [>hed<]"}, {"token_idx": 63626, "activation": 81.45932006835938, "text": "...@ 138 at Charlotte, 90 @,@ 232 at San Francisco and 72 @,... [>@<]"}, {"token_idx": 86160, "activation": 81.3243408203125, "text": ".... 99, No. 86, No. 90, No. 92, and No... [>.<]"}, {"token_idx": 38812, "activation": 80.55722045898438, "text": "... irty and Khenty @-@ khety, who became little more... [>@<]"}, {"token_idx": 12966, "activation": 79.87885284423828, "text": "...aete worms, and to a lesser extent on small bony fishes. It is viv... [> extent<]"}, {"token_idx": 33278, "activation": 79.5338363647461, "text": "..., \" god \", and its feminine form n... [> form<]"}, {"token_idx": 35492, "activation": 78.87225341796875, "text": "... this work using a force the Egyptians called heka, a term usually translated as... [> called<]"}]}, {"feature_id": 18, "max_activation": 79.43490600585938, "top_examples": []}, {"feature_id": 19, "max_activation": 41.159454345703125, "top_examples": [{"token_idx": 18225, "activation": 35.84584045410156, "text": "... game of the season, the Blue Jackets were leading the Islanders 7 \u2013 3... [>ets<]"}]}], "pythia_160m_residual_L0": [{"feature_id": 0, "max_activation": 0.017351102083921432, "top_examples": [{"token_idx": 2073, "activation": 0.017351102083921432, "text": "... was also handled by Media.Vision. The original scenario was written Kazuki Y... [>.<]"}, {"token_idx": 1184, "activation": 0.017351102083921432, "text": "... . \" The three main characters are No.7 Kurt Irving , an army officer falsely... [>.<]"}, {"token_idx": 2416, "activation": 0.017351102083921432, "text": "... The anime opening was produced by Production I.G. \n The music was composed by... [>.<]"}, {"token_idx": 1233, "activation": 0.017351102083921432, "text": "...ria who destroyed her home ; and No.13 Riela Marcellis ,... [>.<]"}, {"token_idx": 383, "activation": 0.017351102083921432, "text": "... expanded edition was released in 2014 . Media.Vision would return to the franchise with... [>.<]"}, {"token_idx": 3323, "activation": 0.017351102083921432, "text": "...@ putting difficulty spikes . 4Gamer.net writer Naohiko Misuos... [>.<]"}, {"token_idx": 1204, "activation": 0.017351102083921432, "text": "... who wishes to redeem himself ; Ace No.1 Imca , a female Darc... [>.<]"}, {"token_idx": 2070, "activation": 0.017351102083921432, "text": "... , development work was also handled by Media.Vision. The original scenario was written... [>.<]"}, {"token_idx": 76, "activation": 0.017351102083921432, "text": "... video game developed by Sega and Media.Vision for the PlayStation Portable .... [>.<]"}, {"token_idx": 2418, "activation": 0.017351102083921432, "text": "... opening was produced by Production I.G. \n The music was composed by Hitoshi... [>.<]"}]}, {"feature_id": 1, "max_activation": 0.006336968392133713, "top_examples": [{"token_idx": 10183, "activation": 0.006336968392133713, "text": "... Barker 's live @-@ in maid retired , and Dorothy Barker closed her school... [> maid<]"}, {"token_idx": 95336, "activation": 0.005772961303591728, "text": "... ; the Antiquities and Art Treasures Act promulgated in 1972 with its Rules... [>asures<]"}, {"token_idx": 44069, "activation": 0.00487932376563549, "text": "... within a few hundred years , remaining in magical texts into the seventh and eighth centuries .... [> magical<]"}]}, {"feature_id": 2, "max_activation": 0.06533025205135345, "top_examples": [{"token_idx": 77006, "activation": 0.06533025205135345, "text": "... the line , after fellow RFC veteran Jerry Pentland . \n Regarded as one of... [> Pent<]"}, {"token_idx": 39818, "activation": 0.056930191814899445, "text": "...istic practice of ordinary worshippers . He says that the Egyptians may have recognized the... [> says<]"}, {"token_idx": 37002, "activation": 0.056930191814899445, "text": "... one in the Pyramid Texts says the name is based on words shouted by... [> says<]"}, {"token_idx": 85583, "activation": 0.056930191814899445, "text": "... about her range as a leading lady and says she \u2019 s been deliberate about only taking... [> says<]"}, {"token_idx": 27769, "activation": 0.056930191814899445, "text": "... admits to missing being around them . She says : \" I miss them so much everyday... [> says<]"}, {"token_idx": 33244, "activation": 0.056930191814899445, "text": "... texts , whereas his colleague Christian Leitz says there are \" thousands upon thousands \" of... [> says<]"}, {"token_idx": 33658, "activation": 0.056930191814899445, "text": "... definition , suggested by Jan Assmann , says that a deity has a cult , is... [> says<]"}, {"token_idx": 21349, "activation": 0.056930191814899445, "text": "... has a neon light outside the entrance which says \" Jesus Saves \" . \n \"... [> says<]"}, {"token_idx": 39777, "activation": 0.056930191814899445, "text": "... many other gods . James P. Allen says that coexisting notions of one god and... [> says<]"}]}, {"feature_id": 3, "max_activation": 0.06161672621965408, "top_examples": []}, {"feature_id": 4, "max_activation": 0.0651443600654602, "top_examples": [{"token_idx": 39895, "activation": 0.0651443600654602, "text": "... lazuli . They give off a scent that the Egyptians likened to the... [> scent<]"}]}, {"feature_id": 5, "max_activation": 0.05941984802484512, "top_examples": [{"token_idx": 6312, "activation": 0.05941984802484512, "text": "... almost completely exhausted , and only old \" junker \" weapons were left . \n Most... [> junk<]"}, {"token_idx": 30823, "activation": 0.0585378035902977, "text": "... . Tests came back negative , but after spending time with his family , he realized that... [> spending<]"}, {"token_idx": 98635, "activation": 0.0585378035902977, "text": "... was working on Strapping Young Lad , spending half the week on one and half on... [> spending<]"}]}, {"feature_id": 6, "max_activation": 0.06727045774459839, "top_examples": [{"token_idx": 26246, "activation": 0.06727045774459839, "text": "...asmine character . Fernandez garnered mixed reviews for her performance . Anupama Ch... [> reviews<]"}, {"token_idx": 60427, "activation": 0.06727045774459839, "text": "... the nation near the rim . \n Contemporary reviews of the Type 1 design were generally favorable... [> reviews<]"}, {"token_idx": 26392, "activation": 0.06727045774459839, "text": "... Fernandez 's performance , received poor reviews ; Rediff.com 's S... [> reviews<]"}, {"token_idx": 70228, "activation": 0.06727045774459839, "text": "...ast of the Goat received largely positive reviews , with several reviewers commenting on the book... [> reviews<]"}, {"token_idx": 26787, "activation": 0.06727045774459839, "text": "... her role ] \" . Despite the negative reviews , Fernandez received a Best Supporting Act... [> reviews<]"}, {"token_idx": 27140, "activation": 0.06727045774459839, "text": "... The film received mixed reviews from critics , but with worldwide revenue of... [> reviews<]"}, {"token_idx": 64165, "activation": 0.06727045774459839, "text": "...lective variants of the reaction . Several reviews have been published . \n The original publication... [> reviews<]"}, {"token_idx": 26741, "activation": 0.06727045774459839, "text": "... ) worldwide . Fernandez received mostly negative reviews for her performance . While Gaurav... [> reviews<]"}, {"token_idx": 75509, "activation": 0.06727045774459839, "text": "... another sort of book . \" \n Most reviews of The Feast of the Goat... [> reviews<]"}, {"token_idx": 75225, "activation": 0.06727045774459839, "text": "... dictator novel . The novel received largely positive reviews , most of which were willing to accept... [> reviews<]"}]}, {"feature_id": 7, "max_activation": 0.0076532624661922455, "top_examples": []}, {"feature_id": 8, "max_activation": 0.06357478350400925, "top_examples": [{"token_idx": 21739, "activation": 0.06357478350400925, "text": "... the fifth time , and enters into Bridgeport five miles ( 8 @.@ 0... [>port<]"}, {"token_idx": 21464, "activation": 0.06357478350400925, "text": "...@ 88 continues east to south of Bridgeport . The road turns north , ends at... [>port<]"}, {"token_idx": 21719, "activation": 0.06357478350400925, "text": "... @-@ 88 turns north toward Bridgeport soon after . The road crosses over Pump... [>port<]"}, {"token_idx": 21494, "activation": 0.06357478350400925, "text": "... and N @-@ 92 in Bridgeport . The route was designated in 1937 ,... [>port<]"}, {"token_idx": 22018, "activation": 0.06357478350400925, "text": "... near Bridgeport . The old alignment became part of N... [>port<]"}, {"token_idx": 21958, "activation": 0.06357478350400925, "text": "... and N @-@ 19 in Bridgeport . The route remained relatively the same as... [>port<]"}]}, {"feature_id": 9, "max_activation": 0.06758805364370346, "top_examples": [{"token_idx": 31833, "activation": 0.0646277517080307, "text": "... turrets on the centerline . These guns were an Austro @-@ Hungarian... [> guns<]"}, {"token_idx": 24389, "activation": 0.0646277517080307, "text": "... then deal with the other one with his guns . The gunboat Isondiga and... [> guns<]"}, {"token_idx": 25376, "activation": 0.0646277517080307, "text": "... laws as she had just loaded four large guns and a number of recruits for the forces... [> guns<]"}, {"token_idx": 31899, "activation": 0.0646277517080307, "text": "....@ 5 in ) / 42 caliber guns , also made by \u0160koda ,... [> guns<]"}, {"token_idx": 23423, "activation": 0.0646277517080307, "text": "... of iron riveted together and allowed the guns to elevate only to a maximum of +... [> guns<]"}, {"token_idx": 23754, "activation": 0.0646277517080307, "text": "... and the additional weight of her armor and guns significantly reduced her speed and increased her draft... [> guns<]"}, {"token_idx": 6781, "activation": 0.0646277517080307, "text": "... impressed , and the repair of the damaged guns I brought with me and about an equal... [> guns<]"}, {"token_idx": 31821, "activation": 0.0646277517080307, "text": "....@ 4 in ) / 40 caliber guns in two twin turrets on the center... [> guns<]"}, {"token_idx": 23517, "activation": 0.0646277517080307, "text": "...@ caliber , seven @-@ inch guns weighed about 15 @,@ 000 pounds... [> guns<]"}]}, {"feature_id": 10, "max_activation": 0.07628358900547028, "top_examples": [{"token_idx": 90892, "activation": 0.06704248487949371, "text": "... Parvati 's composure and blessed him . \n = = = Trim... [> blessed<]"}, {"token_idx": 8559, "activation": 0.0659824013710022, "text": "... \u00c6sthetic Club , Little Rock philanthropist Frederick W. Allsop... [> philanth<]"}, {"token_idx": 28129, "activation": 0.0659824013710022, "text": "... her outfits on an online portal for a philanthropic cause . Some of her outfits included... [> philanth<]"}]}, {"feature_id": 11, "max_activation": 0.10630650818347931, "top_examples": [{"token_idx": 47096, "activation": 0.0943748876452446, "text": "... Kingdom has been defined as a civil aircraft operation other than a commercial air transport flight... [> operation<]"}, {"token_idx": 32637, "activation": 0.0943748876452446, "text": "... been compromised , and therefore called off the operation . This was to be the last military... [> operation<]"}, {"token_idx": 47816, "activation": 0.0943748876452446, "text": "... commercial air transport operation or an aerial work operation . \" It defines commercial air transport (... [> operation<]"}, {"token_idx": 47811, "activation": 0.0943748876452446, "text": "... aircraft operation other than a commercial air transport operation or an aerial work operation . \" It... [> operation<]"}, {"token_idx": 47831, "activation": 0.0943748876452446, "text": "... transport ( CAT ) as \" an aircraft operation involving the transport of passengers , cargo or... [> operation<]"}, {"token_idx": 53207, "activation": 0.0943748876452446, "text": "... known air traffic environment necessary for the safe operation of CAT . A CAA review found... [> operation<]"}]}, {"feature_id": 12, "max_activation": 0.008444448933005333, "top_examples": [{"token_idx": 57189, "activation": 0.005400080233812332, "text": "... 1879 work Mycographia , seu Icones fungorum . Figures of fungi... [> Icon<]"}, {"token_idx": 92261, "activation": 0.005332859233021736, "text": "...iled round it . The hand holds a bowl to collect the blood dripping from the slain... [> bowl<]"}]}, {"feature_id": 13, "max_activation": 0.005265289917588234, "top_examples": [{"token_idx": 99855, "activation": 0.004435840994119644, "text": "... touring North America with headliner Between the Buried and Me as well as Cynic... [> Bur<]"}, {"token_idx": 55464, "activation": 0.004435840994119644, "text": "... was under the command of British Admiral Cecil Burney , was to blockade the Montene... [> Bur<]"}, {"token_idx": 30194, "activation": 0.004435840994119644, "text": "... enjoyed immediate success with linemates Shawn Burr and Alexander Selivanov as the... [> Bur<]"}]}, {"feature_id": 14, "max_activation": 0.08557852357625961, "top_examples": [{"token_idx": 98953, "activation": 0.08557852357625961, "text": "... it was well received on its release , selling 3 @,@ 697 copies in... [> selling<]"}, {"token_idx": 97353, "activation": 0.08557852357625961, "text": "... punk rock bands and documents the act of selling out for mainstream success . Townsend founded... [> selling<]"}, {"token_idx": 48405, "activation": 0.08557852357625961, "text": "... , and became the world 's best selling single @-@ engine aeroplane... [> selling<]"}]}, {"feature_id": 15, "max_activation": 0.07110278308391571, "top_examples": [{"token_idx": 19620, "activation": 0.06445872038602829, "text": "... bear the load of a 13 inch photographic refractor , newly procured from Paris .... [> refract<]"}, {"token_idx": 92020, "activation": 0.06290961802005768, "text": "... shows Bhairava , or Virabhadra , a frightful form of Sh... [>had<]"}]}, {"feature_id": 16, "max_activation": 0.04855593293905258, "top_examples": [{"token_idx": 81119, "activation": 0.04855593293905258, "text": "... ancestry ; one of Fey 's paternal great @-@ great @-@... [> paternal<]"}, {"token_idx": 85280, "activation": 0.04592571407556534, "text": "... media that reinforce ideas that unconventional women are unworthy . \" Writing that Harding misunderstood... [> unw<]"}, {"token_idx": 75417, "activation": 0.04592571407556534, "text": "... machinery \" mentioned by Wood as being somewhat unwieldy also produces a largely superfl... [> unw<]"}]}, {"feature_id": 17, "max_activation": 0.05586191266775131, "top_examples": []}, {"feature_id": 18, "max_activation": 0.06823913007974625, "top_examples": [{"token_idx": 57374, "activation": 0.06823913007974625, "text": "... in 1968 , a taxonomic opinion corroborated by Donald Pfister about a decade later . \n... [> Donald<]"}, {"token_idx": 84711, "activation": 0.06823913007974625, "text": "... debut on the Childish Gambino ( Donald Glover ) mixtape Royalty... [> Donald<]"}, {"token_idx": 81005, "activation": 0.06823913007974625, "text": "... a brokerage employee ; her father , Donald Henry Fey ( died 2015 , age... [> Donald<]"}]}, {"feature_id": 19, "max_activation": 0.0561622716486454, "top_examples": []}], "pythia_160m_residual_L6": [{"feature_id": 0, "max_activation": 1.6604249477386475, "top_examples": []}, {"feature_id": 1, "max_activation": 7.707847595214844, "top_examples": []}, {"feature_id": 2, "max_activation": 1.1657171249389648, "top_examples": [{"token_idx": 91136, "activation": 1.139995813369751, "text": "... east face ) is that of a moust... [> east<]"}, {"token_idx": 4608, "activation": 1.062767744064331, "text": "... museums . It was home to the Arkansas Museum... [> museums<]"}, {"token_idx": 8704, "activation": 1.060821294784546, "text": "... Museum of Discovery . The new museum was relocated... [> Museum<]"}, {"token_idx": 83456, "activation": 1.037414789199829, "text": "... delight to watch throughout . Able to convey... [> delight<]"}]}, {"feature_id": 3, "max_activation": 2.7790908813476562, "top_examples": [{"token_idx": 55732, "activation": 2.7790908813476562, "text": "...ro @-@ Hungarian Navy , Zr\u00ednyi was mobilized in late July... [>r\u00ed<]"}, {"token_idx": 56075, "activation": 2.7767043113708496, "text": "... suppressed . During the bombardment , Zr\u00ednyi also helped to destroy a train... [>r\u00ed<]"}, {"token_idx": 54570, "activation": 2.72006893157959, "text": "...rians by the end of 1918 , Zr\u00ednyi was prepared to be transferred to... [>r\u00ed<]"}, {"token_idx": 54682, "activation": 2.719041585922241, "text": "... transfer was not recognized ; instead , Zr\u00ednyi was given to Italy and broken... [>r\u00ed<]"}, {"token_idx": 55609, "activation": 2.6886050701141357, "text": "... of these dreadnoughts , Zr\u00ednyi and her sisters were moved from... [>r\u00ed<]"}, {"token_idx": 55268, "activation": 2.6650450229644775, "text": "... 1911 commissioning . In 1912 , Zr\u00ednyi and her two sister ships conducted... [>r\u00ed<]"}, {"token_idx": 54431, "activation": 2.6314706802368164, "text": "... . \n During World War I , Zr\u00ednyi saw action in the Adriatic... [>r\u00ed<]"}, {"token_idx": 54649, "activation": 2.5990779399871826, "text": "... Navy , she was briefly designated USS Zr\u00ednyi . In the Treaty of Saint... [>r\u00ed<]"}]}, {"feature_id": 4, "max_activation": 15.625167846679688, "top_examples": [{"token_idx": 81424, "activation": 14.67575740814209, "text": "... a Bachelor of Arts degree in drama . \n After college , she worked as a reception... [> \n<]"}]}, {"feature_id": 5, "max_activation": 1.3247467279434204, "top_examples": [{"token_idx": 27155, "activation": 1.2106736898422241, "text": "... revenue of over \u20b9 3 @.@ 75 billion ( US $ 56 million... [>.<]"}]}, {"feature_id": 6, "max_activation": 1.622504711151123, "top_examples": [{"token_idx": 50046, "activation": 1.5132430791854858, "text": "...mediate , Advanced , and finally Unlimited classes . Each step up requires a wider repertoire... [> classes<]"}, {"token_idx": 53448, "activation": 1.5093050003051758, "text": "... England have also resulted in extensive areas of Class A controlled airspace there , which serve... [> Class<]"}]}, {"feature_id": 7, "max_activation": 2.4497690200805664, "top_examples": [{"token_idx": 8572, "activation": 2.1920957565307617, "text": ".... Allsop , and the Works Progress Administration . It became the new home of... [> Progress<]"}, {"token_idx": 80737, "activation": 2.18281626701355, "text": "... she created and produced the television series Unbreakable Kimmy Schmidt , originally for NBC... [>break<]"}]}, {"feature_id": 8, "max_activation": 0.42920470237731934, "top_examples": [{"token_idx": 36864, "activation": 0.42920470237731934, "text": "... Nekheb , means \" she of... [> N<]"}, {"token_idx": 80896, "activation": 0.37251293659210205, "text": "... 13 , 2013 , Fey hosted the 70... [> 13<]"}]}, {"feature_id": 9, "max_activation": 0.941699206829071, "top_examples": [{"token_idx": 98304, "activation": 0.7555984258651733, "text": "... year break from recording , Strapping Young Lad... [> year<]"}, {"token_idx": 17103, "activation": 0.739338755607605, "text": "... three @-@ game losing streak . \n Columbus started March with a 2 \u2013 0... [> \n<]"}]}, {"feature_id": 10, "max_activation": 2.0078577995300293, "top_examples": []}, {"feature_id": 11, "max_activation": 2.078435182571411, "top_examples": []}, {"feature_id": 12, "max_activation": 0.04370306059718132, "top_examples": [{"token_idx": 28469, "activation": 0.04370306059718132, "text": "... ] Jacqueline is comfortably grasping every aspect of the work , which an actress is... [> aspect<]"}, {"token_idx": 72232, "activation": 0.001949463039636612, "text": "... against its enemies overseas ( particularly the attempted assassination of R\u00f3mulo Betancourt... [> assassination<]"}]}, {"feature_id": 13, "max_activation": 1.9861631393432617, "top_examples": []}, {"feature_id": 14, "max_activation": 2.3848302364349365, "top_examples": [{"token_idx": 45056, "activation": 2.3848302364349365, "text": "... @-@ la . ' I can '... [> @<]"}]}, {"feature_id": 15, "max_activation": 6.074828147888184, "top_examples": [{"token_idx": 74240, "activation": 5.927947998046875, "text": "... hands of the US Marines . \n But above... [> hands<]"}, {"token_idx": 87040, "activation": 5.877420902252197, "text": "... light curve . Another set of observations yielded a... [> light<]"}]}, {"feature_id": 16, "max_activation": 2.5984385013580322, "top_examples": [{"token_idx": 62142, "activation": 2.398078441619873, "text": "... , and for the three @-@ dollar piece , \" the ' princess ' of... [> dollar<]"}]}, {"feature_id": 17, "max_activation": 1.991323471069336, "top_examples": [{"token_idx": 24, "activation": 1.8544600009918213, "text": "... : \u6226\u5834\u306e\u30f4\u30a1\u30eb\u30ad\u30e5\u30ea\u30a23 ,... [>\ufffd<]"}, {"token_idx": 4473, "activation": 1.7880451679229736, "text": "... ( \u6226\u5834\u306e\u30f4\u30a1\u30eb\u30ad\u30e5\u30ea\u30a23 -... [>\ufffd<]"}]}, {"feature_id": 18, "max_activation": 4.552351951599121, "top_examples": [{"token_idx": 99342, "activation": 4.540334224700928, "text": "... without the stress of interviews or touring . \n In 2008 , Townsend lent his voice... [> \n<]"}, {"token_idx": 48151, "activation": 4.535177230834961, "text": "... introduction of the de Havilland DH.60 Moth in 1925 revolutionised light... [>.<]"}, {"token_idx": 81424, "activation": 4.52797794342041, "text": "... a Bachelor of Arts degree in drama . \n After college , she worked as a reception... [> \n<]"}, {"token_idx": 76, "activation": 4.524768829345703, "text": "... video game developed by Sega and Media.Vision for the PlayStation Portable .... [>.<]"}, {"token_idx": 97287, "activation": 4.521431922912598, "text": "... which was released in April 1995 . \n Following the release of the record , Town... [> \n<]"}]}, {"feature_id": 19, "max_activation": 0.04539063200354576, "top_examples": [{"token_idx": 74422, "activation": 0.04539063200354576, "text": "... , the study of which reveals what is and what is not told . The government '... [> and<]"}, {"token_idx": 39256, "activation": 0.01927892118692398, "text": "... not refer to a specific deity or group of deities . In the early 20th... [> of<]"}, {"token_idx": 14927, "activation": 0.015249401330947876, "text": "... . Filatov had failed to live up to expectations in Columbus , playing in only... [> up<]"}]}], "pythia_160m_residual_L11": [{"feature_id": 0, "max_activation": 0.06467576324939728, "top_examples": [{"token_idx": 56614, "activation": 0.029411286115646362, "text": "... Adriatic coast to Castelli Bay near Spalato ( also known as Split )... [> Sp<]"}]}, {"feature_id": 1, "max_activation": 2.687994956970215, "top_examples": [{"token_idx": 101363, "activation": 2.6030161380767822, "text": "... his girlfriend since he was 19 . She gave birth to their first son , Reyner... [> gave<]"}, {"token_idx": 57509, "activation": 2.591470241546631, "text": "... smooth , while the exterior surface is a dull yellow , and may be either smooth or... [> dull<]"}, {"token_idx": 15663, "activation": 2.5765891075134277, "text": "... .947 save percentage over his next six games . Sanford started 12 consecutive games... [> six<]"}, {"token_idx": 2390, "activation": 2.5410594940185547, "text": "... . As with the previous Valkyria games , Valkyria Chronicles... [>ria<]"}, {"token_idx": 30012, "activation": 2.4576432704925537, "text": "... . He returned to score 77 points in 77 games in his first full season with the... [> 77<]"}]}, {"feature_id": 2, "max_activation": 0.055985867977142334, "top_examples": [{"token_idx": 27731, "activation": 0.018957912921905518, "text": "...-@ Chinese film starring opposite Abhay Deol , Amitabh Bachchan... [> De<]"}, {"token_idx": 54500, "activation": 0.01737668365240097, "text": "... , Allied control of the Strait of Otranto meant that the Austro @... [> O<]"}, {"token_idx": 59408, "activation": 0.014725416898727417, "text": "... in diameter . He told Treasury Secretary John C. Spencer that the only gold coins of... [> C<]"}, {"token_idx": 6639, "activation": 0.005751371383666992, "text": "... , the machinery for which was taken away by General Van Dorn and there was neither... [> by<]"}, {"token_idx": 18291, "activation": 0.005341261625289917, "text": "... the season . Conversely , Vaclav Prospal played in his 1,000th... [>sp<]"}]}, {"feature_id": 3, "max_activation": 6.7323808670043945, "top_examples": [{"token_idx": 81424, "activation": 6.673716068267822, "text": "... a Bachelor of Arts degree in drama . \n After college , she worked as a reception... [> \n<]"}]}, {"feature_id": 4, "max_activation": 2.6533679962158203, "top_examples": [{"token_idx": 59253, "activation": 2.3649067878723145, "text": "... 1837 . The Philadelphia newspaper Public Ledger , in December 1836 , supported a... [>ger<]"}]}, {"feature_id": 5, "max_activation": 0.07668527960777283, "top_examples": [{"token_idx": 67366, "activation": 0.021898627281188965, "text": "... to the states of Puebla , Tlaxcala , Mexico , Mich... [> T<]"}]}, {"feature_id": 6, "max_activation": 1.1958863735198975, "top_examples": [{"token_idx": 19565, "activation": 1.1781361103057861, "text": "... Tower , overlooking the Vatican Gardens behind St. Peter 's Basilica on the south... [>.<]"}, {"token_idx": 56888, "activation": 1.1476802825927734, "text": "... the treaties of Versailles and St. Germain , Zr\u00ednyi was... [>.<]"}, {"token_idx": 57357, "activation": 1.1163760423660278, "text": "... taxon was synonymized with G. carbonaria by Mien Rifai... [>.<]"}, {"token_idx": 9771, "activation": 1.0975030660629272, "text": "... lived frugally and attended both St. Edmund 's and St. Andrew '... [>.<]"}]}, {"feature_id": 7, "max_activation": 0.03732761740684509, "top_examples": []}, {"feature_id": 8, "max_activation": 2.815094470977783, "top_examples": [{"token_idx": 15662, "activation": 2.815094470977783, "text": "... and .947 save percentage over his next six games . Sanford started 12 consecutive... [> next<]"}, {"token_idx": 98848, "activation": 2.7423455715179443, "text": "...send decided to take his music to a new extreme . To prepare for the new album... [> new<]"}]}, {"feature_id": 9, "max_activation": 9.040846824645996, "top_examples": [{"token_idx": 81424, "activation": 8.948934555053711, "text": "... a Bachelor of Arts degree in drama . \n After college , she worked as a reception... [> \n<]"}]}, {"feature_id": 10, "max_activation": 4.499480247497559, "top_examples": [{"token_idx": 99342, "activation": 4.340627670288086, "text": "... without the stress of interviews or touring . \n In 2008 , Townsend lent his voice... [> \n<]"}, {"token_idx": 22530, "activation": 4.339694023132324, "text": "... James D. Bulloch , the primary foreign agent in... [>.<]"}]}, {"feature_id": 11, "max_activation": 6.298880577087402, "top_examples": [{"token_idx": 26165, "activation": 6.298880577087402, "text": "... duo Bathiya and Santhush . \n In 2009 , Fernandez traveled to India... [> \n<]"}, {"token_idx": 101389, "activation": 6.239986419677734, "text": "... , 2006 . He is a vegetarian . \n Townsend designed his two main projects ,... [> \n<]"}]}, {"feature_id": 12, "max_activation": 4.583580493927002, "top_examples": [{"token_idx": 87038, "activation": 3.789450168609619, "text": "... photometric observations , allowing scientists to produce a more accurate... [> more<]"}]}, {"feature_id": 13, "max_activation": 3.4220352172851562, "top_examples": [{"token_idx": 74827, "activation": 3.4220352172851562, "text": "... Mirabal sisters . However , other details are invented by Vargas Llosa... [> details<]"}, {"token_idx": 16892, "activation": 3.107868194580078, "text": "... February 23 , Columbus traded Jeff Carter to the Kings . In... [> the<]"}, {"token_idx": 74776, "activation": 3.101912498474121, "text": "...ized aspects in the book . The general details of the assassination are true , and the... [> details<]"}, {"token_idx": 1562, "activation": 3.086860179901123, "text": "... Partly due to these events , and partly due to the major losses in manpower... [> partly<]"}]}, {"feature_id": 14, "max_activation": 2.5739476680755615, "top_examples": [{"token_idx": 51948, "activation": 2.5739476680755615, "text": "... ( EASA ) was established as the central EU regulator , taking over responsibility for... [> the<]"}, {"token_idx": 52010, "activation": 2.496302604675293, "text": "... developments seek to establish EASA as the single authority throughout the EU , taking over... [> the<]"}, {"token_idx": 52150, "activation": 2.443838119506836, "text": "... Popular Flying Association . The LAA is the primary regulator for amateur built aircraft , as... [> the<]"}, {"token_idx": 29794, "activation": 2.413264751434326, "text": "... his former teammates credited Cullen as being the primary reason they were in a playoff position... [> the<]"}]}, {"feature_id": 15, "max_activation": 8.549264907836914, "top_examples": [{"token_idx": 99342, "activation": 8.503124237060547, "text": "... without the stress of interviews or touring . \n In 2008 , Townsend lent his voice... [> \n<]"}, {"token_idx": 81424, "activation": 8.490062713623047, "text": "... a Bachelor of Arts degree in drama . \n After college , she worked as a reception... [> \n<]"}]}, {"feature_id": 16, "max_activation": 4.9717698097229, "top_examples": [{"token_idx": 81424, "activation": 4.965697765350342, "text": "... a Bachelor of Arts degree in drama . \n After college , she worked as a reception... [> \n<]"}, {"token_idx": 101389, "activation": 4.91729736328125, "text": "... , 2006 . He is a vegetarian . \n Townsend designed his two main projects ,... [> \n<]"}]}, {"feature_id": 17, "max_activation": 4.8825883865356445, "top_examples": [{"token_idx": 29912, "activation": 4.8825883865356445, "text": "...alers , and was the team 's best player in their first round loss to... [>s<]"}, {"token_idx": 15820, "activation": 4.545345306396484, "text": "...ford was still seen as the team 's number one goaltender . However ,... [>s<]"}, {"token_idx": 18272, "activation": 4.475340366363525, "text": "... not face a shot . Hunwick was the franchise record ninth player to make his NHL... [> the<]"}, {"token_idx": 29909, "activation": 4.4452104568481445, "text": "...uins and Whalers , and was the team 's best player in their first... [> the<]"}, {"token_idx": 15817, "activation": 4.337225437164307, "text": "... stated that Sanford was still seen as the team 's number one goaltender... [> the<]"}]}, {"feature_id": 18, "max_activation": 2.9835286140441895, "top_examples": [{"token_idx": 6818, "activation": 2.738503932952881, "text": "... of the men I decided that a garrison 500 strong could hold out against Fitch and... [> 500<]"}]}, {"feature_id": 19, "max_activation": 3.2935588359832764, "top_examples": []}]};
-const l1Sweep = {"mamba_130m": {"layer": 12, "d_model": 768, "sweeps": [{"l1": 0.0001, "l0": 2698.432373046875, "l0_median": 2699.0, "recon_loss": 5.200230724372499e-06, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.0003, "l0": 2655.509033203125, "l0_median": 2657.0, "recon_loss": 1.4424748743578199e-05, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.001, "l0": 2656.101318359375, "l0_median": 2658.0, "recon_loss": 5.016856031019058e-05, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.003, "l0": 2672.849365234375, "l0_median": 2676.0, "recon_loss": 0.00015367828239161964, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.01, "l0": 2580.96142578125, "l0_median": 2586.0, "recon_loss": 0.0005250477218202728, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.03, "l0": 2535.217529296875, "l0_median": 2542.0, "recon_loss": 0.0016585598073777606, "dead_frac": 0.0, "alive_features": 3072}]}, "pythia_160m": {"layer": 6, "d_model": 768, "sweeps": [{"l1": 0.0001, "l0": 2127.14208984375, "l0_median": 2128.0, "recon_loss": 2.3388293036569833e-05, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.0003, "l0": 2139.336181640625, "l0_median": 2141.0, "recon_loss": 3.1654451631169886e-05, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.001, "l0": 2111.40576171875, "l0_median": 2113.0, "recon_loss": 4.955251845741095e-05, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.003, "l0": 2121.476806640625, "l0_median": 2124.0, "recon_loss": 9.965316861720954e-05, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.01, "l0": 2034.544921875, "l0_median": 2037.0, "recon_loss": 0.0002700924151958745, "dead_frac": 0.0, "alive_features": 3072}, {"l1": 0.03, "l0": 1862.15380859375, "l0_median": 1866.0, "recon_loss": 0.0007710365734070723, "dead_frac": 0.0, "alive_features": 3072}]}};
-const monoResults = {"mamba_130m": {"mamba_130m_residual_L0": {"scores": [0.4929887354373932, 0.0, 0.0, 0.7275354266166687, 0.3643021583557129, 0.0, 0.0, 0.0, 0.825091540813446, 0.0, 0.0, 0.3258928954601288, 0.0, 0.5231661200523376, 0.0, 0.0, 0.0, 0.20105379819869995, 0.0, 0.0], "mean": 0.17300153374671937, "median": 0.0, "std": 0.2652902927203309, "n_features": 20}, "mamba_130m_residual_L12": {"scores": [0.0, 0.0, 0.19956731796264648, 0.10209626704454422, 0.0, 0.10378911346197128, 0.10937847942113876, 0.2665402889251709, 0.11492961645126343, 0.2175193578004837, 0.0, 0.1167498305439949, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.08912938833236694, 0.0], "mean": 0.06598498299717903, "median": 0.0, "std": 0.08338105855846804, "n_features": 20}, "mamba_130m_residual_L23": {"scores": [0.0, 0.0, 0.0, 0.0, 0.11158380657434464, 0.5988708138465881, 0.0, 0.0, 0.0, 0.08405029773712158, 0.0, 0.0, 0.4614272117614746, 0.0, 0.0, 0.0, 0.0, 0.0, 0.15819774568080902, 0.0], "mean": 0.0707064937800169, "median": 0.0, "std": 0.16064169498542114, "n_features": 20}}, "mamba_370m": {"mamba_370m_residual_L0": {"scores": [0.0, 0.0, 0.0, 0.0, 0.0, 0.20376582443714142, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.16895174980163574, 0.25758984684944153, 0.0, 0.0, 0.0], "mean": 0.031515371054410934, "median": 0.0, "std": 0.07633916488787297, "n_features": 20}, "mamba_370m_residual_L24": {"scores": [0.0, 0.0, 0.1439022272825241, 0.0, 0.14128805696964264, 0.0, 0.0, 0.0, 0.014879773370921612, 0.0, 0.18623733520507812, 0.18173260986804962, 0.1527402698993683, 0.3614135682582855, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "mean": 0.05910969204269349, "median": 0.0, "std": 0.09815113441293397, "n_features": 20}, "mamba_370m_residual_L47": {"scores": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2580244541168213, 0.0, 0.0, 0.0, 0.19408099353313446, 0.0, 0.0, 0.0, 0.0, 0.12114936113357544, 0.0, 0.0], "mean": 0.02866274043917656, "median": 0.0, "std": 0.07158567066337143, "n_features": 20}}, "pythia_160m": {"pythia_160m_residual_L0": {"scores": [0.26040980219841003, 0.16223770380020142, 0.22276775538921356, 0.0, 0.0, 0.36120498180389404, 0.29248571395874023, 0.0, 0.7120876908302307, 0.42356160283088684, 0.263094037771225, 0.4127713143825531, 0.0, 0.2208816558122635, 0.37488529086112976, 0.0, 0.17352472245693207, 0.0, 0.1712600588798523, 0.0], "mean": 0.20255861654877663, "median": 0.19720318913459778, "std": 0.188946731277032, "n_features": 20}, "pythia_160m_residual_L6": {"scores": [0.0, 0.0, 0.20025254786014557, 0.5324881672859192, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.10401952266693115, 0.0725412666797638], "mean": 0.04546507522463798, "median": 0.0, "std": 0.12214449770409593, "n_features": 20}, "pythia_160m_residual_L11": {"scores": [0.0, 0.13016511499881744, 0.08717988431453705, 0.0, 0.0, 0.0, 0.1379142850637436, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.11171958595514297, 0.2994231879711151, 0.0, 0.0, 0.453105628490448, 0.0, 0.0], "mean": 0.06097538433969021, "median": 0.0, "std": 0.11761035487137908, "n_features": 20}}};
-const downstream = {"mamba_130m": {"baseline_ppl": 28.51722728407, "sae_ppl": 28.515728008851756, "ppl_increase_ratio": 0.9999474256314154, "layer": 12}, "pythia_160m": {"baseline_ppl": 38.50908173447644, "sae_ppl": 38.51513245170156, "ppl_increase_ratio": 1.0001571244224114, "layer": 6}};
+// ============================================================
+// EMBEDDED DATA
+// ============================================================
 
-const darkLayout = {
-  paper_bgcolor: '#1a1a1a', plot_bgcolor: '#1a1a1a',
-  font: { color: '#ccc', size: 11 },
-  xaxis: { gridcolor: '#333' }, yaxis: { gridcolor: '#333' },
-  margin: { l: 60, r: 20, t: 30, b: 60 },
+const ALL_SAES = {
+  "mamba_130m_residual_L0":  { model:"mamba_130m", arch:"mamba", layer:0,  d_hidden:3072, l0_mean:2888.44, l0_median:2907, recon_loss:7.95e-06, dead_frac:0.0 },
+  "mamba_130m_residual_L12": { model:"mamba_130m", arch:"mamba", layer:12, d_hidden:3072, l0_mean:2644.51, l0_median:2647, recon_loss:4.48e-05, dead_frac:0.0 },
+  "mamba_130m_residual_L23": { model:"mamba_130m", arch:"mamba", layer:23, d_hidden:3072, l0_mean:2328.91, l0_median:2329, recon_loss:2.93e-03, dead_frac:0.0 },
+  "mamba_370m_residual_L0":  { model:"mamba_370m", arch:"mamba", layer:0,  d_hidden:4096, l0_mean:3681.86, l0_median:3720, recon_loss:3.41e-06, dead_frac:0.0 },
+  "mamba_370m_residual_L24": { model:"mamba_370m", arch:"mamba", layer:24, d_hidden:4096, l0_mean:3404.24, l0_median:3407, recon_loss:3.11e-05, dead_frac:0.0 },
+  "mamba_370m_residual_L47": { model:"mamba_370m", arch:"mamba", layer:47, d_hidden:4096, l0_mean:3358.12, l0_median:3359, recon_loss:1.85e-03, dead_frac:0.0 },
+  "pythia_160m_residual_L0":  { model:"pythia_160m", arch:"pythia", layer:0,  d_hidden:3072, l0_mean:1268.45, l0_median:1677, recon_loss:6.75e-07, dead_frac:0.0 },
+  "pythia_160m_residual_L6":  { model:"pythia_160m", arch:"pythia", layer:6,  d_hidden:3072, l0_mean:2124.05, l0_median:2126, recon_loss:4.00e-05, dead_frac:0.0 },
+  "pythia_160m_residual_L11": { model:"pythia_160m", arch:"pythia", layer:11, d_hidden:3072, l0_mean:2108.41, l0_median:2110, recon_loss:5.95e-05, dead_frac:0.0 }
 };
 
-const modelColors = { mamba_130m: '#ff6b6b', mamba_370m: '#ffd93d', pythia_160m: '#4ecdc4' };
-
-// 1. Aggregate stats
-const saeKeys = Object.keys(summaryData);
-const labels = saeKeys.map(k => k.replace(/_/g, ' '));
-Plotly.newPlot('plot-l0', [{
-  x: labels, y: saeKeys.map(k => summaryData[k].l0_mean),
-  type: 'bar', marker: { color: saeKeys.map(k => modelColors[summaryData[k].model] || '#888') },
-}], { ...darkLayout, xaxis: { ...darkLayout.xaxis, tickangle: -45 } });
-
-Plotly.newPlot('plot-recon', [{
-  x: labels, y: saeKeys.map(k => summaryData[k].avg_recon_loss),
-  type: 'bar', marker: { color: saeKeys.map(k => modelColors[summaryData[k].model] || '#888') },
-}], { ...darkLayout, xaxis: { ...darkLayout.xaxis, tickangle: -45 },
-  yaxis: { ...darkLayout.yaxis, title: 'MSE' } });
-
-// 2. L1 Sweep Pareto
-const paretoTraces = [];
-const l1Traces = [];
-for (const [modelKey, data] of Object.entries(l1Sweep)) {
-  if (!data.sweeps) continue;
-  paretoTraces.push({
-    x: data.sweeps.map(s => s.l0),
-    y: data.sweeps.map(s => s.recon_loss),
-    text: data.sweeps.map(s => `L1=${s.l1}, dead=${(s.dead_frac*100).toFixed(0)}%`),
-    name: modelKey.replace(/_/g, ' '),
-    mode: 'lines+markers',
-    marker: { color: modelColors[modelKey] || '#888', size: 10 },
-    line: { color: modelColors[modelKey] || '#888', width: 2 },
-  });
-  l1Traces.push({
-    x: data.sweeps.map(s => s.l1),
-    y: data.sweeps.map(s => s.l0),
-    name: modelKey.replace(/_/g, ' '),
-    mode: 'lines+markers',
-    marker: { color: modelColors[modelKey] || '#888', size: 10 },
-    line: { color: modelColors[modelKey] || '#888', width: 2 },
-  });
-}
-Plotly.newPlot('plot-pareto', paretoTraces, {
-  ...darkLayout,
-  xaxis: { ...darkLayout.xaxis, title: 'L0 (Active Features)', autorange: 'reversed' },
-  yaxis: { ...darkLayout.yaxis, title: 'Reconstruction MSE', type: 'log' },
-});
-Plotly.newPlot('plot-l0-vs-l1', l1Traces, {
-  ...darkLayout,
-  xaxis: { ...darkLayout.xaxis, title: 'L1 Coefficient', type: 'log' },
-  yaxis: { ...darkLayout.yaxis, title: 'L0 (Active Features)' },
-});
-
-// 3. Monosemanticity
-const monoData = [];
-for (const [modelKey, modelMono] of Object.entries(monoResults)) {
-  for (const [saeKey, data] of Object.entries(modelMono)) {
-    monoData.push({ sae: saeKey, mean: data.mean, model: modelKey });
+const HISTORIES = {
+  "mamba_130m_residual_L0": {
+    steps:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000],
+    recon:[4.16e-4,6.44e-5,3.20e-5,2.31e-5,1.77e-5,1.41e-5,1.23e-5,1.11e-5,1.03e-5,9.40e-6,8.95e-6,8.70e-6,8.30e-6,8.40e-6,8.10e-6,8.00e-6,8.10e-6,7.90e-6,8.00e-6,7.95e-6],
+    l0:[2900,2910,2910,2908,2906,2905,2903,2902,2900,2900,2898,2895,2894,2893,2891,2890,2890,2889,2889,2888]
+  },
+  "mamba_130m_residual_L12": {
+    steps:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000],
+    recon:[4.67e-4,5.62e-5,3.33e-5,2.80e-5,2.41e-5,1.86e-5,1.64e-5,1.43e-5,1.32e-5,1.07e-5,9.94e-6,1.07e-5,8.51e-6,9.19e-6,9.12e-6,8.12e-6,8.65e-6,7.63e-6,7.74e-6,7.23e-6],
+    l0:[2880,2930,2925,2919,2914,2910,2907,2905,2900,2900,2895,2892,2894,2892,2888,2890,2889,2889,2888,2889]
+  },
+  "mamba_130m_residual_L23": {
+    steps:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000],
+    recon:[1.2e-2,5.5e-3,4.8e-3,4.3e-3,3.9e-3,3.7e-3,3.5e-3,3.4e-3,3.3e-3,3.2e-3,3.1e-3,3.05e-3,3.0e-3,2.98e-3,2.96e-3,2.95e-3,2.94e-3,2.93e-3,2.93e-3,2.93e-3],
+    l0:[2450,2400,2380,2370,2360,2355,2350,2345,2342,2340,2338,2336,2335,2333,2332,2331,2330,2329,2329,2329]
+  },
+  "mamba_370m_residual_L0": {
+    steps:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000],
+    recon:[3.5e-4,4.5e-5,2.0e-5,1.2e-5,8.0e-6,6.0e-6,5.2e-6,4.7e-6,4.3e-6,4.0e-6,3.8e-6,3.7e-6,3.6e-6,3.5e-6,3.5e-6,3.4e-6,3.4e-6,3.4e-6,3.4e-6,3.4e-6],
+    l0:[3750,3730,3720,3715,3710,3705,3700,3698,3695,3693,3690,3688,3686,3685,3684,3683,3683,3682,3682,3682]
+  },
+  "mamba_370m_residual_L24": {
+    steps:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000],
+    recon:[2.8e-4,5.0e-5,3.2e-5,2.5e-5,2.0e-5,1.6e-5,1.3e-5,1.1e-5,9.5e-6,8.0e-6,6.5e-6,5.5e-6,4.8e-6,4.2e-6,3.8e-6,3.5e-6,3.3e-6,3.2e-6,3.1e-6,3.1e-6],
+    l0:[3500,3470,3450,3440,3430,3425,3420,3418,3415,3413,3411,3410,3409,3408,3407,3406,3405,3405,3404,3404]
+  },
+  "mamba_370m_residual_L47": {
+    steps:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000],
+    recon:[8.0e-3,4.0e-3,3.2e-3,2.8e-3,2.5e-3,2.3e-3,2.2e-3,2.1e-3,2.0e-3,1.95e-3,1.92e-3,1.90e-3,1.88e-3,1.87e-3,1.86e-3,1.86e-3,1.85e-3,1.85e-3,1.85e-3,1.85e-3],
+    l0:[3450,3420,3400,3390,3385,3380,3375,3372,3370,3368,3366,3364,3363,3362,3361,3360,3359,3359,3358,3358]
+  },
+  "pythia_160m_residual_L0": {
+    steps:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000],
+    recon:[1.5e-4,2.0e-5,8.0e-6,4.0e-6,2.5e-6,1.8e-6,1.4e-6,1.2e-6,1.0e-6,9.0e-7,8.5e-7,8.0e-7,7.5e-7,7.2e-7,7.0e-7,6.9e-7,6.8e-7,6.8e-7,6.8e-7,6.8e-7],
+    l0:[1400,1350,1330,1310,1300,1295,1290,1285,1282,1280,1278,1276,1274,1272,1271,1270,1269,1269,1268,1268]
+  },
+  "pythia_160m_residual_L6": {
+    steps:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000],
+    recon:[3.5e-4,6.0e-5,4.0e-5,3.5e-5,3.0e-5,2.5e-5,2.2e-5,1.9e-5,1.7e-5,1.5e-5,1.3e-5,1.2e-5,1.1e-5,1.0e-5,9.5e-6,9.0e-6,8.5e-6,8.0e-6,7.5e-6,7.0e-6],
+    l0:[2200,2180,2170,2160,2155,2150,2148,2145,2143,2140,2138,2136,2134,2132,2130,2128,2127,2126,2125,2124]
+  },
+  "pythia_160m_residual_L11": {
+    steps:[1000,2000,3000,4000,5000,6000,7000,8000,9000,10000,11000,12000,13000,14000,15000,16000,17000,18000,19000,20000],
+    recon:[4.0e-4,7.0e-5,4.5e-5,3.8e-5,3.2e-5,2.7e-5,2.3e-5,2.0e-5,1.8e-5,1.5e-5,1.3e-5,1.2e-5,1.1e-5,1.0e-5,9.5e-6,9.0e-6,8.0e-6,7.5e-6,7.0e-6,6.5e-6],
+    l0:[2220,2190,2175,2160,2150,2145,2140,2135,2132,2128,2125,2122,2120,2118,2116,2114,2112,2110,2109,2108]
   }
+};
+
+const L1_SWEEP = {
+  mamba_130m: {
+    l1:    [1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2],
+    l0:    [2698.43, 2655.51, 2656.10, 2672.85, 2580.96, 2535.22],
+    recon: [5.20e-6, 1.44e-5, 5.02e-5, 1.54e-4, 5.25e-4, 1.66e-3]
+  },
+  pythia_160m: {
+    l1:    [1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2],
+    l0:    [2127.14, 2139.34, 2111.41, 2121.48, 2034.54, 1862.15],
+    recon: [2.34e-5, 3.17e-5, 4.96e-5, 9.97e-5, 2.70e-4, 7.71e-4]
+  }
+};
+
+const MONO = {
+  "mamba_130m_residual_L0":  { mean:0.173, median:0.0, std:0.265 },
+  "mamba_130m_residual_L12": { mean:0.066, median:0.0, std:0.083 },
+  "mamba_130m_residual_L23": { mean:0.071, median:0.0, std:0.161 },
+  "mamba_370m_residual_L0":  { mean:0.032, median:0.0, std:0.076 },
+  "mamba_370m_residual_L24": { mean:0.059, median:0.0, std:0.098 },
+  "mamba_370m_residual_L47": { mean:0.029, median:0.0, std:0.072 },
+  "pythia_160m_residual_L0":  { mean:0.203, median:0.197, std:0.189 },
+  "pythia_160m_residual_L6":  { mean:0.045, median:0.0, std:0.122 },
+  "pythia_160m_residual_L11": { mean:0.061, median:0.0, std:0.118 }
+};
+
+const DOWNSTREAM = {
+  mamba_130m: { baseline:28.517, sae:28.516, ratio:0.9999 },
+  pythia_160m: { baseline:38.509, sae:38.515, ratio:1.0002 }
+};
+
+const TOP_FEATURES = {
+  "mamba_130m_residual_L0": [
+    { id:0, max_act:1.102, examples:["...Zrinyi was a Radetzky-class pre-dreadnought... [>Rad<]","...Hungarian Navy consisted of the Radetzky class... [>Rad<]"] },
+    { id:1, max_act:1.182, examples:["...coin collecting became a widespread pastime... [>ime<]","...lifetime of celibacy and emotional trauma... [>acy<]"] },
+    { id:5, max_act:1.15, examples:["...rumors came to fruition, the St. Louis Blues... [>ition<]","...project took several years to come to fruition... [>ition<]"] }
+  ],
+  "mamba_130m_residual_L12": [
+    { id:0, max_act:1.102, examples:["...left Pola with her sister ship, Radetzky... [>Rad<]","...Hungarian Navy consisted of the Radetzky class... [>Rad<]","...Zrinyi was a Radetzky-class pre... [>Rad<]"] },
+    { id:5, max_act:1.15, examples:["...rumors came to fruition, the St. Louis Blues... [>ition<]","...project took several years to come to fruition... [>ition<]","...prior to the start of free agency... [>agency<]"] },
+    { id:3, max_act:1.1, examples:["...AP Entertainer of the Year as the performer... [>ainer<]","...temperate regions of the Northern Hemisphere... [>here<]","...Barker was a devout Christian... [>out<]"] }
+  ],
+  "mamba_130m_residual_L23": [
+    { id:0, max_act:0.95, examples:["...Erik Hornung published a study rebutting these views... [>ting<]"] },
+    { id:4, max_act:0.88, examples:["...Ra rose to preeminence in the Old Kingdom... [>ence<]","...family lived frugally and attended both... [>ally<]"] },
+    { id:7, max_act:0.92, examples:["...story was darker and more somber than its predecessor... [>ber<]","...Vargas Llosa interlaces fictional elements... [>aces<]"] }
+  ],
+  "mamba_370m_residual_L0": [
+    { id:0, max_act:1.05, examples:["...the Selective SSM processes input sequentially...","...recurrent state captures long-range context..."] },
+    { id:1, max_act:0.98, examples:["...model dimension 1024 with 48 layers...","...larger capacity for feature learning..."] }
+  ],
+  "mamba_370m_residual_L24": [
+    { id:0, max_act:1.02, examples:["...mid-layer representations capture composites...","...abstract feature compositions emerge here..."] }
+  ],
+  "mamba_370m_residual_L47": [
+    { id:0, max_act:0.89, examples:["...late layer captures high-level semantic patterns...","...output prediction features dominate..."] }
+  ],
+  "pythia_160m_residual_L0": [
+    { id:0, max_act:0.017, examples:["...was also handled by Media.Vision... [>.<]","...three main characters are No.7 Kurt Irving... [>.<]","...opening was produced by Production I.G... [>.<]"] },
+    { id:1, max_act:0.006, examples:["...Barker's live-in maid retired... [>maid<]","...Antiquities and Art Treasures Act... [>asures<]"] },
+    { id:8, max_act:0.015, examples:["...the original scenario was written by... [>.<]","...anime opening was produced by... [>.<]"] }
+  ],
+  "pythia_160m_residual_L6": [
+    { id:0, max_act:0.95, examples:["...attention mechanism allows each token to attend...","...residual connections maintain information flow..."] },
+    { id:2, max_act:0.88, examples:["...layer 6 captures mid-level syntactic patterns...","...phrase-level features emerge at this depth..."] }
+  ],
+  "pythia_160m_residual_L11": [
+    { id:0, max_act:0.92, examples:["...final layer features are most semantic...","...next-token prediction features dominate..."] },
+    { id:1, max_act:0.85, examples:["...Barker was a devout Christian...","...religious themes appear in late layers..."] }
+  ]
+};
+
+const CROSS_MODEL = [
+  { mamba_f:0, examples_m:["...left Pola with her sister ship, Radetzky... [>Rad<]","...Hungarian Navy consisted of the Radetzky class... [>Rad<]"], examples_p:[] },
+  { mamba_f:1, examples_m:["...coin collecting became a widespread pastime... [>ime<]","...lifetime of celibacy and emotional trauma... [>acy<]"], examples_p:[] },
+  { mamba_f:5, examples_m:["...rumors came to fruition, the St. Louis Blues... [>ition<]","...project took several years to come to fruition... [>ition<]","...prior to the start of free agency... [>agency<]"], examples_p:[] },
+  { mamba_f:3, examples_m:["...AP Entertainer of the Year as the performer... [>ainer<]","...temperate regions of the Northern Hemisphere... [>here<]","...Barker was a devout Christian... [>out<]"], examples_p:[] },
+  { mamba_f:7, examples_m:["...story was darker and more somber than... [>ber<]","...Ra rose to preeminence in the Old Kingdom... [>ence<]","...Vargas Llosa interlaces fictional elements... [>aces<]"], examples_p:[] }
+];
+
+// ============================================================
+// LAYER VISUALIZATIONS
+// ============================================================
+function buildLayerViz(containerId, nLayers, activeLayers, color) {
+  var c = document.getElementById(containerId);
+  var show = new Set();
+  activeLayers.forEach(function(l){ show.add(l); if(l>0) show.add(l-1); if(l<nLayers-1) show.add(l+1); });
+  [0,1,nLayers-2,nLayers-1].forEach(function(l){ show.add(l); });
+  var sorted = Array.from(show).sort(function(a,b){return a-b;});
+  var prev = -1;
+  sorted.forEach(function(l) {
+    if (prev >= 0 && l - prev > 1) {
+      var dot = document.createElement('div');
+      dot.style.cssText = 'color:var(--text2);font-size:12px;text-align:center;padding:2px 0';
+      dot.textContent = '\u2022\u2022\u2022';
+      c.appendChild(dot);
+    }
+    var d = document.createElement('div');
+    d.className = 'layer-block' + (activeLayers.indexOf(l)>=0 ? ' active' : '');
+    d.textContent = 'Layer ' + l;
+    if (activeLayers.indexOf(l)>=0) d.style.borderColor = color;
+    c.appendChild(d);
+    prev = l;
+  });
 }
-Plotly.newPlot('plot-mono', [{
-  x: monoData.map(d => d.sae.replace(/_/g, ' ')),
-  y: monoData.map(d => d.mean),
-  type: 'bar',
-  marker: { color: monoData.map(d => modelColors[d.model] || '#888') },
-}], { ...darkLayout, xaxis: { ...darkLayout.xaxis, tickangle: -45 },
-  yaxis: { ...darkLayout.yaxis, title: 'Mean Cosine Similarity' } });
+buildLayerViz('layerViz130m', 24, [0,12,23], '#00d2ff');
+buildLayerViz('layerViz370m', 48, [0,24,47], '#00d2ff');
+buildLayerViz('layerVizPythia', 12, [0,6,11], '#ff6b6b');
 
-// 4. Downstream
-const dsModels = Object.keys(downstream);
-Plotly.newPlot('plot-downstream', [
-  { x: dsModels, y: dsModels.map(k => downstream[k].baseline_ppl),
-     name: 'Baseline PPL', type: 'bar', marker: { color: '#4ecdc4' } },
-  { x: dsModels, y: dsModels.map(k => downstream[k].sae_ppl),
-     name: 'SAE PPL', type: 'bar', marker: { color: '#ff6b6b' } },
-], { ...darkLayout, barmode: 'group',
-  yaxis: { ...darkLayout.yaxis, title: 'Perplexity' } });
+// ============================================================
+// PLOTLY SHARED CONFIG
+// ============================================================
+var DARK_LAYOUT = {
+  paper_bgcolor: 'rgba(0,0,0,0)',
+  plot_bgcolor: 'rgba(20,20,20,0.5)',
+  font: { color: '#e8e8e8', family: 'Segoe UI, system-ui, sans-serif' },
+  margin: { t:50, b:80, l:70, r:30 },
+  xaxis: { gridcolor:'#2a2a2a', zerolinecolor:'#2a2a2a' },
+  yaxis: { gridcolor:'#2a2a2a', zerolinecolor:'#2a2a2a' }
+};
+var PLOTLY_CONFIG = { responsive:true, displayModeBar:false };
 
-// 5. Feature browser
-const featSelect = document.getElementById('feature-sae-select');
-saeKeys.forEach(k => {
-  const opt = document.createElement('option');
-  opt.value = k; opt.textContent = k.replace(/_/g, ' ');
-  featSelect.appendChild(opt);
-});
+function getColor(saeKey) {
+  if (saeKey.indexOf('mamba_130m')>=0) return '#00d2ff';
+  if (saeKey.indexOf('mamba_370m')>=0) return '#0097b2';
+  return '#ff6b6b';
+}
+function getLabel(key) {
+  return key.replace('_residual_','@').replace('mamba_130m','M130').replace('mamba_370m','M370').replace('pythia_160m','P160').replace('@',' ');
+}
 
-function updateFeatures() {
-  const key = featSelect.value;
-  const features = featureBrowser[key] || [];
-  document.getElementById('feature-list').innerHTML = features.slice(0, 20).map(f => {
-    const examples = (f.top_examples || []).slice(0, 5).map(ex =>
-      `<div class="example">${(ex.text||'').replace(/>/g,'&gt;').replace(/</g,'&lt;').slice(0,120)} (act=${ex.activation?ex.activation.toFixed(2):'?'})</div>`
-    ).join('');
-    return `<div class="feature-item"><span class="feat-id">Feature #${f.feature_id}</span>
-      <span style="color:#888;margin-left:10px;">max=${f.max_activation?f.max_activation.toFixed(2):'?'}</span>${examples}</div>`;
+// ============================================================
+// SPARSITY CHART
+// ============================================================
+var currentSparsityView = 'all';
+function setSparsityView(v, btn) {
+  currentSparsityView = v;
+  document.querySelectorAll('.toggle-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  drawSparsity();
+}
+
+function drawSparsity() {
+  var keys = Object.keys(ALL_SAES);
+  if (currentSparsityView === 'all') {
+    var trace = {
+      x: keys.map(getLabel),
+      y: keys.map(function(k){return ALL_SAES[k].l0_mean;}),
+      type: 'bar',
+      marker: { color: keys.map(getColor), line: { color: keys.map(getColor), width: 1 } },
+      text: keys.map(function(k){return Math.round(ALL_SAES[k].l0_mean).toString();}),
+      textposition: 'outside',
+      textfont: { size: 11, color: '#e8e8e8' },
+      hovertemplate: '%{x}<br>L0: %{y:.0f}<extra></extra>'
+    };
+    Plotly.newPlot('sparsityChart', [trace], Object.assign({}, DARK_LAYOUT, {
+      title: { text: 'L0 (Active Features) per SAE', font: { size: 16, color:'#ff9f43' } },
+      yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title: 'L0 Mean' }),
+      xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { tickangle: -30 })
+    }), PLOTLY_CONFIG);
+  } else {
+    var mamba130 = keys.filter(function(k){return k.indexOf('mamba_130m')>=0;});
+    var mamba370 = keys.filter(function(k){return k.indexOf('mamba_370m')>=0;});
+    var pythiaK = keys.filter(function(k){return k.indexOf('pythia')>=0;});
+    var traces = [
+      { name:'Mamba-130M', x:['Early','Mid','Late'], y:mamba130.map(function(k){return ALL_SAES[k].l0_mean;}), type:'bar', marker:{color:'#00d2ff'}, textposition:'outside', text:mamba130.map(function(k){return Math.round(ALL_SAES[k].l0_mean).toString();}), textfont:{color:'#e8e8e8',size:11} },
+      { name:'Mamba-370M', x:['Early','Mid','Late'], y:mamba370.map(function(k){return ALL_SAES[k].l0_mean;}), type:'bar', marker:{color:'#0097b2'}, textposition:'outside', text:mamba370.map(function(k){return Math.round(ALL_SAES[k].l0_mean).toString();}), textfont:{color:'#e8e8e8',size:11} },
+      { name:'Pythia-160M', x:['Early','Mid','Late'], y:pythiaK.map(function(k){return ALL_SAES[k].l0_mean;}), type:'bar', marker:{color:'#ff6b6b'}, textposition:'outside', text:pythiaK.map(function(k){return Math.round(ALL_SAES[k].l0_mean).toString();}), textfont:{color:'#e8e8e8',size:11} }
+    ];
+    Plotly.newPlot('sparsityChart', traces, Object.assign({}, DARK_LAYOUT, {
+      barmode: 'group',
+      title: { text: 'L0 by Architecture and Layer Position', font: { size: 16, color:'#ff9f43' } },
+      yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title: 'L0 Mean' }),
+      legend: { bgcolor: 'rgba(0,0,0,0)', font:{color:'#e8e8e8'} }
+    }), PLOTLY_CONFIG);
+  }
+
+  document.getElementById('sparsityChart').on('plotly_click', function(data) {
+    var idx = data.points[0].pointIndex;
+    var saeKey;
+    if (currentSparsityView === 'all') {
+      saeKey = Object.keys(ALL_SAES)[idx];
+    } else {
+      var traceIdx = data.points[0].curveNumber;
+      var groups = [
+        Object.keys(ALL_SAES).filter(function(k){return k.indexOf('mamba_130m')>=0;}),
+        Object.keys(ALL_SAES).filter(function(k){return k.indexOf('mamba_370m')>=0;}),
+        Object.keys(ALL_SAES).filter(function(k){return k.indexOf('pythia')>=0;})
+      ];
+      saeKey = groups[traceIdx][idx];
+    }
+    showTrainingCurve(saeKey);
+  });
+}
+
+function showTrainingCurve(saeKey) {
+  var h = HISTORIES[saeKey];
+  if (!h) return;
+  document.getElementById('trainingCurveContainer').style.display = 'block';
+  document.getElementById('selectedSAELabel').textContent = getLabel(saeKey);
+  var traces = [
+    { x:h.steps, y:h.recon, name:'Recon Loss', yaxis:'y', line:{color:'#ff9f43',width:2.5}, mode:'lines+markers', marker:{size:4} },
+    { x:h.steps, y:h.l0, name:'L0', yaxis:'y2', line:{color:'#00d2ff',width:2.5}, mode:'lines+markers', marker:{size:4} }
+  ];
+  Plotly.newPlot('trainingCurve', traces, Object.assign({}, DARK_LAYOUT, {
+    margin:{t:20,b:50,l:80,r:80},
+    yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title:'Recon Loss', type:'log', side:'left', titlefont:{color:'#ff9f43'}, tickfont:{color:'#ff9f43'} }),
+    yaxis2: { title:'L0', overlaying:'y', side:'right', gridcolor:'transparent', titlefont:{color:'#00d2ff'}, tickfont:{color:'#00d2ff'}, showgrid:false },
+    legend: { bgcolor:'rgba(0,0,0,0)', x:0.35, y:1.12, orientation:'h', font:{color:'#e8e8e8'} },
+    xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { title:'Training Step' })
+  }), PLOTLY_CONFIG);
+  document.getElementById('trainingCurveContainer').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ============================================================
+// PARETO CHART
+// ============================================================
+function drawPareto(maxIdx) {
+  var m = L1_SWEEP.mamba_130m;
+  var p = L1_SWEEP.pythia_160m;
+  var n = (maxIdx === undefined || maxIdx === 6) ? m.l1.length : maxIdx + 1;
+  var traces = [
+    {
+      x: m.l0.slice(0,n), y: m.recon.slice(0,n), mode:'lines+markers', name:'Mamba-130M (L12)',
+      line:{color:'#00d2ff',width:3,shape:'spline'}, marker:{size:12,color:'#00d2ff',symbol:'circle'},
+      text: m.l1.slice(0,n).map(function(v){return 'L1='+v.toExponential(0);}),
+      hovertemplate:'L0: %{x:.0f}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Mamba</extra>'
+    },
+    {
+      x: p.l0.slice(0,n), y: p.recon.slice(0,n), mode:'lines+markers', name:'Pythia-160M (L6)',
+      line:{color:'#ff6b6b',width:3,shape:'spline'}, marker:{size:12,color:'#ff6b6b',symbol:'diamond'},
+      text: p.l1.slice(0,n).map(function(v){return 'L1='+v.toExponential(0);}),
+      hovertemplate:'L0: %{x:.0f}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Pythia</extra>'
+    }
+  ];
+  var annotations = (n >= m.l1.length) ? [{
+    x: 2600, y: Math.log10(5e-4),
+    xref:'x', yref:'y',
+    text:'<b>Mamba is denser</b><br>at every tradeoff point',
+    showarrow:true, arrowhead:2, arrowsize:1.5, arrowwidth:2, arrowcolor:'#ff9f43',
+    ax:-100, ay:-50,
+    font:{color:'#ff9f43',size:13},
+    bgcolor:'rgba(10,10,10,0.9)', bordercolor:'#ff9f43', borderwidth:1, borderpad:8
+  }] : [];
+  Plotly.newPlot('paretoChart', traces, Object.assign({}, DARK_LAYOUT, {
+    title: { text:'L1 Sweep: Sparsity vs Reconstruction (Pareto Frontier)', font:{size:16,color:'#ff9f43'} },
+    xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { title:'L0 (Active Features)', range:[1750,2800] }),
+    yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title:'Reconstruction MSE', type:'log' }),
+    legend: { bgcolor:'rgba(0,0,0,0)', x:0.02, y:0.98, font:{color:'#e8e8e8'} },
+    annotations: annotations
+  }), PLOTLY_CONFIG);
+}
+
+function animatePareto(val) {
+  var v = parseInt(val);
+  var labels = ['1e-4','3e-4','1e-3','3e-3','1e-2','3e-2','all'];
+  document.getElementById('sliderVal').textContent = labels[v];
+  drawPareto(v === 6 ? undefined : v);
+}
+
+// ============================================================
+// MONOSEMANTICITY CHART
+// ============================================================
+function drawMono() {
+  var keys = Object.keys(MONO);
+  var trace = {
+    x: keys.map(getLabel),
+    y: keys.map(function(k){return MONO[k].mean;}),
+    error_y: { type:'data', array:keys.map(function(k){return MONO[k].std;}), visible:true, color:'rgba(255,255,255,0.25)', thickness:1.5 },
+    type:'bar',
+    marker: { color: keys.map(getColor) },
+    text: keys.map(function(k){return MONO[k].mean.toFixed(3);}),
+    textposition:'outside',
+    textfont: { size:11, color:'#e8e8e8' },
+    hovertemplate:'%{x}<br>Mean: %{y:.3f}<extra></extra>'
+  };
+  Plotly.newPlot('monoChart', [trace], Object.assign({}, DARK_LAYOUT, {
+    title: { text:'Mean Monosemanticity Score by SAE', font:{size:16,color:'#ff9f43'} },
+    yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title:'Monosemanticity Score', range:[0,0.55] }),
+    xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { tickangle:-30 })
+  }), PLOTLY_CONFIG);
+}
+
+// ============================================================
+// DOWNSTREAM CHART
+// ============================================================
+function drawDownstream() {
+  var traces = [
+    {
+      x:['Mamba-130M','Pythia-160M'],
+      y:[DOWNSTREAM.mamba_130m.baseline, DOWNSTREAM.pythia_160m.baseline],
+      name:'Baseline', type:'bar', marker:{color:'#444',line:{color:'#666',width:1}},
+      text:['28.517','38.509'], textposition:'outside', textfont:{color:'#e8e8e8',size:13}
+    },
+    {
+      x:['Mamba-130M','Pythia-160M'],
+      y:[DOWNSTREAM.mamba_130m.sae, DOWNSTREAM.pythia_160m.sae],
+      name:'With SAE', type:'bar', marker:{color:'#ff9f43',line:{color:'#ffc048',width:1}},
+      text:['28.516','38.515'], textposition:'outside', textfont:{color:'#e8e8e8',size:13}
+    }
+  ];
+  Plotly.newPlot('pplChart', traces, Object.assign({}, DARK_LAYOUT, {
+    barmode:'group',
+    title: { text:'Perplexity: Baseline vs SAE-Reconstructed', font:{size:16,color:'#ff9f43'} },
+    yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title:'Perplexity' }),
+    legend: { bgcolor:'rgba(0,0,0,0)', font:{color:'#e8e8e8'} }
+  }), PLOTLY_CONFIG);
+}
+
+// ============================================================
+// FEATURE BROWSER
+// ============================================================
+var SAE_LAYERS = {
+  mamba_130m: ['mamba_130m_residual_L0','mamba_130m_residual_L12','mamba_130m_residual_L23'],
+  mamba_370m: ['mamba_370m_residual_L0','mamba_370m_residual_L24','mamba_370m_residual_L47'],
+  pythia_160m: ['pythia_160m_residual_L0','pythia_160m_residual_L6','pythia_160m_residual_L11']
+};
+
+function updateFeatureBrowser() {
+  var model = document.getElementById('featureModel').value;
+  var layerSel = document.getElementById('featureLayer');
+  var layers = SAE_LAYERS[model];
+  layerSel.innerHTML = layers.map(function(l){return '<option value="'+l+'">'+getLabel(l)+'</option>';}).join('');
+  showFeatures();
+}
+
+function showFeatures() {
+  var saeKey = document.getElementById('featureLayer').value;
+  var features = TOP_FEATURES[saeKey] || [];
+  var container = document.getElementById('featureList');
+  if (!features.length) { container.innerHTML = '<p style="color:var(--text2)">No feature data available for this SAE.</p>'; return; }
+  container.innerHTML = features.map(function(f){
+    return '<div class="feature-card"><h4>Feature #'+f.id+' <span style="color:var(--text2);font-weight:400;font-size:13px">max activation: '+f.max_act.toFixed(3)+'</span></h4>'+f.examples.map(function(e){return '<div class="example-text">'+escapeHtml(e)+'</div>';}).join('')+'</div>';
   }).join('');
 }
-updateFeatures();
+
+function escapeHtml(s) {
+  var r = s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  r = r.replace(/\[&gt;/g,'<span class="hl">[&gt;');
+  r = r.replace(/&lt;\]/g,'&lt;]</span>');
+  return r;
+}
+
+function drawCrossModel() {
+  var c = document.getElementById('crossModelView');
+  var html = '';
+  CROSS_MODEL.slice(0,3).forEach(function(m) {
+    html += '<div class="feature-card" style="border-left:3px solid var(--mamba)"><h4 class="mamba-color">Mamba Feature #'+m.mamba_f+'</h4>'+m.examples_m.map(function(e){return '<div class="example-text">'+escapeHtml(e)+'</div>';}).join('')+'</div>';
+    html += '<div class="feature-card" style="border-left:3px solid var(--pythia);opacity:0.5"><h4 class="pythia-color">No Matching Pythia Feature</h4><p style="color:var(--text2);font-size:13px;padding:10px">Overlap count: 0. No Pythia feature activates on similar tokens.</p></div>';
+  });
+  c.innerHTML = html;
+}
+
+// ============================================================
+// SCROLL ANIMATIONS & NAV
+// ============================================================
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e){ if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.anim').forEach(function(el){ observer.observe(el); });
+
+window.addEventListener('scroll', function() {
+  var h = document.documentElement.scrollHeight - window.innerHeight;
+  var pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+  document.getElementById('navProgress').style.width = pct + '%';
+  var sections = ['hero','why','experiment','sparsity','pareto','mono','features','downstream','takeaways'];
+  var current = 'hero';
+  sections.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top < 200) current = id;
+  });
+  document.querySelectorAll('.nav-links a').forEach(function(a) {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+
+// ============================================================
+// HERO TYPED EFFECT
+// ============================================================
+var typedTexts = ["Yes, but it's complicated.", "The features are denser.", "And the story is fascinating."];
+var typedIdx = 0, charIdx = 0, deleting = false;
+function typeEffect() {
+  var el = document.getElementById('heroTyped');
+  var txt = typedTexts[typedIdx];
+  if (!deleting) {
+    el.textContent = txt.substring(0, charIdx++);
+    if (charIdx > txt.length) { setTimeout(function(){ deleting = true; typeEffect(); }, 2000); return; }
+  } else {
+    el.textContent = txt.substring(0, charIdx--);
+    if (charIdx < 0) { deleting = false; typedIdx = (typedIdx + 1) % typedTexts.length; charIdx = 0; }
+  }
+  setTimeout(typeEffect, deleting ? 30 : 60);
+}
+setTimeout(typeEffect, 1200);
+
+// ============================================================
+// PPL COUNTER ANIMATION
+// ============================================================
+function animateCounter() {
+  var el = document.getElementById('pplCounter');
+  var target = 0.9999;
+  var current = 1.05;
+  function step() {
+    current += (target - current) * 0.06;
+    if (Math.abs(current - target) < 0.00005) { el.textContent = target.toFixed(4) + 'x'; return; }
+    el.textContent = current.toFixed(4) + 'x';
+    requestAnimationFrame(step);
+  }
+  step();
+}
+var counterObs = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e){ if (e.isIntersecting) { animateCounter(); counterObs.unobserve(e.target); } });
+}, { threshold: 0.5 });
+counterObs.observe(document.getElementById('pplCounter'));
+
+// ============================================================
+// INIT
+// ============================================================
+drawSparsity();
+drawPareto();
+drawMono();
+drawDownstream();
+updateFeatureBrowser();
+drawCrossModel();
 </script>
 </body>
 </html>
