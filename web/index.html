@@ -799,21 +799,11 @@ function drawPareto(maxIdx) {
       hovertemplate:'L0: %{x:.0f}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Pythia</extra>'
     }
   ];
-  var annotations = (n >= m.l1.length) ? [{
-    x: 2600, y: Math.log10(5e-4),
-    xref:'x', yref:'y',
-    text:'<b>Mamba is denser</b><br>at every tradeoff point',
-    showarrow:true, arrowhead:2, arrowsize:1.5, arrowwidth:2, arrowcolor:'#ff9f43',
-    ax:-100, ay:-50,
-    font:{color:'#ff9f43',size:13},
-    bgcolor:'rgba(10,10,10,0.9)', bordercolor:'#ff9f43', borderwidth:1, borderpad:8
-  }] : [];
-  Plotly.newPlot('paretoChart', traces, Object.assign({}, DARK_LAYOUT, {
+  Plotly.react('paretoChart', traces, Object.assign({}, DARK_LAYOUT, {
     title: { text:'L1 Sweep: Sparsity vs Reconstruction (Pareto Frontier)', font:{size:16,color:'#ff9f43'} },
     xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { title:'L0 (Active Features)', range:[1750,2800] }),
     yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title:'Reconstruction MSE', type:'log' }),
-    legend: { bgcolor:'rgba(0,0,0,0)', x:0.02, y:0.98, font:{color:'#e8e8e8'} },
-    annotations: annotations
+    legend: { bgcolor:'rgba(0,0,0,0)', x:0.02, y:0.98, font:{color:'#e8e8e8'} }
   }), PLOTLY_CONFIG);
 }
 
