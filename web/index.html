@@ -336,7 +336,7 @@ footer { text-align: center; padding: 40px; color: var(--text2); font-size: 13px
     <button class="toggle-btn active" onclick="setSparsityView('all', this)">All SAEs</button>
     <button class="toggle-btn" onclick="setSparsityView('arch', this)">Mamba vs Pythia</button>
   </div>
-  <div id="sparsityChart" style="width:100%;height:500px" class="anim"></div>
+  <div id="sparsityChart" style="width:100%;height:500px"></div>
   <p style="color:var(--text2);font-size:13px;margin-top:8px" class="anim">Click any bar to view that SAE's training curve below.</p>
   <div id="trainingCurveContainer" style="display:none;margin-top:24px" class="anim">
     <h4 style="margin-bottom:8px">Training Curves for: <span id="selectedSAELabel" class="accent"></span></h4>
@@ -350,7 +350,7 @@ footer { text-align: center; padding: 40px; color: var(--text2); font-size: 13px
     <div class="section-title">L1 Pareto Frontier: <span class="accent">The Money Slide</span></div>
     <p class="section-subtitle">Sweeping the L1 penalty reveals the fundamental sparsity-reconstruction tradeoff. At <strong>every</strong> tradeoff point, Mamba activations are denser and harder to sparsify.</p>
   </div>
-  <div id="paretoChart" style="width:100%;height:520px" class="anim"></div>
+  <div id="paretoChart" style="width:100%;height:520px"></div>
   <div class="slider-container anim">
     <span class="slider-label">Animate L1: <strong id="sliderVal">all</strong></span>
     <input type="range" id="l1Slider" min="0" max="6" value="6" oninput="animatePareto(this.value)">
@@ -380,7 +380,7 @@ footer { text-align: center; padding: 40px; color: var(--text2); font-size: 13px
       </div>
     </div>
   </div>
-  <div id="monoChart" style="width:100%;height:450px" class="anim"></div>
+  <div id="monoChart" style="width:100%;height:450px"></div>
   <div class="callout anim">
     <h3>Comparable Interpretability</h3>
     <p>Despite being denser, Mamba's early-layer features show monosemanticity scores competitive with Pythia. This suggests that SSM representations, while less sparse, still contain individually meaningful features.</p>
@@ -416,7 +416,7 @@ footer { text-align: center; padding: 40px; color: var(--text2); font-size: 13px
     <div class="section-title">Downstream Impact: <span class="accent">Perplexity</span></div>
     <p class="section-subtitle">The ultimate test: does routing activations through the SAE hurt model performance?</p>
   </div>
-  <div id="pplChart" style="width:100%;height:400px" class="anim"></div>
+  <div id="pplChart" style="width:100%;height:400px"></div>
   <div style="margin-top:40px;text-align:center" class="anim">
     <div class="big-counter" id="pplCounter">1.0500x</div>
     <div class="big-label">Perplexity Increase Ratio (Mamba-130M)</div>
