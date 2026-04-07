@@ -348,7 +348,7 @@ footer { text-align: center; padding: 40px; color: var(--text2); font-size: 13px
 <section id="pareto">
   <div class="anim">
     <div class="section-title">L1 Pareto Frontier: <span class="accent">The Money Slide</span></div>
-    <p class="section-subtitle">Sweeping the L1 penalty reveals the fundamental sparsity-reconstruction tradeoff. At <strong>every</strong> tradeoff point, Mamba activations are denser and harder to sparsify.</p>
+    <p class="section-subtitle">Sweeping the L1 penalty reveals the sparsity-reconstruction tradeoff. Mamba activations are consistently denser (higher L0), and at stronger L1 penalties this density costs more in reconstruction quality.</p>
   </div>
   <div id="paretoChart" style="width:100%;height:520px"></div>
   <div class="slider-container anim">
@@ -356,8 +356,8 @@ footer { text-align: center; padding: 40px; color: var(--text2); font-size: 13px
     <input type="range" id="l1Slider" min="0" max="6" value="6" oninput="animatePareto(this.value)">
   </div>
   <div class="callout anim">
-    <h3>Mamba is denser at every tradeoff point</h3>
-    <p>Even with 300x more L1 penalty, Mamba's L0 barely drops below Pythia's minimum. The SSM recurrent state appears to distribute information more uniformly across dimensions.</p>
+    <h3>Mamba activations are harder to sparsify</h3>
+    <p>Mamba's L0 is always much higher than Pythia's (~2500–2700 vs ~1800–2100). At low L1 penalties, Mamba actually reconstructs better thanks to its denser representation. But at high L1 penalties, the cost of density shows: Mamba's reconstruction degrades more steeply. The SSM recurrent state appears to distribute information more uniformly across dimensions.</p>
   </div>
 </section>
 
