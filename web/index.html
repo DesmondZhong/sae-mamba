@@ -567,14 +567,14 @@ const HISTORIES = {
 
 const L1_SWEEP = {
   mamba_130m: {
-    l1:    [3e-2, 1e-2, 3e-4, 1e-3, 3e-3, 1e-4],
-    l0:    [2535.22, 2580.96, 2655.51, 2656.10, 2672.85, 2698.43],
-    recon: [1.66e-3, 5.25e-4, 1.44e-5, 5.02e-5, 1.54e-4, 5.20e-6]
+    l1:    [1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2],
+    l0:    [2698.43, 2655.51, 2656.10, 2672.85, 2580.96, 2535.22],
+    recon: [5.20e-6, 1.44e-5, 5.02e-5, 1.54e-4, 5.25e-4, 1.66e-3]
   },
   pythia_160m: {
-    l1:    [3e-2, 1e-2, 1e-3, 3e-3, 1e-4, 3e-4],
-    l0:    [1862.15, 2034.54, 2111.41, 2121.48, 2127.14, 2139.34],
-    recon: [7.71e-4, 2.70e-4, 4.96e-5, 9.97e-5, 2.34e-5, 3.17e-5]
+    l1:    [1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2],
+    l0:    [2127.14, 2139.34, 2111.41, 2121.48, 2034.54, 1862.15],
+    recon: [2.34e-5, 3.17e-5, 4.96e-5, 9.97e-5, 2.70e-4, 7.71e-4]
   }
 };
 
@@ -787,21 +787,21 @@ function drawPareto(maxIdx) {
   var n = (maxIdx === undefined || maxIdx === 6) ? m.l1.length : maxIdx + 1;
   var traces = [
     {
-      x: m.l0.slice(0,n), y: m.recon.slice(0,n), mode:'lines+markers', name:'Mamba-130M (L12)',
+      x: m.l1.slice(0,n), y: m.recon.slice(0,n), mode:'lines+markers', name:'Mamba-130M (L12)',
       line:{color:'#00d2ff',width:3}, marker:{size:12,color:'#00d2ff',symbol:'circle'},
-      text: m.l1.slice(0,n).map(function(v){return 'L1='+v.toExponential(0);}),
-      hovertemplate:'L0: %{x:.0f}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Mamba</extra>'
+      text: m.l0.slice(0,n).map(function(v){return 'L0='+v.toFixed(0);}),
+      hovertemplate:'L1: %{x}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Mamba</extra>'
     },
     {
-      x: p.l0.slice(0,n), y: p.recon.slice(0,n), mode:'lines+markers', name:'Pythia-160M (L6)',
+      x: p.l1.slice(0,n), y: p.recon.slice(0,n), mode:'lines+markers', name:'Pythia-160M (L6)',
       line:{color:'#ff6b6b',width:3}, marker:{size:12,color:'#ff6b6b',symbol:'diamond'},
-      text: p.l1.slice(0,n).map(function(v){return 'L1='+v.toExponential(0);}),
-      hovertemplate:'L0: %{x:.0f}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Pythia</extra>'
+      text: p.l0.slice(0,n).map(function(v){return 'L0='+v.toFixed(0);}),
+      hovertemplate:'L1: %{x}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Pythia</extra>'
     }
   ];
   Plotly.newPlot('paretoChart', traces, Object.assign({}, DARK_LAYOUT, {
-    title: { text:'L1 Sweep: Sparsity vs Reconstruction (Pareto Frontier)', font:{size:16,color:'#ff9f43'} },
-    xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { title:'L0 (Active Features)', range:[1750,2800] }),
+    title: { text:'L1 Sweep: Sparsity vs Reconstruction', font:{size:16,color:'#ff9f43'} },
+    xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { title:'L1 Coefficient', type:'log' }),
     yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title:'Reconstruction MSE', type:'log' }),
     legend: { bgcolor:'rgba(0,0,0,0)', x:0.02, y:0.98, font:{color:'#e8e8e8'} }
   }), PLOTLY_CONFIG);
@@ -809,7 +809,7 @@ function drawPareto(maxIdx) {
 
 function animatePareto(val) {
   var v = parseInt(val);
-  var labels = ['3e-2','1e-2','3e-4','1e-3','3e-3','1e-4','all'];
+  var labels = ['1e-4','3e-4','1e-3','3e-3','1e-2','3e-2','all'];
   document.getElementById('sliderVal').textContent = labels[v];
   drawPareto(v === 6 ? undefined : v);
 }
