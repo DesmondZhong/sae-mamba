@@ -799,7 +799,7 @@ function drawPareto(maxIdx) {
       hovertemplate:'L0: %{x:.0f}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Pythia</extra>'
     }
   ];
-  Plotly.react('paretoChart', traces, Object.assign({}, DARK_LAYOUT, {
+  Plotly.newPlot('paretoChart', traces, Object.assign({}, DARK_LAYOUT, {
     title: { text:'L1 Sweep: Sparsity vs Reconstruction (Pareto Frontier)', font:{size:16,color:'#ff9f43'} },
     xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { title:'L0 (Active Features)', range:[1750,2800] }),
     yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title:'Reconstruction MSE', type:'log' }),
