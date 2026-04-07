@@ -350,7 +350,10 @@ footer { text-align: center; padding: 40px; color: var(--text2); font-size: 13px
     <div class="section-title">L1 Pareto Frontier: <span class="accent">The Money Slide</span></div>
     <p class="section-subtitle">Sweeping the L1 penalty reveals the sparsity-reconstruction tradeoff. Mamba activations are consistently denser (higher L0), and at stronger L1 penalties this density costs more in reconstruction quality.</p>
   </div>
-  <div id="paretoChart" style="width:100%;height:520px"></div>
+  <div style="display:flex;gap:16px;flex-wrap:wrap">
+    <div id="paretoL0Chart" style="flex:1;min-width:400px;height:480px"></div>
+    <div id="paretoChart" style="flex:1;min-width:400px;height:480px"></div>
+  </div>
   <div class="slider-container anim">
     <span class="slider-label">Animate L1: <strong id="sliderVal">all</strong></span>
     <input type="range" id="l1Slider" min="0" max="6" value="6" oninput="animatePareto(this.value)">
@@ -785,22 +788,40 @@ function drawPareto(maxIdx) {
   var m = L1_SWEEP.mamba_130m;
   var p = L1_SWEEP.pythia_160m;
   var n = (maxIdx === undefined || maxIdx === 6) ? m.l1.length : maxIdx + 1;
-  var traces = [
+  // Left panel: L1 vs L0
+  Plotly.newPlot('paretoL0Chart', [
+    {
+      x: m.l1.slice(0,n), y: m.l0.slice(0,n), mode:'lines+markers', name:'Mamba-130M (L12)',
+      line:{color:'#00d2ff',width:3}, marker:{size:10,color:'#00d2ff',symbol:'circle'},
+      hovertemplate:'L1: %{x}<br>L0: %{y:.0f}<extra>Mamba</extra>'
+    },
+    {
+      x: p.l1.slice(0,n), y: p.l0.slice(0,n), mode:'lines+markers', name:'Pythia-160M (L6)',
+      line:{color:'#ff6b6b',width:3}, marker:{size:10,color:'#ff6b6b',symbol:'diamond'},
+      hovertemplate:'L1: %{x}<br>L0: %{y:.0f}<extra>Pythia</extra>'
+    }
+  ], Object.assign({}, DARK_LAYOUT, {
+    title: { text:'L1 vs Active Features (L0)', font:{size:14,color:'#ff9f43'} },
+    xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { title:'L1 Coefficient', type:'log' }),
+    yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title:'L0 (Active Features)' }),
+    legend: { bgcolor:'rgba(0,0,0,0)', x:0.02, y:0.02, font:{color:'#e8e8e8'} }
+  }), PLOTLY_CONFIG);
+  // Right panel: L1 vs Recon MSE
+  Plotly.newPlot('paretoChart', [
     {
       x: m.l1.slice(0,n), y: m.recon.slice(0,n), mode:'lines+markers', name:'Mamba-130M (L12)',
-      line:{color:'#00d2ff',width:3}, marker:{size:12,color:'#00d2ff',symbol:'circle'},
+      line:{color:'#00d2ff',width:3}, marker:{size:10,color:'#00d2ff',symbol:'circle'},
       text: m.l0.slice(0,n).map(function(v){return 'L0='+v.toFixed(0);}),
       hovertemplate:'L1: %{x}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Mamba</extra>'
     },
     {
       x: p.l1.slice(0,n), y: p.recon.slice(0,n), mode:'lines+markers', name:'Pythia-160M (L6)',
-      line:{color:'#ff6b6b',width:3}, marker:{size:12,color:'#ff6b6b',symbol:'diamond'},
+      line:{color:'#ff6b6b',width:3}, marker:{size:10,color:'#ff6b6b',symbol:'diamond'},
       text: p.l0.slice(0,n).map(function(v){return 'L0='+v.toFixed(0);}),
       hovertemplate:'L1: %{x}<br>Recon MSE: %{y:.2e}<br>%{text}<extra>Pythia</extra>'
     }
-  ];
-  Plotly.newPlot('paretoChart', traces, Object.assign({}, DARK_LAYOUT, {
-    title: { text:'L1 Sweep: Sparsity vs Reconstruction', font:{size:16,color:'#ff9f43'} },
+  ], Object.assign({}, DARK_LAYOUT, {
+    title: { text:'L1 vs Reconstruction MSE', font:{size:14,color:'#ff9f43'} },
     xaxis: Object.assign({}, DARK_LAYOUT.xaxis, { title:'L1 Coefficient', type:'log' }),
     yaxis: Object.assign({}, DARK_LAYOUT.yaxis, { title:'Reconstruction MSE', type:'log' }),
     legend: { bgcolor:'rgba(0,0,0,0)', x:0.02, y:0.98, font:{color:'#e8e8e8'} }
