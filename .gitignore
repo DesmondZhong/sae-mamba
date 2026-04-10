@@ -6,3 +6,10 @@ __pycache__/
 data/
 checkpoints/
 .ipynb_checkpoints/
+
+# Experiment outputs
+*.log
+logs/
+results_2.8b/
+checkpoints_2.8b/
+activations_2.8b/
