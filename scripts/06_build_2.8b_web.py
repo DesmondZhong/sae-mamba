@@ -688,15 +688,25 @@ function renderFeatureBrowser() {{
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         if (tabEl) tabEl.classList.add('active');
 
-        const features = featuresData[modelKey] || [];
+        // Filter out dead features (max_activation === 0) and sort by activation
+        const features = (featuresData[modelKey] || [])
+            .filter(f => (f.max_activation || 0) > 0 && (f.top_examples || []).length > 0)
+            .sort((a, b) => (b.max_activation || 0) - (a.max_activation || 0));
+
+        if (features.length === 0) {{
+            browserEl.innerHTML = '<p style="color:var(--text-dim)">No active features found.</p>';
+            return;
+        }}
+
         browserEl.innerHTML = features.slice(0, 15).map(f => {{
-            const examples = (f.top_examples || []).slice(0, 5).map(ex => {{
+            const examples = (f.top_examples || []).map(ex => {{
                 const text = (ex.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 const highlighted = text.replace(/\\[&gt;(.*?)&lt;\\]/g, '<mark>$1</mark>');
                 return `<div class="feature-example">${{highlighted}} <span style="color:var(--accent)">(act=${{ex.activation?.toFixed(2) || '?'}})</span></div>`;
             }}).join('');
+            const nEx = (f.top_examples || []).length;
             return `<div class="feature-card">
-                <h4>Feature #${{f.feature_id}} (max activation: ${{f.max_activation?.toFixed(2) || '?'}})</h4>
+                <h4>Feature #${{f.feature_id}} &mdash; ${{nEx}} examples, max activation: ${{f.max_activation?.toFixed(2) || '?'}}</h4>
                 ${{examples}}
             </div>`;
         }}).join('');
