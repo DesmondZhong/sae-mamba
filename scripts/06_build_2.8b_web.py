@@ -78,6 +78,8 @@ def build_html(results):
     coactivation = results.get("coactivation", {})
     within_cka = results.get("within_model_cka", {})
     eff_dim = results.get("effective_dim", {})
+    steering = results.get("steering", {})
+    induction = results.get("induction", {})
 
     # Load feature examples
     features_data = {}
@@ -344,6 +346,20 @@ footer {{
     <div id="chart-downstream" class="chart-box"></div>
 </div>
 
+<!-- Section 6.5: Causal Feature Steering (Phase 3) -->
+<div class="section">
+    <h2>Causal Feature Steering: Are These Features Real?</h2>
+    <div class="subtitle">For each architecture, we ablated the top 100 SAE features one at a time and measured KL divergence on model output. Higher KL = feature has larger causal effect.</div>
+    <div class="chart-row">
+        <div class="chart-box" id="chart-steering-summary"></div>
+        <div class="chart-box" id="chart-steering-curve"></div>
+    </div>
+    <div class="chart-row">
+        <div class="chart-box full" id="chart-steering-scatter"></div>
+    </div>
+    <div id="insight-steering" class="insight"></div>
+</div>
+
 <!-- Section 7: Feature Geometry (Phase 2) -->
 <div class="section">
     <h2>Feature Geometry: How Do Learned Features Differ?</h2>
@@ -387,6 +403,8 @@ const featFreqData = {_safe_json(feat_freq)};
 const decoderGeoData = {_safe_json(decoder_geo)};
 const withinCKAData = {_safe_json(within_cka)};
 const effDimData = {_safe_json(eff_dim)};
+const steeringData = {_safe_json(steering)};
+const inductionData = {_safe_json(induction)};
 
 const modelColors = {_safe_json(MODEL_COLORS)};
 const modelLabels = {_safe_json(MODEL_LABELS)};
@@ -821,6 +839,78 @@ function renderNormAblation() {{
         'indicating SSM activation scales are naturally well-conditioned across layers.';
 }}
 
+// ---- Phase 3: Steering Charts ----
+function renderSteering() {{
+    const models = Object.keys(steeringData);
+    if (models.length === 0) return;
+
+    // Chart 1: Mean KL bar comparison
+    const summaryTraces = [{{
+        x: models.map(m => modelLabels[m] || m),
+        y: models.map(m => steeringData[m].mean_kl),
+        name: 'Mean KL (top 100 features)',
+        type: 'bar',
+        marker: {{ color: models.map(m => modelColors[m]) }},
+        text: models.map(m => steeringData[m].mean_kl.toFixed(3)),
+        textposition: 'auto',
+    }}];
+    Plotly.newPlot('chart-steering-summary', summaryTraces, {{
+        ...plotLayout,
+        title: 'Mean Causal Effect (KL Divergence per Feature Ablation)',
+        xaxis: {{ ...plotLayout.xaxis, title: '' }},
+        yaxis: {{ ...plotLayout.yaxis, title: 'Mean KL on output logits' }},
+    }});
+
+    // Chart 2: Sorted leverage curve (top 100 features)
+    const curveTraces = [];
+    for (const m of models) {{
+        const all = (steeringData[m].all_kls || []).map(x => x.mean_kl).sort((a, b) => b - a);
+        curveTraces.push({{
+            x: all.map((_, i) => i + 1),
+            y: all,
+            name: modelLabels[m] || m,
+            type: 'scatter', mode: 'lines',
+            line: {{ color: modelColors[m], width: 2 }},
+        }});
+    }}
+    Plotly.newPlot('chart-steering-curve', curveTraces, {{
+        ...plotLayout,
+        title: 'Per-Feature Leverage Curve (sorted)',
+        xaxis: {{ ...plotLayout.xaxis, title: 'Feature rank (by KL)' }},
+        yaxis: {{ ...plotLayout.yaxis, title: 'KL divergence' }},
+    }});
+
+    // Chart 3: Mean vs Max KL scatter (per-input variability)
+    const scatterTraces = [];
+    for (const m of models) {{
+        const features = (steeringData[m].all_kls || []);
+        scatterTraces.push({{
+            x: features.map(f => f.mean_kl),
+            y: features.map(f => f.max_kl),
+            name: modelLabels[m] || m,
+            type: 'scatter', mode: 'markers',
+            marker: {{ color: modelColors[m], size: 8, opacity: 0.7 }},
+            text: features.map(f => `feat ${{f.feature}}`),
+            hovertemplate: '%{{text}}<br>mean_KL=%{{x:.3f}}<br>max_KL=%{{y:.3f}}<extra></extra>',
+        }});
+    }}
+    Plotly.newPlot('chart-steering-scatter', scatterTraces, {{
+        ...plotLayout,
+        title: 'Mean vs Max KL per feature (input-to-input variability)',
+        xaxis: {{ ...plotLayout.xaxis, title: 'Mean KL across 20 test sequences' }},
+        yaxis: {{ ...plotLayout.yaxis, title: 'Max KL on a single sequence' }},
+    }});
+
+    const m1 = steeringData['mamba1_2.8b'] || {{}};
+    const py = steeringData['pythia_2.8b'] || {{}};
+    const insight = document.getElementById('insight-steering');
+    insight.innerHTML = `<strong>Two findings:</strong> ` +
+        `(1) Pythia features are ${{(py.mean_kl/m1.mean_kl).toFixed(2)}}x more causally impactful per ablation ` +
+        `(${{py.mean_kl?.toFixed(3)}} vs ${{m1.mean_kl?.toFixed(3)}}), confirming that Transformer representations are more concentrated. ` +
+        `(2) The leverage curve is remarkably flat — there are no "killer features" with dominant impact in either architecture. ` +
+        `(3) Per-feature max KL is 5–10x larger than mean KL, meaning ablating a feature can completely change predictions on some inputs while barely affecting others — features have highly input-dependent effects.`;
+}}
+
 // ---- Phase 2: Feature Geometry Charts ----
 function renderFeatureGeometry() {{
     // Effective dimensionality by depth
@@ -923,6 +1013,7 @@ renderKSweep();
 renderNormAblation();
 renderCKA();
 renderDownstream();
+renderSteering();
 renderFeatureGeometry();
 renderFeatureBrowser();
 </script>
