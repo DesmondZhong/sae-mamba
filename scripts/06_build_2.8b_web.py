@@ -401,20 +401,40 @@ const plotLayout = {{
     legend: {{ bgcolor: 'rgba(0,0,0,0)', font: {{ size: 11 }} }},
 }};
 
+// Prefer normalized stats; fall back to raw if none for a given model
+function preferredStatsFor(model) {{
+    const normed = Object.values(normedStats).filter(s => s.model_key === model);
+    if (normed.length > 0) return normed;
+    return Object.values(allStats).filter(s => s.model_key === model);
+}}
+function preferredStatsAll() {{
+    // Build a combined view: normed for models that have it, raw otherwise
+    const out = [];
+    const seenNormedModels = new Set();
+    for (const s of Object.values(normedStats)) {{
+        out.push(s);
+        seenNormedModels.add(s.model_key);
+    }}
+    for (const s of Object.values(allStats)) {{
+        if (!seenNormedModels.has(s.model_key)) out.push(s);
+    }}
+    return out;
+}}
+
 // ---- Key Metrics ----
 function renderKeyMetrics() {{
     const container = document.getElementById('key-metrics');
     const metrics = [];
 
-    // Count models and SAEs
-    const nSAEs = Object.keys(allStats).length;
+    // Count models and SAEs (combined raw + normed unique runs)
+    const nSAEs = Object.keys(allStats).length + Object.keys(normedStats).length;
     metrics.push({{ value: nSAEs, label: 'SAEs Trained' }});
 
-    // Gather FVE by model
+    // Gather FVE by model — prefer normalized when available
     for (const [model, label] of Object.entries(modelLabels)) {{
-        const modelStats = Object.values(allStats).filter(s => s.model_key === model);
+        const modelStats = preferredStatsFor(model);
         if (modelStats.length > 0) {{
-            const avgFVE = modelStats.reduce((s, x) => s + (x.fve || 0), 0) / modelStats.length;
+            const avgFVE = modelStats.reduce((s, x) => s + (x.fve || x.final_fve || 0), 0) / modelStats.length;
             metrics.push({{ value: avgFVE.toFixed(3), label: `${{label}} Avg FVE` }});
         }}
     }}
@@ -431,16 +451,16 @@ function renderDepthCharts() {{
 
     for (const [model, label] of Object.entries(modelLabels)) {{
         const color = modelColors[model];
-        const modelStats = Object.values(allStats)
-            .filter(s => s.model_key === model && s.k === 64 && s.expansion_ratio === 16)
+        const modelStats = preferredStatsFor(model)
+            .filter(s => s.k === 64 && s.expansion_ratio === 16)
             .sort((a, b) => a.layer - b.layer);
 
         if (modelStats.length === 0) continue;
 
         const nLayers = model.includes('pythia') ? 32 : 64;
         const depths = modelStats.map(s => s.layer / (nLayers - 1));
-        const fves = modelStats.map(s => s.fve || 0);
-        const l0s = modelStats.map(s => s.l0_mean || 0);
+        const fves = modelStats.map(s => s.fve || s.final_fve || 0);
+        const l0s = modelStats.map(s => s.l0_mean || s.final_l0 || 0);
 
         fveTraces.push({{
             x: depths, y: fves,
@@ -498,15 +518,15 @@ function renderExpansionCharts() {{
 
     for (const [model, label] of Object.entries(modelLabels)) {{
         const color = modelColors[model];
-        const modelStats = Object.values(allStats)
-            .filter(s => s.model_key === model && s.k === 64)
+        const modelStats = preferredStatsFor(model)
+            .filter(s => s.k === 64)
             .sort((a, b) => (a.expansion_ratio || 0) - (b.expansion_ratio || 0));
 
-        // Group by expansion ratio (take middle layer)
+        const targetMid = model.includes('pythia') ? 16 : 32;
         const byExp = {{}};
         for (const s of modelStats) {{
             const exp = s.expansion_ratio;
-            if (!byExp[exp] || Math.abs(s.layer - 32) < Math.abs(byExp[exp].layer - 32)) {{
+            if (!byExp[exp] || Math.abs(s.layer - targetMid) < Math.abs(byExp[exp].layer - targetMid)) {{
                 byExp[exp] = s;
             }}
         }}
@@ -516,14 +536,18 @@ function renderExpansionCharts() {{
 
         fveTraces.push({{
             x: exps.map(e => `${{e}}x`),
-            y: exps.map(e => byExp[e].fve || 0),
+            y: exps.map(e => byExp[e].fve || byExp[e].final_fve || 0),
             name: label, type: 'bar',
             marker: {{ color }},
         }});
 
         deadTraces.push({{
             x: exps.map(e => `${{e}}x`),
-            y: exps.map(e => (byExp[e].dead_frac || 0) * 100),
+            y: exps.map(e => {{
+                const d = byExp[e].dead_features || byExp[e].final_dead_features || 0;
+                const dh = byExp[e].d_hidden || (2560 * e);
+                return (d / dh) * 100;
+            }}),
             name: label, type: 'bar',
             marker: {{ color }},
         }});
@@ -552,15 +576,15 @@ function renderKSweep() {{
 
     for (const [model, label] of Object.entries(modelLabels)) {{
         const color = modelColors[model];
-        const modelStats = Object.values(allStats)
-            .filter(s => s.model_key === model && s.expansion_ratio === 16)
+        const modelStats = preferredStatsFor(model)
+            .filter(s => s.expansion_ratio === 16)
             .sort((a, b) => (a.k || 0) - (b.k || 0));
 
-        // Group by K (take middle layer)
+        const targetMid = model.includes('pythia') ? 16 : 32;
         const byK = {{}};
         for (const s of modelStats) {{
             const k = s.k;
-            if (!byK[k] || Math.abs(s.layer - 32) < Math.abs(byK[k].layer - 32)) {{
+            if (!byK[k] || Math.abs(s.layer - targetMid) < Math.abs(byK[k].layer - targetMid)) {{
                 byK[k] = s;
             }}
         }}
@@ -570,7 +594,7 @@ function renderKSweep() {{
 
         traces.push({{
             x: ks,
-            y: ks.map(k => byK[k].fve || 0),
+            y: ks.map(k => byK[k].fve || byK[k].final_fve || 0),
             name: label, type: 'scatter', mode: 'lines+markers',
             line: {{ color, width: 2 }}, marker: {{ size: 8 }},
         }});
