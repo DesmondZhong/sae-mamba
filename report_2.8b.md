@@ -54,19 +54,40 @@ Mamba-1 FVE is essentially unchanged by normalization (max change ±0.01 at L0/L
 
 **Implication for the field:** Cross-architecture SAE studies must normalize activations or per-layer FVE comparisons are confounded by activation scale. Earlier published claims about Transformer SAE quality at middle layers may need revisiting.
 
-### 2. After Normalization, Both Architectures Are Equally Sparse-Decomposable
+### 2. After Normalization, All Three Architectures Are Equally Sparse-Decomposable
 
-| Relative Depth | Mamba-1 FVE | Pythia FVE |
-|---|---|---|
-| 0.00 (early) | 0.973 | 0.970 |
-| 0.13 | 0.828 | 0.790 |
-| 0.25 | 0.758 | 0.724 |
-| 0.38 | 0.707 | 0.704 |
-| 0.50 (middle) | 0.671 | 0.722 |
-| 0.63 | 0.690 | 0.737 |
-| 0.88 (late) | 0.738 | 0.726 |
+| Relative Depth | Mamba-1 FVE | Mamba-2 FVE | Pythia FVE |
+|---|---|---|---|
+| 0.00 (early) | 0.973 | 0.942 | 0.970 |
+| 0.13 | 0.828 | 0.800 | 0.790 |
+| 0.26 | 0.758 | 0.728 | 0.724 |
+| 0.39 | 0.707 | 0.632 | 0.704 |
+| 0.52 (middle) | 0.671 | 0.693 | 0.722 |
+| 0.65 | 0.690 | 0.739 | 0.737 |
+| 0.78 | 0.739 | 0.725 | 0.745 |
+| 0.91 (late) | 0.738 | 0.675 | 0.726 |
 
-Both architectures achieve FVE in the same range (0.67–0.97) and both show U-shaped curves: highest reconstruction quality at the embedding layer, dipping in the middle, partial recovery at the end. The earlier "SSMs are more decomposable" claim from raw activations turned out to be a normalization artifact.
+All three architectures achieve FVE in the same range (0.63–0.97) and show similar U-shaped curves: highest reconstruction quality at the embedding layer, dipping in the middle, partial recovery at the end. The earlier "SSMs are more decomposable" claim from raw activations turned out to be a normalization artifact. **Sparse decomposability is insensitive to architecture family** — what differs is *how* the features are used, not whether they exist.
+
+#### K sweep (middle layer, 16x expansion)
+
+| K | Mamba-1 | Mamba-2 | Pythia |
+|---|---|---|---|
+| 32 | 0.553 | 0.589 | 0.625 |
+| 64 | 0.671 | 0.693 | 0.722 |
+| 128 | 0.736 | 0.782 | 0.787 |
+
+Smooth, monotonic improvement for all three. **Pythia consistently has the highest FVE at every K**, followed by Mamba-2, then Mamba-1. The gap is small (~0.05–0.07) but consistent.
+
+#### Expansion sweep (middle layer, K=64)
+
+| Expansion | Mamba-1 | Mamba-2 | Pythia |
+|---|---|---|---|
+| 8x (20K features) | 0.644 | 0.686 | 0.705 |
+| 16x (40K features) | 0.671 | 0.693 | 0.722 |
+| 32x (82K features) | 0.689 | 0.698 | 0.734 |
+
+Diminishing returns for all three. Doubling the dictionary from 16x to 32x only adds ~0.02 FVE. Pythia again has the highest FVE at every width.
 
 ### 3. Transformers Concentrate, SSMs Distribute (Participation Ratio)
 
