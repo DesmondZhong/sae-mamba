@@ -45,6 +45,11 @@ def load_results():
     return results
 
 
+def _safe_json(obj):
+    """JSON-encode for embedding in HTML <script>: escape </ to prevent script injection."""
+    return json.dumps(obj, default=str).replace("</", "<\\/")
+
+
 def _slim_stats(stats):
     """Strip large fields (feature_frequency, top_features) — viz only needs scalars."""
     slimmed = {}
@@ -371,20 +376,20 @@ footer {{
 
 <script>
 // Embed data
-const allStats = {json.dumps(stats)};
-const normedStats = {json.dumps(normed_stats)};
-const ckaData = {json.dumps(cka)};
-const baselineData = {json.dumps(baselines)};
-const downstreamData = {json.dumps(downstream)};
-const monoData = {json.dumps(mono)};
-const featuresData = {json.dumps(features_data)};
-const featFreqData = {json.dumps(feat_freq)};
-const decoderGeoData = {json.dumps(decoder_geo)};
-const withinCKAData = {json.dumps(within_cka)};
-const effDimData = {json.dumps(eff_dim)};
+const allStats = {_safe_json(stats)};
+const normedStats = {_safe_json(normed_stats)};
+const ckaData = {_safe_json(cka)};
+const baselineData = {_safe_json(baselines)};
+const downstreamData = {_safe_json(downstream)};
+const monoData = {_safe_json(mono)};
+const featuresData = {_safe_json(features_data)};
+const featFreqData = {_safe_json(feat_freq)};
+const decoderGeoData = {_safe_json(decoder_geo)};
+const withinCKAData = {_safe_json(within_cka)};
+const effDimData = {_safe_json(eff_dim)};
 
-const modelColors = {json.dumps(MODEL_COLORS)};
-const modelLabels = {json.dumps(MODEL_LABELS)};
+const modelColors = {_safe_json(MODEL_COLORS)};
+const modelLabels = {_safe_json(MODEL_LABELS)};
 
 const plotLayout = {{
     paper_bgcolor: '#161b22',
