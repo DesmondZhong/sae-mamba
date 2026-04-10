@@ -69,6 +69,13 @@ def build_html(results):
     # Prepare data for charts (slim stats: drop feature_frequency arrays etc)
     stats = _slim_stats(results.get("sae_stats", {}))
     normed_stats = _slim_stats(results.get("normed_stats", {}))
+
+    # Load steering demo
+    steering_demo = {}
+    sd_path = STORAGE / "results_steering_demo" / "steering_demo.json"
+    if sd_path.exists():
+        with open(sd_path) as f:
+            steering_demo = json.load(f)
     cka = results.get("cka", {})
     baselines = results.get("baselines", {})
     downstream = results.get("downstream", {})
@@ -346,6 +353,15 @@ footer {{
     <div id="chart-downstream" class="chart-box"></div>
 </div>
 
+<!-- Section 6.4: Steering Showcase -->
+<div class="section">
+    <h2>Feature Steering Showcase: Hijacking Generation</h2>
+    <div class="subtitle">For each architecture, we picked the top SAE feature, identified its concept from max-activating examples, and clamped it to a high value during generation. Same prompts, different feature clamps.</div>
+    <div class="tabs" id="steering-demo-tabs"></div>
+    <div id="steering-demo" style="margin-top: 15px;"></div>
+    <div id="insight-steering-demo" class="insight"></div>
+</div>
+
 <!-- Section 6.5: Causal Feature Steering (Phase 3) -->
 <div class="section">
     <h2>Causal Feature Steering: Are These Features Real?</h2>
@@ -405,6 +421,7 @@ const withinCKAData = {_safe_json(within_cka)};
 const effDimData = {_safe_json(eff_dim)};
 const steeringData = {_safe_json(steering)};
 const inductionData = {_safe_json(induction)};
+const steeringDemo = {_safe_json(steering_demo)};
 
 const modelColors = {_safe_json(MODEL_COLORS)};
 const modelLabels = {_safe_json(MODEL_LABELS)};
@@ -839,6 +856,85 @@ function renderNormAblation() {{
         'indicating SSM activation scales are naturally well-conditioned across layers.';
 }}
 
+// ---- Steering Demo (qualitative) ----
+function renderSteeringDemo() {{
+    const tabsEl = document.getElementById('steering-demo-tabs');
+    const demoEl = document.getElementById('steering-demo');
+    if (!steeringDemo || Object.keys(steeringDemo).length === 0) {{
+        demoEl.innerHTML = '<p style="color:var(--text-dim)">No steering demo data.</p>';
+        return;
+    }}
+
+    // Build feature index: each model has features
+    const items = [];
+    for (const [model, mr] of Object.entries(steeringDemo)) {{
+        for (const f of (mr.features || [])) {{
+            items.push({{ model, layer: mr.layer, feature: f }});
+        }}
+    }}
+
+    tabsEl.innerHTML = items.map((item, i) => {{
+        const label = `${{(modelLabels[item.model] || item.model).split(' ')[0]}} feat #${{item.feature.feature_id}}`;
+        return `<button class="tab ${{i === 0 ? 'active' : ''}}" onclick="window.showSteering(${{i}}, this)">${{label}}</button>`;
+    }}).join('');
+
+    window.showSteering = function(idx, tabEl) {{
+        document.querySelectorAll('#steering-demo-tabs .tab').forEach(t => t.classList.remove('active'));
+        if (tabEl) tabEl.classList.add('active');
+
+        const item = items[idx];
+        const f = item.feature;
+        const examplesHtml = (f.top_examples || []).map(ex => {{
+            const t = (ex.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return `<div class="feature-example">${{t}} <span style="color:var(--accent)">(act=${{ex.activation?.toFixed(2) || '?'}})</span></div>`;
+        }}).join('');
+
+        const escape = s => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        const promptsHtml = (f.prompts || []).map(p => {{
+            // Find clamp keys
+            const clampKeys = Object.keys(p).filter(k => k.startsWith('clamp_') || k === 'ablate' || k === 'baseline');
+            const ordered = ['baseline', 'ablate', ...clampKeys.filter(k => k.startsWith('clamp_')).sort((a,b)=>parseInt(a.split('_')[1])-parseInt(b.split('_')[1]))];
+            const rows = ordered.filter(k => p[k] !== undefined).map(k => {{
+                const labelMap = {{ baseline: 'baseline', ablate: 'ablate (clamp 0)' }};
+                const label = labelMap[k] || `clamp ${{k.split('_')[1]}}`;
+                const colorMap = {{ baseline: '#8b949e', ablate: '#58a6ff' }};
+                const color = colorMap[k] || '#ff6b6b';
+                return `<tr>
+                    <td style="color:${{color}};padding:6px 12px;font-weight:bold;white-space:nowrap;vertical-align:top;">${{label}}</td>
+                    <td style="padding:6px 12px;font-family:monospace;font-size:0.85em;color:var(--text);">${{escape(p[k])}}</td>
+                </tr>`;
+            }}).join('');
+            return `<div style="background:var(--surface2);border-radius:8px;padding:15px;margin:10px 0;">
+                <div style="color:var(--accent);font-weight:bold;margin-bottom:8px;">Prompt: "${{escape(p.prompt)}}"</div>
+                <table style="width:100%;border-collapse:collapse;">${{rows}}</table>
+            </div>`;
+        }}).join('');
+
+        demoEl.innerHTML = `
+            <div style="background:var(--surface2);border-radius:8px;padding:15px;margin-bottom:15px;">
+                <h4 style="color:var(--accent);">${{modelLabels[item.model] || item.model}} L${{item.layer}}, Feature #${{f.feature_id}} (max activation: ${{f.max_activation.toFixed(2)}})</h4>
+                <div style="color:var(--text-dim);font-size:0.85em;margin-top:8px;">Top activating examples (what concept this feature represents):</div>
+                ${{examplesHtml}}
+            </div>
+            <h4 style="color:var(--text);margin:15px 0 5px;">Generation comparison:</h4>
+            ${{promptsHtml}}
+        `;
+    }};
+
+    if (items.length > 0) showSteering(0, null);
+
+    document.getElementById('insight-steering-demo').innerHTML =
+        '<strong>Reading guide:</strong> The top examples show what concept the feature responds to. ' +
+        'The "baseline" row is normal model output. The "ablate" row removes the feature (clamp to 0). ' +
+        'The "clamp X" rows force the feature to a high activation. ' +
+        'Look for: does clamping cause the model to output text related to the feature\\'s concept? ' +
+        'Pythia features show the cleanest steering — Feature #20598 (a Python-code feature) ' +
+        'hijacks every prompt into outputting Python-like text (py_dict_dict_dict...) when clamped high. ' +
+        'Mamba features at this scale (16x expansion, K=64) are more polysemantic and tend to degrade ' +
+        'into repetitive tokens when clamped — better steering may require larger SAEs (training in progress).';
+}}
+
 // ---- Phase 3: Steering Charts ----
 function renderSteering() {{
     const models = Object.keys(steeringData);
@@ -1013,6 +1109,7 @@ renderKSweep();
 renderNormAblation();
 renderCKA();
 renderDownstream();
+renderSteeringDemo();
 renderSteering();
 renderFeatureGeometry();
 renderFeatureBrowser();
