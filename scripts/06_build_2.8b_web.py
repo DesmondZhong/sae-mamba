@@ -165,7 +165,9 @@ header p {{ color: var(--text-dim); font-size: 1.1em; max-width: 800px; margin: 
     background: var(--surface2);
     border-radius: 8px;
     padding: 15px;
+    min-height: 400px;
 }}
+.chart-box > div {{ height: 100%; min-height: 370px; }}
 .chart-box.full {{ grid-column: 1 / -1; }}
 .metric-grid {{
     display: grid;
