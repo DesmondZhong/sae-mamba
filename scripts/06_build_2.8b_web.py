@@ -70,12 +70,21 @@ def build_html(results):
     stats = _slim_stats(results.get("sae_stats", {}))
     normed_stats = _slim_stats(results.get("normed_stats", {}))
 
-    # Load steering demo
+    # Load steering demos (both 16x and 64x)
     steering_demo = {}
     sd_path = STORAGE / "results_steering_demo" / "steering_demo.json"
     if sd_path.exists():
         with open(sd_path) as f:
-            steering_demo = json.load(f)
+            d16 = json.load(f)
+            for k, v in d16.items():
+                steering_demo[f"{k}_16x"] = {**v, "sae_label": "16x K=64", "sae_size": "16x"}
+
+    sd64_path = STORAGE / "results_steering_demo" / "steering_demo_64x.json"
+    if sd64_path.exists():
+        with open(sd64_path) as f:
+            d64 = json.load(f)
+            for k, v in d64.items():
+                steering_demo[f"{k}_64x"] = {**v, "sae_label": "64x K=32", "sae_size": "64x"}
     cka = results.get("cka", {})
     baselines = results.get("baselines", {})
     downstream = results.get("downstream", {})
@@ -869,12 +878,14 @@ function renderSteeringDemo() {{
     const items = [];
     for (const [model, mr] of Object.entries(steeringDemo)) {{
         for (const f of (mr.features || [])) {{
-            items.push({{ model, layer: mr.layer, feature: f }});
+            items.push({{ model, layer: mr.layer, feature: f, saeLabel: mr.sae_label || '' }});
         }}
     }}
 
     tabsEl.innerHTML = items.map((item, i) => {{
-        const label = `${{(modelLabels[item.model] || item.model).split(' ')[0]}} feat #${{item.feature.feature_id}}`;
+        const baseModel = item.model.replace('_16x', '').replace('_64x', '');
+        const sae = item.model.endsWith('_64x') ? '64x' : '16x';
+        const label = `${{(modelLabels[baseModel] || baseModel).split(' ')[0]}} ${{sae}} feat #${{item.feature.feature_id}}`;
         return `<button class="tab ${{i === 0 ? 'active' : ''}}" onclick="window.showSteering(${{i}}, this)">${{label}}</button>`;
     }}).join('');
 
@@ -911,9 +922,10 @@ function renderSteeringDemo() {{
             </div>`;
         }}).join('');
 
+        const baseModel = item.model.replace('_16x', '').replace('_64x', '');
         demoEl.innerHTML = `
             <div style="background:var(--surface2);border-radius:8px;padding:15px;margin-bottom:15px;">
-                <h4 style="color:var(--accent);">${{modelLabels[item.model] || item.model}} L${{item.layer}}, Feature #${{f.feature_id}} (max activation: ${{f.max_activation.toFixed(2)}})</h4>
+                <h4 style="color:var(--accent);">${{modelLabels[baseModel] || baseModel}} L${{item.layer}} (SAE: ${{item.saeLabel}}), Feature #${{f.feature_id}} (max activation: ${{f.max_activation.toFixed(2)}})</h4>
                 <div style="color:var(--text-dim);font-size:0.85em;margin-top:8px;">Top activating examples (what concept this feature represents):</div>
                 ${{examplesHtml}}
             </div>
@@ -926,13 +938,20 @@ function renderSteeringDemo() {{
 
     document.getElementById('insight-steering-demo').innerHTML =
         '<strong>Reading guide:</strong> The top examples show what concept the feature responds to. ' +
-        'The "baseline" row is normal model output. The "ablate" row removes the feature (clamp to 0). ' +
-        'The "clamp X" rows force the feature to a high activation. ' +
-        'Look for: does clamping cause the model to output text related to the feature\\'s concept? ' +
-        'Pythia features show the cleanest steering — Feature #20598 (a Python-code feature) ' +
-        'hijacks every prompt into outputting Python-like text (py_dict_dict_dict...) when clamped high. ' +
-        'Mamba features at this scale (16x expansion, K=64) are more polysemantic and tend to degrade ' +
-        'into repetitive tokens when clamped — better steering may require larger SAEs (training in progress).';
+        'The "baseline" row is normal output. The "ablate" row removes the feature (clamp to 0). ' +
+        'The "clamp" rows force the feature to a high activation.<br><br>' +
+        '<strong>Best result:</strong> Pythia 16x Feature #20598 is a Python-code feature ' +
+        '(top examples are Django and Python paths). When clamped high, every prompt produces ' +
+        'Python-like text: "The weather today is" \u2192 "py_dict_dict_dict_dict...". ' +
+        'This is a clean Golden-Gate-style steering result.<br><br>' +
+        '<strong>Honest finding:</strong> Most features at this scale (10M tokens, 16x or 64x expansion) ' +
+        'are not cleanly monosemantic. Steering them tends to produce repetitive token spam ' +
+        '(periods, "the the the", or zero-width spaces) rather than themed text. ' +
+        'Cleaner steering would require billions of training tokens (Anthropic\\'s recipe). ' +
+        'The 64x SAEs (163,840 features) trained at 10M tokens still find mostly token-level features ' +
+        '(path separators, sentence boundaries, code syntax) rather than semantic concepts ' +
+        '(countries, sentiments, topics). This is itself a useful negative finding: SAE quality ' +
+        'is dominated by token budget, not just architectural choices.';
 }}
 
 // ---- Phase 3: Steering Charts ----
