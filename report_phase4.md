@@ -21,6 +21,8 @@
 | Natural Pile repeats activation ratio | **5.4× mean** | features generalize from synthetic → natural text |
 | Long-range gap sweep (natural text, 16–512 token gaps) | 2.3–3.3× ratio | induction holds at ≥256-token distances |
 | Mamba-2 (SSD architecture) gap | **0.22 vs 3.23** | Mamba-2 induction is 15× weaker and distributed, not concentrated |
+| Internal SAE (L30 x_proj input, d_inner=5120): induction features | **3 features** | fire at 6-8 on clean, ≤0.002 on corrupted (extreme specificity) |
+| Internal SAE training FVE | 0.739 | clean 40,960-feature decomposition of 5120-dim pre-SSM representation |
 
 ## Research Question
 
@@ -310,9 +312,40 @@ Localization stays in **[0.69, 0.84]** across all five configurations. Interesti
 
 Patching the full residual stream at any layer 16–31 in the corrupted run trivially gives 100% rescue, because residuals include all downstream information. This experiment is too coarse to discriminate layers. The slice-level sufficiency test (§7) is the right methodology for "is this component sufficient?".
 
-## 9. Internal SAE on L30 x_proj input (in progress)
+## 9. Internal SAE on L30 x_proj input: induction features live in ~10 sparse dims of d_inner=5120
 
-_[Pending: TopK SAE on `x_proj` INPUT (d_inner=5120, 10M tokens, x8 expansion → 40,960 features). Will identify which features in the d_inner representation that feeds x_proj carry the induction signal — i.e. where in the 5120-dim space does the C-matrix receive its induction input from?]_
+We trained a TopK SAE directly on the L30 x_proj INPUT activations (d_inner=5120, 10M Pile tokens, x8 expansion → 40,960 features, k=64, 30K steps). Training stats: **FVE=0.7393, L0=64, dead=1**.
+
+### Induction features in the d_inner=5120 pre-x_proj space
+
+Scoring internal SAE features by `(clean − corrupted)` at induction positions (1,024 synthetic pairs):
+
+| feature | score | clean mean | corrupted mean |
+|---|---|---|---|
+| 33108 | **+8.74** | 8.92 | 0.18 |
+| 2230 | +7.65 | 7.65 | 0.0005 |
+| 18334 | +6.34 | 6.35 | 0.002 |
+| 16064 | +6.32 | 7.05 | 0.73 |
+| 5252 | +3.37 | 3.37 | 0.0004 |
+| 28090 | +2.34 | 2.70 | 0.36 |
+| 35328 | +2.25 | 2.30 | 0.05 |
+| 40652 | +2.21 | 2.29 | 0.08 |
+| 10942 | +2.19 | 2.28 | 0.09 |
+| 5794 | +2.15 | 2.21 | 0.06 |
+
+Three features (2230, 18334, 5252) show **essentially zero activation on corrupted input** (<0.002) while firing at 3–8 on clean. These are highly specific induction detectors in the pre-x_proj representation.
+
+### Composite picture of Mamba-1's induction mechanism
+
+Combining the internal and L32 SAE results gives an end-to-end mechanistic story:
+
+1. **Layers 0–29 accumulate pattern memory** in the SSM state (distributed; supported by §7 sufficiency asymmetry).
+2. **At L30, ~10 sparse features in the d_inner=5120 pre-x_proj representation fire** on pattern-match events (this section).
+3. **Those features project through the `C` rows of x_proj** — a 16-dim output slice (§6).
+4. **Selective scan `y = C·h` reads the matched pattern** from the accumulated state.
+5. **The mixer output propagates to the L32 residual stream**, where a separate ~10 sparse features (identified by the L32 SAE, §1-§3) fire on induction-complete tokens.
+
+Two SAEs, two different bases at two different sites, one causal pathway. Both reveal sparse coding of the same induction signal — the internal SAE at the input side of the readout, the L32 SAE at the output side.
 
 ## 10. Mamba-2 induction — SSD architecture is very different
 

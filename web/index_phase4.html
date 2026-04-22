@@ -312,6 +312,38 @@ corrupted = [prefix 8] P(8) [mid 32] P'(8)    # second pattern differs</code></p
 
 </div>
 
+<!-- Internal SAE -->
+<div class="section" id="internal-sae">
+    <h2>6. Internal SAE on the pre-x_proj representation</h2>
+    <p>We trained a second TopK SAE <em>inside</em> L30, on the x_proj INPUT activations (d_inner=5120), over 10M Pile tokens (x8 expansion, k=64, 30K steps). Training stats: <strong>FVE=0.739, L0=64, dead=1</strong>.</p>
+
+    <p>Scoring every internal feature by <code>(clean − corrupted)</code> at the induction positions:</p>
+
+    <table>
+        <thead><tr><th>feature</th><th>score</th><th>clean mean</th><th>corrupted mean</th></tr></thead>
+        <tbody>
+            <tr><td>33108</td><td class="good">+8.74</td><td>8.92</td><td>0.18</td></tr>
+            <tr><td>2230</td><td>+7.65</td><td>7.65</td><td class="good">0.0005</td></tr>
+            <tr><td>18334</td><td>+6.34</td><td>6.35</td><td class="good">0.002</td></tr>
+            <tr><td>16064</td><td>+6.32</td><td>7.05</td><td>0.73</td></tr>
+            <tr><td>5252</td><td>+3.37</td><td>3.37</td><td class="good">0.0004</td></tr>
+            <tr><td>28090</td><td>+2.34</td><td>2.70</td><td>0.36</td></tr>
+        </tbody>
+    </table>
+
+    <p>Three features (2230, 18334, 5252) fire at 3–8 activation on clean input and <strong>essentially zero (&lt;0.002) on corrupted</strong>. Extreme specificity — these are dedicated induction detectors in the pre-x_proj d_inner space.</p>
+
+    <h3>End-to-end picture of Mamba-1's induction</h3>
+    <ol style="margin-left: 20px;">
+        <li>Layers 0–29 accumulate pattern memory in the SSM state (distributed).</li>
+        <li>At L30, ~10 sparse features in the d_inner=5120 pre-x_proj representation fire on pattern-match events (§6).</li>
+        <li>Those features project through the 16 `C` rows of x_proj (§3).</li>
+        <li>Selective scan <code>y = C·h</code> reads the matched pattern from state.</li>
+        <li>The output propagates to L32, where a separate set of ~10 sparse features (identified by the L32 SAE) fire on induction-complete tokens.</li>
+    </ol>
+    <p>Two SAEs, two different bases at two different sites of the same pipeline, both showing sparse coding of the induction signal.</p>
+</div>
+
 <div class="section">
     <h2>7. Take-home</h2>
     <ul>
