@@ -258,9 +258,53 @@ corrupted = [prefix 8] P(8) [mid 32] P'(8)    # second pattern differs</code></p
             </table>
             <p>Top-10 feature-set Jaccard across lengths: 0.82. Localization is stable; damage actually grows slightly with longer patterns.</p>
         </div>
+
+        <div>
+            <h3>E. SAE hyperparameter robustness</h3>
+            <p>Re-run with 5 Mamba-1 L32 SAEs across k ∈ {32, 64, 128} and expansion ∈ {8×, 16×, 32×}. The top-10 feature INDEX set differs almost entirely between SAEs (Jaccard near 0 — each SAE learns a different basis), but the causal locus is invariant:</p>
+            <table>
+                <thead><tr><th>SAE config</th><th>L30 x_proj damage</th></tr></thead>
+                <tbody>
+                    <tr><td>x16 k32</td><td class="good">+0.835</td></tr>
+                    <tr><td>x16 k64 (canonical)</td><td>+0.746</td></tr>
+                    <tr><td>x16 k128</td><td>+0.699</td></tr>
+                    <tr><td>x8 k64</td><td>+0.801</td></tr>
+                    <tr><td>x32 k64</td><td>+0.691</td></tr>
+                </tbody>
+            </table>
+            <p>All five fall in [0.69, 0.84]. Mechanism &gt; specific feature IDs.</p>
+        </div>
+
+        <div>
+            <h3>F. Long-range natural-text gap sweep</h3>
+            <p>Induction ratio (feature activation at natural Pile repeats vs. baseline) by gap between occurrences:</p>
+            <table>
+                <thead><tr><th>gap (tokens)</th><th>n repeats</th><th>ratio</th></tr></thead>
+                <tbody>
+                    <tr><td>[16, 32)</td><td>7,437</td><td>2.97×</td></tr>
+                    <tr><td>[32, 64)</td><td>11,216</td><td>3.26×</td></tr>
+                    <tr><td>[64, 128)</td><td>15,685</td><td>3.28×</td></tr>
+                    <tr><td>[128, 256)</td><td>19,348</td><td>3.15×</td></tr>
+                    <tr><td>[256, 512)</td><td>13,631</td><td>2.31×</td></tr>
+                </tbody>
+            </table>
+            <p>Induction survives gaps up to ≥256 tokens (3.15× ratio). Modest degradation at the longest gap (2.31× at 256-512).</p>
+        </div>
     </div>
 
-    <h3>E. Real-text validation</h3>
+    <h3>G. Max-activating natural-text examples (qualitative)</h3>
+    <p>Top activations of induction features in 1,500 Pile documents. Several are textbook induction:</p>
+    <table>
+        <thead><tr><th>feat</th><th>act</th><th>context (arrow = max-activating token)</th></tr></thead>
+        <tbody>
+            <tr><td>13980</td><td>6.03</td><td><code>...crackdown. "Oh! Thsupra shoes supra shoes, thsupra shoes supra shoes the →</code> <span class="good">[` shoes`]</span></td></tr>
+            <tr><td>36829</td><td>15.11</td><td><code>...CT-based cup insertion, and all had postoperative CT. After CT-based cup placement, average →</code> <span class="good">[` cup`]</span></td></tr>
+            <tr><td>13980</td><td>5.68</td><td><code>...$1 = foo $2 = bar1 $3 = bar2 $4 →</code> <span class="good">[` bar`]</span></td></tr>
+            <tr><td>34338</td><td>14.72</td><td><code>...sales and service for all makes and models of sewing machines and vacuums. Please contact →</code> <span class="good">[`ums`]</span></td></tr>
+        </tbody>
+    </table>
+
+    <h3>H. Real-text validation (all features, aggregate)</h3>
     <figure>
         <img src="figures/real_text_bar.png" alt="real text">
         <figcaption>Left: synthetic clean-vs-corrupted score. Right: mean activation ratio at natural Pile bigram repeats vs. random baseline positions (26,807 repeat positions from 400 docs). <strong>All 10 features show ≥ 2× activation at natural repeats</strong>, mean 5.4×, max 17.4×. The synthetic pattern detector generalizes to natural language induction.</figcaption>

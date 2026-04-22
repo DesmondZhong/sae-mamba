@@ -35,7 +35,7 @@ RESULTS_DIR = STORAGE / "results_phase4"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL_NAME = "state-spaces/mamba-2.8b-hf"
-LAYER = 30
+LAYER = int(os.environ.get("XPROJ_LAYER", "30"))
 D_IN = 5120
 EXPANSION = 8
 K = 64
