@@ -177,6 +177,12 @@ corrupted = [prefix 8] P(8) [mid 32] P'(8)    # second pattern differs</code></p
 
     <h3>Necessary but not sufficient</h3>
     <p>The sufficiency direction tells a complementary story: patching <em>clean</em> C into an otherwise-corrupted run rescues only 5.6% of induction. L30's C is <strong>necessary</strong> (patching it destroys induction) but <strong>not sufficient</strong> (putting it back alone doesn't restore it). Induction requires both (i) the correct C readout AND (ii) the state built by layers 0–29 from the clean sequence.</p>
+
+    <h3>Behavioral confirmation: next-token logit damage</h3>
+    <figure>
+        <img src="figures/next_token_damage.png" alt="next-token damage">
+        <figcaption>From SAE-feature activation (the proxy we've used for induction) to actual next-token logit: patching just the 16-dim C slice at L30 drops the model's next-token prediction logit by <strong>0.475 of the clean-vs-corrupted gap</strong> (4.86 nats). Δ_pre and B matrix: zero effect. 16 dims out of 163,840 cause 47.5% of the behavioral degradation.</figcaption>
+    </figure>
 </div>
 
 <!-- Pythia -->
@@ -212,6 +218,11 @@ corrupted = [prefix 8] P(8) [mid 32] P'(8)    # second pattern differs</code></p
     <figure>
         <img src="figures/heatmap_mamba2.png" alt="Mamba-2 heatmap">
         <figcaption>Mamba-2 <code>in_proj</code> slice-level patching. Signal at L32 spreads roughly evenly across <code>z_gate</code> (0.59), <code>x_stream</code> (0.35), <code>B</code> (0.20), <code>C</code> (0.19). The clean "induction lives in C" concentration that characterizes Mamba-1 is absent. L0 values &gt;1.0 are artifacts of the small gap (0.22) combined with L0 patching trivially swapping token info; genuine signal is at L28-L32.</figcaption>
+    </figure>
+
+    <figure>
+        <img src="figures/mamba2_plen.png" alt="Mamba-2 pattern-length">
+        <figcaption>Mamba-2's clean-vs-corrupted gap across pattern lengths 4–32. Even at plen=32, gap = 0.28, more than 10× smaller than Mamba-1's 3.23 at plen=8. The architectural difference (SSD vs. selective scan) dominates the pattern-length variation.</figcaption>
     </figure>
 
     <p><strong>Interpretation.</strong> The L30 x_proj.C localization is specific to selective scan, not to SSMs in general. Mamba-2's SSD, with its merged projections and smaller per-group d_state, distributes pattern-matching differently — consistent with external observations that SSD underperforms selective scan on in-context tasks at matched scale.</p>
@@ -277,18 +288,10 @@ corrupted = [prefix 8] P(8) [mid 32] P'(8)    # second pattern differs</code></p
 
         <div>
             <h3>F. Long-range natural-text gap sweep</h3>
-            <p>Induction ratio (feature activation at natural Pile repeats vs. baseline) by gap between occurrences:</p>
-            <table>
-                <thead><tr><th>gap (tokens)</th><th>n repeats</th><th>ratio</th></tr></thead>
-                <tbody>
-                    <tr><td>[16, 32)</td><td>7,437</td><td>2.97×</td></tr>
-                    <tr><td>[32, 64)</td><td>11,216</td><td>3.26×</td></tr>
-                    <tr><td>[64, 128)</td><td>15,685</td><td>3.28×</td></tr>
-                    <tr><td>[128, 256)</td><td>19,348</td><td>3.15×</td></tr>
-                    <tr><td>[256, 512)</td><td>13,631</td><td>2.31×</td></tr>
-                </tbody>
-            </table>
-            <p>Induction survives gaps up to ≥256 tokens (3.15× ratio). Modest degradation at the longest gap (2.31× at 256-512).</p>
+            <figure>
+                <img src="figures/gap_sweep.png" alt="gap sweep">
+                <figcaption>Induction survives gaps up to ≥256 tokens (3.15× ratio at 128–256). Modest degradation at the longest bin (2.31× at 256–512).</figcaption>
+            </figure>
         </div>
     </div>
 

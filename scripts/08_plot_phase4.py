@@ -244,6 +244,74 @@ def real_text_bar(rt, out):
     print(f"wrote {out}")
 
 
+def gap_sweep_plot(data, out):
+    results = data["results"]
+    bins = list(results.keys())
+    ratios = [results[b]["mean_ratio"] for b in bins]
+    ns = [results[b]["n_repeats"] for b in bins]
+    mids = [2 ** (4 + i + 0.5) for i in range(len(bins))]  # geometric midpoint approx
+    fig, ax = plt.subplots(figsize=(8, 4.2))
+    ax.plot(range(len(bins)), ratios, "o-", color="#c03", markersize=8, linewidth=2)
+    ax.set_xticks(range(len(bins)), labels=bins, rotation=20, ha="right")
+    ax.axhline(1.0, color="k", ls=":", lw=0.8, label="no-repeat baseline")
+    ax.axhline(2.0, color="#888", ls="--", lw=0.8, label="2× threshold")
+    for i, (r, n) in enumerate(zip(ratios, ns)):
+        ax.text(i, r + 0.12, f"{r:.2f}×\n(n={n:,})",
+                ha="center", va="bottom", fontsize=9)
+    ax.set_ylabel("activation ratio (repeat / baseline)")
+    ax.set_xlabel("gap between first and second bigram occurrence")
+    ax.set_title("Induction features fire strongly even at long gaps (natural Pile text)")
+    ax.set_ylim(0, max(ratios) * 1.25)
+    ax.legend(loc="lower left")
+    plt.tight_layout()
+    fig.savefig(out, dpi=140)
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
+def next_token_bar(data, out):
+    per = data["per_slice"]
+    names = ["delta_pre", "B_matrix", "C_matrix", "B_and_C", "full_xproj"]
+    dams = [per[n]["next_token_damage"] for n in names]
+    fig, ax = plt.subplots(figsize=(8, 4))
+    y = np.arange(len(names))
+    ax.barh(y, dams, color="#c03")
+    ax.set_yticks(y, labels=names)
+    ax.set_xlabel("next-token logit damage")
+    ax.set_title(f"Behavioral confirmation: C slice drops logit by 47.5% of gap "
+                 f"(clean={data['clean_mean_logit']:.2f}, corrupted={data['corrupted_mean_logit']:.2f})")
+    ax.axvline(0, color="k", lw=0.5)
+    for i, v in enumerate(dams):
+        ax.text(v + 0.008, y[i], f"{v:+.3f}", va="center", fontsize=10)
+    ax.set_xlim(-0.05, max(dams) * 1.2)
+    plt.tight_layout()
+    fig.savefig(out, dpi=140)
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
+def mamba2_plen_plot(data, out):
+    results = data["results"]
+    lengths = [int(l) for l in data["lengths"]]
+    gaps = [results[str(l)]["gap"] for l in lengths]
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.plot(lengths, gaps, "o-", color="#ffd93d", markersize=8, linewidth=2,
+            label="Mamba-2 (L32 SAE)")
+    ax.axhline(3.23, color="#ff6b6b", ls="--", lw=1.5,
+                label="Mamba-1 gap at plen=8 (3.23)")
+    ax.set_xlabel("pattern length")
+    ax.set_ylabel("clean − corrupted activation gap")
+    ax.set_title("Mamba-2 induction is ~15× weaker than Mamba-1 at all pattern lengths")
+    ax.set_xscale("log", base=2)
+    ax.set_xticks(lengths)
+    ax.set_xticklabels(lengths)
+    ax.legend()
+    plt.tight_layout()
+    fig.savefig(out, dpi=140)
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
 def main():
     m = load("patching_results.json")
     p = load("pythia_patching_results.json")
@@ -253,6 +321,9 @@ def main():
     suff_data = load("sufficiency_patch.json")
     mamba2_data = load("mamba2_induction.json")
     real_text = load("real_text_induction.json")
+    gap_data = load("gap_sweep.json")
+    ntd_data = load("next_token_damage.json")
+    m2_plen = load("mamba2_plen_sweep.json")
 
     if m is None or p is None:
         print("ERROR: missing patching_results.json or pythia_patching_results.json")
@@ -279,6 +350,12 @@ def main():
         mamba2_heatmap(mamba2_data, FIGS / "heatmap_mamba2.png")
     if real_text is not None:
         real_text_bar(real_text, FIGS / "real_text_bar.png")
+    if gap_data is not None:
+        gap_sweep_plot(gap_data, FIGS / "gap_sweep.png")
+    if ntd_data is not None:
+        next_token_bar(ntd_data, FIGS / "next_token_damage.png")
+    if m2_plen is not None:
+        mamba2_plen_plot(m2_plen, FIGS / "mamba2_plen.png")
 
 
 if __name__ == "__main__":
