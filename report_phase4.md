@@ -28,7 +28,7 @@
 
 ## Research Question
 
-Transformer induction heads are a well-studied circuit (Olsson et al. 2022): a "previous-token" head copies the current token backwards, and a "matching" head attends to the earlier occurrence, producing the "copy what came after last time" behavior. Mamba-1 has no attention but demonstrably does induction (we see clean clean–vs.–corrupted contrast on repeated token patterns at mid-depth). **Where in the mixer is this computation actually done?**
+Transformer induction heads are a well-studied circuit (Olsson et al. 2022): a "previous-token" head copies the current token backwards, and a "matching" head attends to the earlier occurrence, producing the "copy what came after last time" behavior. Mamba-1 has no attention but demonstrably does induction (we see clean–vs.–corrupted contrast on repeated token patterns at mid-depth). **Where in the mixer is this computation actually done?**
 
 ## Method
 
