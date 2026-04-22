@@ -336,6 +336,20 @@ corrupted = [prefix 8] P(8) [mid 32] P'(8)    # second pattern differs</code></p
 
     <p>Three features (2230, 18334, 5252) fire at 3–8 activation on clean input and <strong>essentially zero (&lt;0.002) on corrupted</strong>. Extreme specificity — these are dedicated induction detectors in the pre-x_proj d_inner space.</p>
 
+    <h3>L28 vs L30: induction features strengthen during emergence</h3>
+    <p>We also trained an internal SAE at L28 (where the <code>x_proj</code> patch_damage is only 0.19 — beginning of emergence). Same x8, k=64, 30K steps. Comparison:</p>
+    <table>
+        <thead><tr><th></th><th>L28</th><th>L30</th></tr></thead>
+        <tbody>
+            <tr><td>training FVE</td><td>0.722</td><td>0.739</td></tr>
+            <tr><td>patch_damage (§1)</td><td>+0.19</td><td class="good">+0.83</td></tr>
+            <tr><td>top-feature score</td><td>6.83</td><td>8.74</td></tr>
+            <tr><td>2nd-feature score</td><td>1.97</td><td>7.65</td></tr>
+            <tr><td>mean top-10 score</td><td>1.94</td><td class="good">4.36</td></tr>
+        </tbody>
+    </table>
+    <p>At L28 a few features are beginning to fire on matched patterns; by L30 many more are clearly separating clean from corrupted. Top-feature score grows 27%; 2nd through 4th features grow 3–4× (L28: 1.97, 1.76, 1.56; L30: 7.65, 6.34, 6.32). Consistent with the causal picture: induction isn't fully formed at L28; by L30 the mechanism is in place.</p>
+
     <h3>End-to-end picture of Mamba-1's induction</h3>
     <ol style="margin-left: 20px;">
         <li>Layers 0–29 accumulate pattern memory in the SSM state (distributed).</li>
