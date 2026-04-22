@@ -368,7 +368,23 @@ Combining the internal and L32 SAE results gives an end-to-end mechanistic story
 
 Two SAEs, two different bases at two different sites, one causal pathway. Both reveal sparse coding of the same induction signal — the internal SAE at the input side of the readout, the L32 SAE at the output side.
 
-### 9a. Internal features specialize by text type
+### 9a. L28 vs L30: induction features strengthen during the L28→L30 transition
+
+Repeated the internal-SAE analysis on a Mamba-1 L28 SAE (where `x_proj` patch_damage = +0.19, the first layer with non-trivial induction signal). Same hyperparameters: x8 expansion, k=64, 30K steps.
+
+| | L28 | L30 |
+|---|---|---|
+| training FVE | 0.7228 | 0.7393 |
+| patching site `x_proj` patch_damage (from §1) | +0.19 | +0.83 |
+| top-feature score (clean − corrupted) | 6.83 | **8.74** |
+| top-10 feature-set overlap | 0/10 | (different basis — expected) |
+| # top-10 features with corrupted activation < 0.02 | 4/10 | 3/10 |
+| 2nd-highest feature score | 1.97 | **7.65** |
+| mean score, top-10 | 1.94 | **4.36** |
+
+Both SAEs find highly specific induction detectors (features with near-zero activation on corrupted input). The quality of the induction signal is visibly sharper at L30: the top feature is only 27% stronger in raw score, but the 2nd-through-4th features are 3–4× larger (L30: 7.65, 6.34, 6.32; L28: 1.97, 1.76, 1.56). This matches the causal picture: at L28 a few features are beginning to fire on matched patterns; by L30 many more are clearly separating clean from corrupted.
+
+### 9b. Internal features specialize by text type
 
 Max-activating Pile examples for the 10 internal SAE features show clear specialization — analogous to transformer induction heads, different features fire on different content types:
 

@@ -64,7 +64,10 @@ def main():
     args = ap.parse_args()
     device = args.device
 
-    ind = json.load(open(RESULTS_DIR / "xproj_internal_sae_induction_features.json"))
+    # Try new filename format first, fall back to old (pre-fix) name
+    p1 = RESULTS_DIR / f"xproj_L{LAYER}_internal_sae_induction_features.json"
+    p2 = RESULTS_DIR / "xproj_internal_sae_induction_features.json"
+    ind = json.load(open(p1 if p1.exists() else p2))
     top_feats = ind["top_features"]["feature"][:args.top_feats]
     print(f"Feature set: {top_feats}")
 

@@ -211,7 +211,7 @@ def main():
             "median_score": float(score.median().item()),
             "fraction_pos_score": float((score > 0).float().mean().item()),
         }
-        out_path = RESULTS_DIR / "xproj_internal_sae_induction_features.json"
+        out_path = RESULTS_DIR / f"xproj_L{LAYER}_internal_sae_induction_features.json"
         json.dump(result, open(out_path, "w"), indent=2)
         print(f"Wrote {out_path}")
         print(f"Top induction features in L30 x_proj internal SAE:")
