@@ -138,15 +138,15 @@ def _extract_with_hooks(model, sequences, layer_indices, device, batch_size):
     def make_hook(layer_idx):
         def hook_fn(module, input, output):
             if backend == "mamba_ssm":
-                # mamba_ssm Block: (hidden_states, residual) tuple
-                # hidden_states (index 0) is post-norm, residual (index 1) is raw accumulation
-                # Use hidden_states (post-norm) for consistent scale across layers
+                # mamba_ssm Block returns (mixer_output, residual_before_block).
+                # Post-block residual stream = mixer_output + residual_before_block.
+                # Must sum both — output[0] alone is only this block's SSM delta.
                 if isinstance(output, tuple) and len(output) == 2:
-                    hidden = output[0]  # post-norm hidden states
+                    hidden = output[0] + output[1]
                 else:
                     hidden = output[0] if isinstance(output, tuple) else output
             else:
-                # HF Transformers layer: output is tuple (hidden_states, ...)
+                # HF Transformers / HF Mamba: output[0] is the post-block residual stream
                 hidden = output[0] if isinstance(output, tuple) else output
             activations[layer_idx].append(hidden.float().cpu())
         return hook_fn

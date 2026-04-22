@@ -125,8 +125,9 @@ def experiment_a_steering(device="cuda:0"):
         hook_output = {}
 
         def capture_hook(module, inp, out):
-            if isinstance(out, tuple) and len(out) == 2:
-                hook_output["h"] = out[0] if backend == "mamba_ssm" else out[0]
+            if backend == "mamba_ssm" and isinstance(out, tuple) and len(out) == 2:
+                # mamba_ssm Block: (mixer_output, residual_before_block) — sum is residual stream.
+                hook_output["h"] = out[0] + out[1]
             elif isinstance(out, tuple):
                 hook_output["h"] = out[0]
             else:
@@ -156,7 +157,10 @@ def experiment_a_steering(device="cuda:0"):
 
         for feat_idx in tqdm(top_features, desc="Ablating"):
             def ablation_hook(module, inp, out, feat=feat_idx):
-                if isinstance(out, tuple):
+                if backend == "mamba_ssm" and isinstance(out, tuple) and len(out) == 2:
+                    # Residual stream = mixer_output + residual. Modify so ablated R propagates.
+                    h = (out[0] + out[1]).float()
+                elif isinstance(out, tuple):
                     h = out[0].float()
                 else:
                     h = out.float()
@@ -173,8 +177,11 @@ def experiment_a_steering(device="cuda:0"):
                 h_recon = sae.decode(z)
                 # Unnormalize
                 h_unnormed = h_recon * act_std + act_mean
-                h_new = h_unnormed.half().reshape(b, s, d)
+                h_new = h_unnormed.reshape(b, s, d).to(out[0].dtype if isinstance(out, tuple) else out.dtype)
 
+                if backend == "mamba_ssm" and isinstance(out, tuple) and len(out) == 2:
+                    # Preserve output[1] (residual_before_block); rewrite output[0] so sum = h_new.
+                    return (h_new - out[1], out[1])
                 if isinstance(out, tuple):
                     return (h_new,) + out[1:]
                 return h_new

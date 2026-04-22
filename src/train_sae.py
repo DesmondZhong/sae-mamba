@@ -14,10 +14,13 @@ def train_sae(activations: torch.Tensor, d_hidden: int, sae_type: str = "topk",
               batch_size: int = 4096, lr: float = 3e-4, device: str = "cuda",
               save_path: str = None, log_interval: int = 2000,
               warmup_steps: int = 1000, resample_interval: int = 25000,
-              resample_dead_threshold: int = 10000):
+              resample_dead_threshold: int = 10000,
+              aux_dead_threshold: int = 1000,
+              k_aux: int = 512, aux_coeff: float = 1.0 / 32.0):
     """Train an SAE with LR warmup, dead feature resampling, and FVE tracking."""
     d_input = activations.shape[1]
-    sae = create_sae(d_input, d_hidden, sae_type=sae_type, k=k, l1_coeff=l1_coeff).to(device)
+    sae = create_sae(d_input, d_hidden, sae_type=sae_type, k=k, l1_coeff=l1_coeff,
+                     k_aux=k_aux, aux_coeff=aux_coeff).to(device)
     optimizer = torch.optim.Adam(sae.parameters(), lr=lr, betas=(0.9, 0.999))
 
     # LR schedule: linear warmup then cosine decay
@@ -59,7 +62,15 @@ def train_sae(activations: torch.Tensor, d_hidden: int, sae_type: str = "topk",
             (batch,) = next(loader_iter)
 
         batch = batch.to(device)
-        x_hat, z, loss, metrics = sae(batch)
+
+        # Compute dead mask for AuxK (features that haven't fired in aux_dead_threshold steps).
+        # Only relevant after a warmup period, otherwise most features are "dead".
+        if sae_type == "topk" and step > aux_dead_threshold:
+            dead_mask = (step_counter - feature_last_fired) > aux_dead_threshold
+        else:
+            dead_mask = None
+
+        x_hat, z, loss, metrics = sae(batch, dead_mask=dead_mask) if sae_type == "topk" else sae(batch)
 
         optimizer.zero_grad()
         loss.backward()
@@ -70,10 +81,10 @@ def train_sae(activations: torch.Tensor, d_hidden: int, sae_type: str = "topk",
         # Normalize decoder after each step
         sae.normalize_decoder()
 
-        # Track dead features
+        # Track dead features — keep step_counter on-device to avoid CPU sync every step.
         step_counter += 1
         active_mask = (z > 0).any(dim=0)  # (d_hidden,)
-        feature_last_fired[active_mask] = step_counter.item()
+        feature_last_fired = torch.where(active_mask, step_counter, feature_last_fired)
 
         # Dead feature resampling
         if resample_interval > 0 and (step + 1) % resample_interval == 0:
@@ -148,13 +159,20 @@ def _resample_dead_features(sae, activations, dead_mask, optimizer, device, batc
 
     # Reinitialize dead encoder weights from high-loss inputs
     dead_indices = dead_mask.nonzero(as_tuple=True)[0]
+    alive_mask = ~dead_mask
     with torch.no_grad():
-        # Set encoder rows to normalized high-loss inputs
+        # Scale resampled encoder rows to 0.2 * mean ||alive encoder rows||.
+        if alive_mask.any():
+            alive_norm_mean = sae.encoder.weight.data[alive_mask].norm(dim=-1).mean()
+        else:
+            alive_norm_mean = torch.tensor(1.0, device=sae.encoder.weight.device)
+        target_enc_norm = 0.2 * alive_norm_mean
+
         normed = resampled_inputs / (resampled_inputs.norm(dim=-1, keepdim=True) + 1e-8)
-        sae.encoder.weight.data[dead_indices] = normed * 0.2  # small scale
+        sae.encoder.weight.data[dead_indices] = normed * target_enc_norm
         sae.encoder.bias.data[dead_indices] = 0.0
 
-        # Set decoder columns to normalized high-loss inputs
+        # Set decoder columns to normalized high-loss inputs (unit norm).
         sae.decoder.weight.data[:, dead_indices] = normed.T
 
     # Reset optimizer state for these parameters
