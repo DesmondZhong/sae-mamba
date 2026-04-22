@@ -329,6 +329,18 @@ Re-run the patch at L30 x_proj, using the top-10 induction features identified b
 
 Localization stays in **[0.69, 0.84]** across all five configurations. Interestingly, the top-10 feature-set Jaccard between different SAEs is near 0: each SAE learns a different basis, so the specific feature indices change, but the underlying causal locus (L30 x_proj) is invariant. The mechanism is not an artifact of SAE hyperparameters.
 
+A stronger robustness check: same architecture config (x16 k64) but two *independent training runs* of the Mamba-1 L32 SAE — one from the original cloud-transferred tarball, one freshly retrained on this box with the fixed hook + AuxK loss. Top-5 patching sites:
+
+| site | original SAE | retrained SAE | Δ |
+|---|---|---|---|
+| L30 x_proj | +0.833 | +0.809 | 0.024 |
+| L30 conv1d | +0.743 | +0.739 | 0.004 |
+| L30 in_proj | +0.648 | +0.654 | 0.006 |
+| L30 out_proj_in | +0.648 | +0.654 | 0.006 |
+| L32 in_proj | +0.333 | +0.252 | 0.081 |
+
+Two independently-trained SAEs, **disjoint top-10 feature sets** (Jaccard = 0), **same causal localization within 3%** at the top sites. Stronger evidence that the mechanism is a property of Mamba-1's internal computation, not of any specific SAE.
+
 ### 8d. Residual-stream patching (inconclusive)
 
 Patching the full residual stream at any layer 16–31 in the corrupted run trivially gives 100% rescue, because residuals include all downstream information. This experiment is too coarse to discriminate layers. The slice-level sufficiency test (§7) is the right methodology for "is this component sufficient?".
