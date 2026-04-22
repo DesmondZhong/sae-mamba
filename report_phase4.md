@@ -347,6 +347,22 @@ Combining the internal and L32 SAE results gives an end-to-end mechanistic story
 
 Two SAEs, two different bases at two different sites, one causal pathway. Both reveal sparse coding of the same induction signal — the internal SAE at the input side of the readout, the L32 SAE at the output side.
 
+### 9a. Internal features specialize by text type
+
+Max-activating Pile examples for the 10 internal SAE features show clear specialization — analogous to transformer induction heads, different features fire on different content types:
+
+| feature | specialization | sample context (→ max-activating token) |
+|---|---|---|
+| 33108 | repetitive SEO text / spam patterns | `"supra shoes in a state of dull ... supra shoes"` → `[' shoes']` (act=23.3) |
+| 2230 | SQL / structured syntax | `"UPDATE office SET name = 'Office of Brail and Southern Cone (WHA/BSC"` → `['SC']` (act=23.1) |
+| 18334 | URL / punctuation-marker completion | `"www.nytimes.com/.../in-5-minutes-he-lets"` → `['-']` (act=14.0) |
+| 16064 | code / technical identifier completion | `"class ModelCompiler : public _i"` → `[' :']` (act=26.1) |
+| 5252 | medical / biomedical terminology | `"combination with external beam radiotherapy, it seems that brachytherapy"` → `['rapy']` (act=16.2) |
+| 40652 | all-caps / acronyms | `"LOW-COMPLEXITY AND RELIABLE TRANSFORMS"` → `[' TR']` (act=27.5) |
+| 10942 | single-letter / abbreviation completion | `"pepD-, pepB-, pepN-, and p"` → `['N']` (act=24.1) |
+
+Features 33108 and 28090 both fire strongly on the same "supra shoes" contexts — suggesting multiple features cover the same induction event but encode different aspects (e.g., "token" vs. "pattern detected"). This specialization parallels Olsson et al.'s finding that transformer induction heads split by content type rather than firing uniformly.
+
 ## 10. Mamba-2 induction — SSD architecture is very different
 
 Mamba-2 replaces selective scan with state-space duality (SSD) and merges all projections into a single `in_proj` whose output of 10,576 channels decomposes as:
