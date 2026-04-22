@@ -16,12 +16,22 @@ def train_sae(activations: torch.Tensor, d_hidden: int, sae_type: str = "topk",
               warmup_steps: int = 1000, resample_interval: int = 25000,
               resample_dead_threshold: int = 10000,
               aux_dead_threshold: int = 1000,
-              k_aux: int = 512, aux_coeff: float = 1.0 / 32.0):
-    """Train an SAE with LR warmup, dead feature resampling, and FVE tracking."""
+              k_aux: int = 512, aux_coeff: float = 1.0 / 32.0,
+              act_mean: torch.Tensor = None, act_std: torch.Tensor = None):
+    """Train an SAE with LR warmup, dead feature resampling, and FVE tracking.
+
+    If act_mean and act_std are provided, activations are assumed to be the
+    raw (un-normalized) tensor and are normalized per-batch on-device. This
+    avoids materializing a full-size normalized copy in CPU RAM.
+    """
     d_input = activations.shape[1]
     sae = create_sae(d_input, d_hidden, sae_type=sae_type, k=k, l1_coeff=l1_coeff,
                      k_aux=k_aux, aux_coeff=aux_coeff).to(device)
     optimizer = torch.optim.Adam(sae.parameters(), lr=lr, betas=(0.9, 0.999))
+
+    if act_mean is not None:
+        act_mean = act_mean.to(device).float()
+        act_std = act_std.to(device).float()
 
     # LR schedule: linear warmup then cosine decay
     def lr_lambda(step):
@@ -37,9 +47,11 @@ def train_sae(activations: torch.Tensor, d_hidden: int, sae_type: str = "topk",
                         num_workers=4, pin_memory=True)
     loader_iter = iter(loader)
 
-    # Compute activation variance for FVE
+    # Compute activation variance for FVE (on *normalized* activations if stats given)
     with torch.no_grad():
-        sample = activations[:min(50000, len(activations))].to(device)
+        sample = activations[:min(50000, len(activations))].to(device).float()
+        if act_mean is not None:
+            sample = (sample - act_mean) / act_std
         act_var = sample.var(dim=0).mean().item()
         act_mean_norm = sample.norm(dim=-1).mean().item()
         del sample
@@ -61,7 +73,9 @@ def train_sae(activations: torch.Tensor, d_hidden: int, sae_type: str = "topk",
             loader_iter = iter(loader)
             (batch,) = next(loader_iter)
 
-        batch = batch.to(device)
+        batch = batch.to(device).float()
+        if act_mean is not None:
+            batch = (batch - act_mean) / act_std
 
         # Compute dead mask for AuxK (features that haven't fired in aux_dead_threshold steps).
         # Only relevant after a warmup period, otherwise most features are "dead".
@@ -91,7 +105,8 @@ def train_sae(activations: torch.Tensor, d_hidden: int, sae_type: str = "topk",
             dead_mask = (step_counter.item() - feature_last_fired) > resample_dead_threshold
             n_dead = dead_mask.sum().item()
             if n_dead > 0:
-                _resample_dead_features(sae, activations, dead_mask, optimizer, device, batch_size)
+                _resample_dead_features(sae, activations, dead_mask, optimizer, device,
+                                        batch_size, act_mean=act_mean, act_std=act_std)
                 feature_last_fired[dead_mask] = step_counter.item()
                 print(f"  [Step {step+1}] Resampled {n_dead} dead features "
                       f"({n_dead/d_hidden:.1%})", flush=True)
@@ -138,7 +153,8 @@ def train_sae(activations: torch.Tensor, d_hidden: int, sae_type: str = "topk",
     return sae, history, summary
 
 
-def _resample_dead_features(sae, activations, dead_mask, optimizer, device, batch_size=4096):
+def _resample_dead_features(sae, activations, dead_mask, optimizer, device, batch_size=4096,
+                            act_mean=None, act_std=None):
     """Resample dead features from high-loss examples (Anthropic's approach)."""
     n_dead = dead_mask.sum().item()
     if n_dead == 0:
@@ -146,7 +162,9 @@ def _resample_dead_features(sae, activations, dead_mask, optimizer, device, batc
 
     # Find high-loss examples
     indices = torch.randperm(len(activations))[:min(batch_size * 4, len(activations))]
-    sample = activations[indices].to(device)
+    sample = activations[indices].to(device).float()
+    if act_mean is not None:
+        sample = (sample - act_mean) / act_std
 
     with torch.no_grad():
         x_hat, z, loss_tensor, _ = sae(sample)
