@@ -2,6 +2,26 @@
 
 **(Companion to `report_2.8b.md`. Covers the activation-patching experiments that reverse-engineer where Mamba-1's attention-free induction behavior is computed.)**
 
+## Summary at a glance
+
+| Finding | Number | Significance |
+|---|---|---|
+| Mamba-1 dominant site: L30 `x_proj` (selective-scan parameter generator) | **+0.833** patch_damage | single site carries 83% of the induction signal |
+| Slice within x_proj: C matrix (16 dim of 192) | **+0.800** patch_damage | the "state readout" carries 99.6% of x_proj's effect |
+| Next-token logit damage from patching C alone | **+0.475** | feature-level finding translates to behavior |
+| Δ (time-step) slice | +0.012 | Δ carries essentially no induction signal |
+| B (state write) slice | +0.002 | B carries essentially no induction signal |
+| Pythia max single-site: L10 attention | +0.365 | **2.3× concentration gap** favors Mamba |
+| Cross-layer emergence: first crosses 0.5 at | layer 30 | sharp L28→L30 transition (0.19 → 0.83) |
+| Sufficiency of L30 C alone (clean→corrupted rescue) | +0.056 | necessary but not sufficient |
+| Null-patching (pipeline sanity) | 0.0000 | exact |
+| Multi-seed robustness (Jaccard across 5 seeds) | 1.00 | same top-10 feature set every seed |
+| Pattern-length robustness (plen ∈ {4,8,16}) | 0.73–0.77 | localization stable |
+| SAE hyperparameter robustness (5 configs) | 0.69–0.84 | mechanism > specific feature IDs |
+| Natural Pile repeats activation ratio | **5.4× mean** | features generalize from synthetic → natural text |
+| Long-range gap sweep (natural text, 16–512 token gaps) | 2.3–3.3× ratio | induction holds at ≥256-token distances |
+| Mamba-2 (SSD architecture) gap | **0.22 vs 3.23** | Mamba-2 induction is 15× weaker and distributed, not concentrated |
+
 ## Research Question
 
 Transformer induction heads are a well-studied circuit (Olsson et al. 2022): a "previous-token" head copies the current token backwards, and a "matching" head attends to the earlier occurrence, producing the "copy what came after last time" behavior. Mamba-1 has no attention but demonstrably does induction (we see clean clean–vs.–corrupted contrast on repeated token patterns at mid-depth). **Where in the mixer is this computation actually done?**
@@ -220,6 +240,25 @@ Patching each slice separately (corrupted → clean) at L30:
 **The entire induction signal is carried by C — a 16-dimensional slice of the 192-dim x_proj output.** Patching Δ (the time-step) carries essentially none of the signal (consistent with `dt_proj` showing patch_damage=0.00 across all layers in §1's heatmap). Patching B carries none either.
 
 Interpretation: selective scan runs `h_t+1 = A(Δ) · h_t + B · x_t` and `y_t = C · h_t`. Induction requires reading the state, not writing to it — so the "match found" signal is encoded in C. The model stores pattern memory in the state via prior layers, then at L30 uses C to selectively read the matching component.
+
+### 6a. Behavioral confirmation: next-token logit damage
+
+The SAE-feature patch_damage is an intermediate measurement. Does the C-matrix locus also affect the model's actual next-token prediction?
+
+For each clean induction pair, the model should predict the tokens at positions 48–55 (copying them from the first pattern). We measure the logit at the correct next-token target, then patch L30 x_proj slices:
+
+| slice | clean logit | corrupted logit | patched logit | next_token_damage |
+|---|---|---|---|---|
+| (no patch, baseline/corrupted) | 27.07 | 16.84 | — | — |
+| full x_proj | — | — | 22.21 | **+0.475** |
+| Δ_pre (160 dim) | — | — | 27.08 | 0.000 |
+| B (16 dim) | — | — | 27.07 | 0.000 |
+| **C matrix (16 dim)** | — | — | **22.21** | **+0.475** |
+| B + C (32 dim) | — | — | 22.20 | +0.476 |
+
+Patching only the 16 dimensions of C at L30 drops next-token logit by 4.86 nats (47.5% of the clean–vs–corrupted gap). The feature-level C localization (+0.80 patch_damage) translates to **+0.47 damage to actual next-token prediction**. Δ and B remain as zero-effect in the logit metric too, confirming the slice analysis.
+
+The 47% vs 80% difference is mechanistically meaningful: next-token prediction involves layers L31–L63 making additional processing on top of the L32 residual, diluting the effect of any single layer; SAE feature activation is a localized metric. The fact that 47% of logit damage comes from 16 / 163,840 ≈ 0.01% of the hidden state is the core behavioral finding.
 
 ## 7. Sufficiency: L30 C alone doesn't restore induction
 
