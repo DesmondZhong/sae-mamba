@@ -27,3 +27,29 @@ python scripts/02_build_webpage.py
 ## View Results
 
 Open `web/index.html` in a browser. See [report.md](report.md) for analysis.
+
+## Phase 4: Induction-Circuit Localization (Mamba-1 2.8B)
+
+Goal: reverse-engineer *where* in the Mamba-1 block the attention-free
+induction behavior is computed. We reuse the existing L32 SAE to identify
+induction features, then activation-patch each internal mixer submodule
+(`in_proj`, `conv1d`, `x_proj`, `dt_proj`, and `out_proj` input) across a
+layer sweep. A large `patch_damage` means that submodule carries the
+induction signal.
+
+Core code:
+- `src/mamba_internals.py`: capture / patcher context managers for Mamba-1 mixer internals.
+- `scripts/04_induction_circuit.py`: main experiment (Mamba-1).
+- `scripts/05_pythia_induction_compare.py`: matched experiment on Pythia-2.8B for comparison.
+
+Run:
+```bash
+# Main Mamba-1 localization (~10 min on 1x H100)
+python scripts/04_induction_circuit.py --layers 4 8 12 16 20 24 28 30 31 32
+
+# Pythia comparison (~10 min on 1x H100)
+python scripts/05_pythia_induction_compare.py --layers 2 4 6 8 10 12 14 15 16
+```
+
+Results land in `$SAE_MAMBA_STORAGE/results_phase4/`
+(default: `/mnt/storage/desmond/excuse/results_phase4/`).
