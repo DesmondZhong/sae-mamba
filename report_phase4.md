@@ -25,6 +25,11 @@
 | Mamba-2 (SSD architecture) gap | **0.22 vs 3.23** | Mamba-2 induction is 15× weaker and distributed, not concentrated |
 | Internal SAE (L30 x_proj input, d_inner=5120): induction features | **3 features** | fire at 6-8 on clean, ≤0.002 on corrupted (extreme specificity) |
 | Internal SAE training FVE | 0.739 | clean 40,960-feature decomposition of 5120-dim pre-SSM representation |
+| **Natural-text patching** (real Pile clean vs corrupted) | +0.831 C-matrix damage | replicates synthetic +0.800; mechanism not a synthetic-stimulus artifact |
+| **Mamba-130M scaling**: same mechanism | L15 C_matrix, logit damage +1.64 | at 28% of gap; scaling-invariant mechanism type, shifted depth |
+| Mamba-370M scaling | weak, max +0.038 | no dominant locus at this intermediate scale — unresolved |
+| L30 internal → L32 SAE cross-layer linear R² | −1.63 | relationship is non-linear; selective scan non-linearity is essential |
+| Feature steering (additive) | null on semantic prompts | large perturbations revert to induction, but don't cleanly amplify it; calibration result |
 
 ## Research Question
 
