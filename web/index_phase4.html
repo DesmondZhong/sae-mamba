@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 4: Induction-Circuit Localization in Mamba-1 2.8B</title>
+<style>
+:root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --mamba1: #ff6b6b;
+    --mamba2: #ffd93d;
+    --pythia: #6bcb77;
+    --good: #3fb950;
+    --bad: #f85149;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    line-height: 1.6; }
+.container { max-width: 1200px; margin: 0 auto; padding: 32px 20px; }
+header { text-align: center; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
+h1 { font-size: 28px; margin-bottom: 8px; }
+h2 { color: var(--accent); margin: 28px 0 12px; font-size: 22px; }
+h3 { color: var(--text); margin: 18px 0 8px; font-size: 17px; }
+.tagline { color: var(--text-dim); font-size: 15px; }
+.section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 24px; margin-bottom: 20px; }
+.headline { background: linear-gradient(180deg, var(--surface), var(--surface2));
+    border: 1px solid var(--accent); padding: 24px; border-radius: 8px; margin-bottom: 28px; }
+.headline-number { font-size: 54px; font-weight: 700; color: var(--mamba1);
+    line-height: 1; display: inline-block; }
+.vs-number { font-size: 36px; font-weight: 400; color: var(--text-dim);
+    display: inline-block; margin: 0 8px; vertical-align: super; }
+.pythia-number { color: var(--pythia); font-size: 36px; font-weight: 500;
+    display: inline-block; }
+.caption { color: var(--text-dim); font-size: 14px; margin-top: 10px; font-style: italic; }
+p { margin: 10px 0; }
+code { background: var(--surface2); padding: 1px 6px; border-radius: 3px;
+    font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 14px; color: #d2a8ff; }
+pre code { display: block; padding: 12px; overflow-x: auto; font-size: 13px; }
+figure { margin: 16px 0; text-align: center; }
+figure img { max-width: 100%; border-radius: 4px; background: white; padding: 6px;
+    border: 1px solid var(--border); }
+figcaption { color: var(--text-dim); font-size: 14px; margin-top: 8px; text-align: left; }
+table { border-collapse: collapse; margin: 12px 0; font-size: 14px;
+    width: 100%; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+th, td { padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+th { background: var(--surface); color: var(--accent); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+.good { color: var(--good); font-weight: 600; }
+.bad { color: var(--bad); }
+.dim { color: var(--text-dim); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 12px; font-weight: 600; margin-right: 4px; }
+.badge-m1 { background: rgba(255, 107, 107, 0.15); color: var(--mamba1); }
+.badge-m2 { background: rgba(255, 217, 61, 0.15); color: var(--mamba2); }
+.badge-py { background: rgba(107, 203, 119, 0.15); color: var(--pythia); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+ul { padding-left: 24px; margin: 8px 0; }
+li { margin: 4px 0; }
+a { color: var(--accent); }
+nav { background: var(--surface2); padding: 10px 16px; border-radius: 4px;
+    margin-bottom: 20px; font-size: 14px; }
+nav a { margin-right: 16px; text-decoration: none; }
+nav a:hover { text-decoration: underline; }
+.warn { border-left: 3px solid var(--bad); padding-left: 12px; color: var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+    <h1>Phase 4: Induction-Circuit Localization in Mamba-1 2.8B</h1>
+    <p class="tagline">Where does a state space model do the "match-and-copy" computation that transformers do with attention heads?</p>
+</header>
+
+<nav>
+    <a href="index_2.8b.html">&larr; Main Dashboard (Phases 1-3)</a>
+    <a href="#method">Method</a>
+    <a href="#mamba1">Mamba-1 localization</a>
+    <a href="#slice">C matrix</a>
+    <a href="#pythia">Pythia control</a>
+    <a href="#mamba2">Mamba-2</a>
+    <a href="#validation">Validation</a>
+</nav>
+
+<div class="headline">
+    <h2 style="margin-top:0">Headline</h2>
+    <p style="font-size:17px">Mamba-1's attention-free induction mechanism localizes to <strong>a single 16-dimensional slice (the C matrix of the selective-scan parameters) at layer 30</strong>. Patching it destroys</p>
+    <p style="text-align:center; margin:16px 0">
+        <span class="headline-number">80%</span>
+        <span class="vs-number">of induction signal</span>
+    </p>
+    <p>vs. Pythia-2.8B where the strongest single site reaches only</p>
+    <p style="text-align:center; margin:16px 0">
+        <span class="pythia-number">37%</span>
+        <span class="dim" style="font-size:20px">(distributed across ≥4 attention layers)</span>
+    </p>
+    <p>Mamba-1 concentrates a function that a transformer distributes — in a single 16-d subspace (state-space "readout" C), not in attention Q·K·V dot products.</p>
+</div>
+
+<!-- Method -->
+<div class="section" id="method">
+    <h2>1. Method</h2>
+    <p><strong>Induction-pair construction.</strong> Synthetic pairs</p>
+    <pre><code>clean     = [prefix 8] P(8) [mid 32] P(8)     # pattern P repeats
+corrupted = [prefix 8] P(8) [mid 32] P'(8)    # second pattern differs</code></pre>
+
+    <p><strong>Features-of-interest.</strong> Using the pre-existing Mamba-1 L32 SAE (TopK, K=64, 40,960 features), score every feature by <code>(clean − corrupted)</code> activation at the induction positions; take top-10.</p>
+
+    <p><strong>Patching sweep.</strong> For every <code>(layer, submodule)</code>, capture the submodule's activation on the corrupted run, patch into the clean run, measure <code>patch_damage = 1 − (patched − corrupted) / (clean − corrupted)</code>. 1.0 = this submodule fully carries the induction signal.</p>
+
+    <p><strong>Position-specific variant.</strong> Patch only at <em>induction-pattern positions</em> (48-55), or only at <em>pre-induction positions</em> (0-47), to separate "specifically induction" from "generic context."</p>
+
+    <p><strong>Bug that mattered.</strong> HF's default <code>MambaMixer.forward</code> dispatches to <code>cuda_kernels_forward</code>, which calls <code>causal_conv1d_fn(x, self.conv1d.weight, ...)</code> directly — forward hooks on the <code>Conv1d</code> module never fire. Added <code>force_slow_forward()</code> helper (<code>src/mamba_internals.py</code>) that replaces each mixer's forward with <code>slow_forward</code>, which calls <code>self.conv1d(x)</code> and triggers hooks correctly.</p>
+</div>
+
+<!-- Mamba-1 localization -->
+<div class="section" id="mamba1">
+    <h2>2. Mamba-1 localizes induction to a single layer × submodule</h2>
+    <figure>
+        <img src="figures/heatmap_mamba1.png" alt="Mamba-1 heatmap">
+        <figcaption>patch_damage across 17 layers × 5 submodules of Mamba-1 2.8B. One dark cell: <code>L30 x_proj = 0.833</code>. <code>dt_proj</code> is essentially zero everywhere — the time-step Δ is not where induction lives.</figcaption>
+    </figure>
+    <p>Top sites:</p>
+    <table>
+        <thead><tr><th>Layer</th><th>Submodule</th><th>patch_damage</th></tr></thead>
+        <tbody>
+            <tr><td>L30</td><td><code>x_proj</code></td><td class="good">+0.833</td></tr>
+            <tr><td>L30</td><td><code>conv1d</code></td><td>+0.743</td></tr>
+            <tr><td>L30</td><td><code>in_proj</code></td><td>+0.648</td></tr>
+            <tr><td>L30</td><td><code>out_proj_in</code></td><td>+0.648</td></tr>
+            <tr><td>L32</td><td><code>in_proj</code></td><td>+0.333</td></tr>
+            <tr><td>L32</td><td><code>out_proj_in</code></td><td>+0.333</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Cross-layer emergence</h3>
+    <figure>
+        <img src="figures/emergence_line.png" alt="cross-layer emergence">
+        <figcaption><code>x_proj</code> patch_damage by layer. Essentially 0 through layer 26 (slight bump at L10 = 0.047), a jump to 0.19 at L28, then 0.83 at L30 — the induction computation emerges sharply between L28 and L30, then layer 31/32's <code>x_proj</code> contribute ≤ 0.06.</figcaption>
+    </figure>
+
+    <h3>Position-specific patching: L30 is induction-specific, not generic</h3>
+    <figure>
+        <img src="figures/position_specific_bar.png" alt="position-specific">
+        <figcaption>Patching restricted to <em>induction positions</em> (48-55) alone reproduces the full damage for <code>x_proj</code>, <code>in_proj</code>, and <code>out_proj_in</code>. Restricting to <em>pre-induction positions</em> gives 0.00 for these three. <code>conv1d</code> is the exception: <code>all=0.74, ind_only=0.00</code> — it carries short-range context, not induction-specific signal.</figcaption>
+    </figure>
+</div>
+
+<!-- Slice patching -->
+<div class="section" id="slice">
+    <h2>3. The induction signal lives in <code>C</code> — a 16-dimensional slice</h2>
+    <p>Mamba-1's <code>x_proj</code> is a Linear(d_inner=5120 → 192) that produces the selective-scan parameters:</p>
+    <ul>
+        <li><code>time_step (Δ_pre)</code>: 160 dims — fed to <code>dt_proj</code> → discrete time-step Δ</li>
+        <li><code>B</code>: 16 dims — state-space "input" matrix (how tokens write to state)</li>
+        <li><code>C</code>: 16 dims — state-space "output" matrix (how state reads out to residual)</li>
+    </ul>
+
+    <p>Patching each slice individually at L30:</p>
+
+    <figure>
+        <img src="figures/slice_necessity_sufficiency.png" alt="slice patching">
+        <figcaption>Red = necessity (patch corrupted→clean, expect damage). Blue = sufficiency (patch clean→corrupted, expect rescue). <strong>The entire induction necessity concentrates in <code>C</code> (16-dim, 0.80 damage = 99.6% of the full-x_proj effect).</strong> <code>B</code> and Δ carry essentially none.</figcaption>
+    </figure>
+
+    <p><strong>Interpretation.</strong> Selective scan runs <code>h_{t+1} = A(Δ) · h_t + B · x_t</code> then <code>y_t = C · h_t</code>. Induction requires <em>reading</em> the state, not <em>writing</em> to it — so the "match found" signal is encoded in C. Earlier layers accumulate pattern memory into the state; at L30, C selectively reads out the matching component.</p>
+
+    <h3>Necessary but not sufficient</h3>
+    <p>The sufficiency direction tells a complementary story: patching <em>clean</em> C into an otherwise-corrupted run rescues only 5.6% of induction. L30's C is <strong>necessary</strong> (patching it destroys induction) but <strong>not sufficient</strong> (putting it back alone doesn't restore it). Induction requires both (i) the correct C readout AND (ii) the state built by layers 0–29 from the clean sequence.</p>
+</div>
+
+<!-- Pythia -->
+<div class="section" id="pythia">
+    <h2>4. Pythia-2.8B control: distributed, not concentrated</h2>
+    <figure>
+        <img src="figures/heatmap_pythia.png" alt="Pythia heatmap">
+        <figcaption>Pythia-2.8B patch_damage heatmap. Signal is spread across layers 2, 6, 10, 12 attention; max at L10 = 0.365. Attention_output and attention_qkv show identical damage at each layer — downstream-coupled as expected.</figcaption>
+    </figure>
+
+    <figure>
+        <img src="figures/top_sites_bar.png" alt="top sites">
+        <figcaption>Top-10 patching sites, Mamba-1 (left, red) vs. Pythia (right, blue). Mamba's highest site is <strong>2.3× stronger</strong> than Pythia's; Pythia lacks any single-site damage ≥ 0.5.</figcaption>
+    </figure>
+</div>
+
+<!-- Mamba-2 -->
+<div class="section" id="mamba2">
+    <h2>5. Mamba-2 (SSD architecture) — the story does not transfer</h2>
+    <p>Mamba-2 replaces selective scan with <em>state-space duality (SSD)</em> and merges all projections into a single <code>in_proj</code> that outputs <code>[z, x, B, C, dt]</code> (10,576 channels). We ran the analog of Phase B using the freshly-retrained Mamba-2 L32 SAE (see main report for the hook-fix that makes Mamba-2 SAE numbers comparable).</p>
+
+    <h3>Mamba-2's induction signal is ~15× weaker than Mamba-1's at the same SAE</h3>
+    <table>
+        <thead><tr><th></th><th>baseline act</th><th>corrupted act</th><th>gap</th></tr></thead>
+        <tbody>
+            <tr><td>Mamba-1 (L32 SAE, plen=8)</td><td>3.33</td><td>0.10</td><td class="good">3.23</td></tr>
+            <tr><td>Mamba-2 (L32 SAE, plen=8)</td><td>0.47</td><td>0.25</td><td class="bad">0.22</td></tr>
+        </tbody>
+    </table>
+
+    <p>Pattern-length sweep on Mamba-2: gap grows from 0.16 (plen=4) to 0.27 (plen=32) but never approaches Mamba-1's 3.23. The weak signal isn't an artifact of short patterns.</p>
+
+    <figure>
+        <img src="figures/heatmap_mamba2.png" alt="Mamba-2 heatmap">
+        <figcaption>Mamba-2 <code>in_proj</code> slice-level patching. Signal at L32 spreads roughly evenly across <code>z_gate</code> (0.59), <code>x_stream</code> (0.35), <code>B</code> (0.20), <code>C</code> (0.19). The clean "induction lives in C" concentration that characterizes Mamba-1 is absent. L0 values &gt;1.0 are artifacts of the small gap (0.22) combined with L0 patching trivially swapping token info; genuine signal is at L28-L32.</figcaption>
+    </figure>
+
+    <p><strong>Interpretation.</strong> The L30 x_proj.C localization is specific to selective scan, not to SSMs in general. Mamba-2's SSD, with its merged projections and smaller per-group d_state, distributes pattern-matching differently — consistent with external observations that SSD underperforms selective scan on in-context tasks at matched scale.</p>
+</div>
+
+<!-- Validation -->
+<div class="section" id="validation">
+    <h2>6. Validation: survives pressure testing</h2>
+
+    <div class="grid">
+        <div>
+            <h3>A. Null-patching control</h3>
+            <p>Patch <strong>clean → clean</strong> at each top site. If the pipeline is numerically correct, patch_damage must be 0. Result:</p>
+            <table>
+                <thead><tr><th>Site</th><th>patch_damage (clean→clean)</th></tr></thead>
+                <tbody>
+                    <tr><td>L30 x_proj</td><td class="good">0.0000</td></tr>
+                    <tr><td>L30 conv1d</td><td class="good">0.0000</td></tr>
+                    <tr><td>L30 in_proj</td><td class="good">0.0000</td></tr>
+                    <tr><td>L32 in_proj</td><td class="good">0.0000</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div>
+            <h3>B. Random-feature baseline</h3>
+            <p>Random-feature baseline activation on induction pairs: 0.005 (noise floor). Induction features: 3.36 (<strong>700× larger</strong>). Patching affects real signal in induction features; random-feature "damage" is noise amplified by a tiny denominator.</p>
+        </div>
+
+        <div>
+            <h3>C. Multi-seed robustness</h3>
+            <p>Re-identify induction features with 5 different random seeds (128 pairs each). <strong>All 5 seeds yield the identical top-10 feature set.</strong> Pairwise Jaccard = 1.0. Feature IDs are not an artifact of the induction-pair sampling.</p>
+        </div>
+
+        <div>
+            <h3>D. Pattern-length robustness</h3>
+            <table>
+                <thead><tr><th>pattern length</th><th>patch_damage</th></tr></thead>
+                <tbody>
+                    <tr><td>4</td><td>+0.729</td></tr>
+                    <tr><td>8</td><td>+0.746</td></tr>
+                    <tr><td>16</td><td>+0.772</td></tr>
+                </tbody>
+            </table>
+            <p>Top-10 feature-set Jaccard across lengths: 0.82. Localization is stable; damage actually grows slightly with longer patterns.</p>
+        </div>
+    </div>
+
+    <h3>E. Real-text validation</h3>
+    <figure>
+        <img src="figures/real_text_bar.png" alt="real text">
+        <figcaption>Left: synthetic clean-vs-corrupted score. Right: mean activation ratio at natural Pile bigram repeats vs. random baseline positions (26,807 repeat positions from 400 docs). <strong>All 10 features show ≥ 2× activation at natural repeats</strong>, mean 5.4×, max 17.4×. The synthetic pattern detector generalizes to natural language induction.</figcaption>
+    </figure>
+
+</div>
+
+<div class="section">
+    <h2>7. Take-home</h2>
+    <ul>
+        <li><strong>Localization:</strong> Mamba-1 2.8B implements its attention-free induction mechanism in a single 16-dim subspace (C matrix at L30 x_proj) of its 163,840-dim hidden state at that depth.</li>
+        <li><strong>Mechanism:</strong> Earlier layers accumulate pattern memory into SSM state; at L30, <code>C</code> selectively reads it out. Δ and B slices carry nothing.</li>
+        <li><strong>Necessary ≠ sufficient:</strong> Removing L30's C kills induction (80%); adding clean C into a corrupted run rescues only 5.6%. The mechanism is distributed across the state-building path (0-29) and concentrated at the readout.</li>
+        <li><strong>Emergence:</strong> L26 → L28 → L30 transitions from patch_damage 0.00 → 0.19 → 0.83. Crosses 0.5 first at L30.</li>
+        <li><strong>Robustness:</strong> Null-patch 0.00, Jaccard 1.0 across 5 seeds, 82% overlap across pattern lengths, features generalize to 5.4× natural-text activation ratio.</li>
+        <li><strong>Contrast with Pythia:</strong> max single-site 0.37, distributed across 4+ attention layers. Mamba concentrates; transformers distribute. 2.3× concentration gap.</li>
+        <li><strong>Mamba-2 differs:</strong> SSD's merged in_proj + smaller per-group state distributes pattern-matching more like a transformer than like Mamba-1; the "C matrix carries induction" property is specific to selective scan.</li>
+    </ul>
+</div>
+
+<div class="section">
+    <h2>8. Artifacts</h2>
+    <p>Report: <a href="https://github.com/DesmondZhong/sae-mamba/blob/master/report_phase4.md"><code>report_phase4.md</code></a></p>
+    <p>Result JSONs (all under <code>$SAE_MAMBA_STORAGE/results_phase4/</code>):</p>
+    <ul>
+        <li><code>induction_features.json</code> — top-10 Mamba-1 induction features</li>
+        <li><code>patching_results.json</code> — 17-layer × 5-component patching sweep (main)</li>
+        <li><code>patching_position_specific.json</code> — all/ind_only/pre_ind_only decomposition</li>
+        <li><code>xproj_slice_patching.json</code> — Δ vs B vs C slice necessity</li>
+        <li><code>sufficiency_patch.json</code> — slice-level sufficiency (rescue)</li>
+        <li><code>validation.json</code> — null-patch, random-feat, multi-seed</li>
+        <li><code>real_text_induction.json</code> — 26,807 natural Pile repeats</li>
+        <li><code>pattern_length_robustness.json</code>, <code>per_position_patching.json</code></li>
+        <li><code>mamba2_induction.json</code>, <code>mamba2_plen_sweep.json</code></li>
+        <li><code>pythia_induction_features.json</code>, <code>pythia_patching_results.json</code></li>
+    </ul>
+    <p>Code (all under <code>src/</code> and <code>scripts/</code> in the repo):</p>
+    <ul>
+        <li><code>src/mamba_internals.py</code> — capture/patch context managers + <code>force_slow_forward</code> helper</li>
+        <li><code>scripts/04_induction_circuit.py</code>, <code>scripts/05_pythia_induction_compare.py</code> — main Phase B/C</li>
+        <li><code>scripts/07_extract_xproj.py</code>, <code>scripts/10_train_xproj_sae.py</code> — internal SAE pipeline</li>
+        <li><code>scripts/09_real_text_induction.py</code>, <code>scripts/11_validate_patching.py</code> — validations</li>
+        <li><code>scripts/12_slice_patching.py</code>, <code>scripts/15_sufficiency_patch.py</code> — slice-level necessity / sufficiency</li>
+        <li><code>scripts/17_mamba2_induction.py</code> — Mamba-2 SSD adaptation</li>
+    </ul>
+</div>
+
+</div>
+</body>
+</html>
