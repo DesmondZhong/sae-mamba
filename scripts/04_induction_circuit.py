@@ -40,6 +40,7 @@ from src.mamba_internals import (
     MambaInternalCapture,
     MambaInternalPatcher,
     ResidualStreamCapture,
+    force_slow_forward,
 )
 from src.sae import create_sae
 
@@ -298,6 +299,10 @@ def main():
 
     print(f"Loading {MODEL_NAME}...")
     model, tokenizer = get_model_and_tokenizer(MODEL_NAME, device)
+    # HF MambaMixer default forward goes through causal_conv1d_fn which bypasses
+    # self.conv1d — forward hooks on the Conv1d submodule don't fire. Force
+    # slow_forward globally so all our capture/patch hooks work.
+    force_slow_forward(model)
 
     print(f"Loading L{MID_LAYER} SAE...")
     sae, act_mean, act_std = load_sae_and_norm(MID_LAYER, device)
