@@ -315,7 +315,53 @@ Pairwise Jaccard of top-10 feature sets across lengths: **0.82**. Localization i
 
 Patching L30 x_proj at each position individually yields zero damage at positions 0-47 (because clean=corrupted there by construction) and non-zero damage only at positions 48–55 (the induction positions themselves). Average per-position damage at positions 48-55 = +0.117, max = +0.133. Eight positions summed nominally to 0.936 but the actual joint patch was 0.833 — the scan aggregates sub-linearly.
 
-### 8c. SAE hyperparameter robustness
+### 8c-bis. Natural-text patching (kills the "synthetic-only" limitation)
+
+We constructed clean/corrupted pairs from natural Pile text (128 pairs): clean = original Pile document with a naturally occurring bigram repeat; corrupted = same text with tokens at the second-occurrence position replaced by random non-matching tokens. Running the slice-patching at L30 on these natural pairs:
+
+| slice | patch_damage on natural pairs | synthetic (§6) |
+|---|---|---|
+| full x_proj | +0.811 | +0.804 |
+| Δ_pre | -0.073 | +0.012 |
+| B | -0.020 | +0.002 |
+| **C matrix** | **+0.831** | +0.800 |
+
+The C-matrix localization is reproduced *precisely* on natural text (0.83 vs 0.80 on synthetic). This rules out the concern that the mechanism only manifests on artificial uniform-random patterns — the same 16 dims of `x_proj` at L30 carry the induction signal when the model is doing real in-context pattern matching.
+
+### 8c-tris. Scaling to Mamba-130M: same mechanism, different depth
+
+We ran a logit-based Phase-B variant on Mamba-130M (24 layers, d_model=768, x_proj output=80 dim). Clean-vs-corrupted gap is measured by the **next-token logit** (not SAE features, which would require a new SAE for the smaller model). Top 5 single-slice sites:
+
+| rank | site | logit_damage |
+|---|---|---|
+| 1 | L15 C_matrix | **+1.643** |
+| 2 | L20 C_matrix | +1.068 |
+| 3 | L22 C_matrix | +0.661 |
+| 4 | L14 Δ_pre | +0.507 |
+| 5 | L15 Δ_pre | +0.491 |
+
+**The C-matrix site still dominates in the smaller model.** The dominant layer shifts (L30/64 = 47% in Mamba-2.8B → L15/24 = 63% in Mamba-130M), but the slice (C, not B or Δ) is the same. Scaling invariance of the mechanism type.
+
+**Mamba-370M** (48 layers, d_model=1024): same logit-based sweep. Gap=6.11. Top single-slice damage = +0.038 at L44 C_matrix — an order of magnitude smaller than Mamba-130M's +1.64. C-matrix damage shows small local peaks at L28 (+0.028) and L44 (+0.027) but nothing dominant. Either (i) Mamba-370M's induction is much more distributed, (ii) the 16-dim C slice is less load-bearing at this intermediate scale due to the model's redundancy, or (iii) the logit metric under-reports single-slice effects when the model is highly confident (clean logit 14 vs corrupted 8). The 2.8B and 130M numbers are the cleanest anchors.
+
+### 8c-quint. Feature steering: mixed result, honest report
+
+We attempted to causally amplify the dominant L30 internal SAE induction feature (#33108, score 8.74) by adding `strength × decoder_direction` to x_proj INPUT at L30 during greedy generation. Tested strength ∈ {−50, −20, −10, −5, 0, 5, 10, 20, 50}.
+
+Clear effect only visible on a specific pattern-heavy prompt: `"The code repeats every 4 tokens: foo bar baz qux foo bar baz qux foo bar baz qux foo"`.
+- strength = 0 (no steering): repetition_rate = 0.00 (model switches to "...A: You can use a regex...")
+- strength = ±50: repetition_rate = 0.91 (model stays locked in foo-bar-baz-qux repetition)
+- strength = ±5–20: repetition_rate ≈ 0.25 (intermediate)
+
+Both positive and negative large perturbations push the model into pure repetition. Interpretation: **large perturbations disrupt high-level semantic processing at L30; when disrupted, the default local-copy (induction) behavior dominates**. Rather than "amplify feature → more induction", it's "break feature → revert to induction baseline".
+
+On other prompts (natural text like "Python is a programming language that"), steering had no visible effect on greedy generation — the argmax is too stable to flip with additive perturbation of this magnitude.
+
+This is a weaker result than patch-level experiments. It does NOT cleanly demonstrate feature-level causal amplification. Reported as a calibration experiment: **steering via additive feature directions at the x_proj input level is a coarser lever than the patching sweep.** For a cleaner intervention, one would need to replace the SAE-reconstructed activation rather than add a small delta.
+
+### 8d. SAE hyperparameter robustness
+
+### 8d. SAE hyperparameter robustness
 
 Re-run the patch at L30 x_proj, using the top-10 induction features identified by a **different** Mamba-1 L32 SAE. If the mechanism is real, patch_damage should stay high across SAE configurations.
 
@@ -379,6 +425,18 @@ Combining the internal and L32 SAE results gives an end-to-end mechanistic story
 5. **The mixer output propagates to the L32 residual stream**, where a separate ~10 sparse features (identified by the L32 SAE, §1-§3) fire on induction-complete tokens.
 
 Two SAEs, two different bases at two different sites, one causal pathway. Both reveal sparse coding of the same induction signal — the internal SAE at the input side of the readout, the L32 SAE at the output side.
+
+### 9'. The two SAEs are connected by a non-linear map
+
+A natural question: if L30 internal SAE features project through x_proj.C (a linear op) and then through selective scan to produce L32 residual SAE features — is the relationship linear?
+
+We fit a 5-fold cross-validated Ridge regression from L30 internal SAE feature activations (40,960 dims) → top-10 L32 induction features (10 dims) on 16,384 induction-position samples.
+
+Result: **overall CV R² = −1.63** (i.e., worse than predicting the mean). Per-feature R² all negative, ranging −3.7 to −0.05. A Lasso sparsity-selector finds 163 non-zero predictors but still doesn't generalize.
+
+This confirms the selective scan's essential non-linearity. The map `L30 internal features → L32 induction features` factors through `(Δ, B, C) → exp(A·Δ) state update → C·h readout`, which is inherently non-linear in the pre-scan features (the `exp(A·Δ)` term is an exponential of the Δ slice). Linear regression can't short-circuit this computation — you actually have to run the scan.
+
+Interpreted positively: *internal SAE features are not redundant with residual SAE features*. They capture different aspects of the induction pipeline. Both are necessary to fully describe the mechanism: internal features encode the "match detected" pre-scan signal, residual features encode the "match delivered to downstream layers" post-scan signal, and selective scan is the non-linear operation that transforms one into the other.
 
 ### 9a. L28 vs L30: induction features strengthen during the L28→L30 transition
 
