@@ -9,6 +9,8 @@
 | Mamba-1 dominant site: L30 `x_proj` (selective-scan parameter generator) | **+0.833** patch_damage | single site carries 83% of the induction signal |
 | Slice within x_proj: C matrix (16 dim of 192) | **+0.800** patch_damage | the "state readout" carries 99.6% of x_proj's effect |
 | Next-token logit damage from patching C alone | **+0.475** | feature-level finding translates to behavior |
+| Linear probe on C slice (clean vs corrupted) | 57.5% | C is not a pattern detector — it's a state-readout direction |
+| Linear probe on Δ_pre (160 dim) | 97.7% | Δ_pre carries the info, C executes the computation |
 | Δ (time-step) slice | +0.012 | Δ carries essentially no induction signal |
 | B (state write) slice | +0.002 | B carries essentially no induction signal |
 | Pythia max single-site: L10 attention | +0.365 | **2.3× concentration gap** favors Mamba |
@@ -243,7 +245,26 @@ Patching each slice separately (corrupted → clean) at L30:
 
 Interpretation: selective scan runs `h_t+1 = A(Δ) · h_t + B · x_t` and `y_t = C · h_t`. Induction requires reading the state, not writing to it — so the "match found" signal is encoded in C. The model stores pattern memory in the state via prior layers, then at L30 uses C to selectively read the matching component.
 
-### 6a. Behavioral confirmation: next-token logit damage
+### 6a. Linear-probe readability: representation ≠ computation
+
+What if we test not "which slice is causally important" (patching) but "which slice *encodes* the clean-vs-corrupted distinction in a linearly-readable form"? Train a logistic regression on each slice to predict clean vs corrupted at induction positions (512 pairs, 5-fold CV):
+
+| slice | dim | probe accuracy |
+|---|---|---|
+| C matrix (output) | 16 | **57.5% ± 0.5%** |
+| B matrix (output) | 16 | 54.1% |
+| Δ_pre (output) | 160 | **97.7% ± 0.4%** |
+| full x_proj output | 192 | 97.8% |
+| x_proj input (d_inner) | 5120 | 98.6% |
+| random 16 dims of d_inner | 16 | 83.5% |
+
+**This is the inverse of the patching result.** Δ_pre has 97.7% linear decodability but +0.012 patch_damage — it *encodes* the pattern distinction redundantly but is not *used* for downstream induction. C has only 57.5% linear decodability but +0.80 patch_damage — it's causally critical despite not carrying the distinction as a linearly-extractable bit.
+
+Mechanistic reading: **C is not a pattern detector. C is a READOUT DIRECTION** for the SSM state via `y = C · h`. On its own, 16 dims of C don't let a linear classifier tell clean from corrupted. But when multiplied by the state h (which encodes pattern memory from layers 0–29), the product `C · h` produces a pattern-match signal — that's the causal channel. Patching C means sending a wrong "query" to the state's readout; the result is wrong even though the linear content of C itself looks similar.
+
+This is the classic **representation vs. computation** distinction: Δ_pre contains more about-the-pattern information in a linearly decodable form, but doesn't do the computation. C contains less linearly decodable info but executes the state-readout computation that actually produces induction.
+
+### 6b. Behavioral confirmation: next-token logit damage
 
 The SAE-feature patch_damage is an intermediate measurement. Does the C-matrix locus also affect the model's actual next-token prediction?
 
