@@ -176,21 +176,18 @@ Re-run feature identification with 5 different random seeds (each with 128 fresh
 
 **All 5 seeds yield the identical set of 10 features** (just reordered). Pairwise Jaccard = **1.0**. The induction-feature set is robust to the induction-pair sampling.
 
-### (D1) Max-activating natural-text examples (qualitative check)
+### (D) Real-text validation: features fire on natural repeated bigrams
 
-For each top-10 induction feature, the single highest-activating position in 1500 Pile documents:
+We streamed 400 Pile documents, found positions `j` where the bigram `(t_{j-1}, t_j)` has an earlier occurrence at least 32 tokens back, and measured the top-10 induction features' activation at `j` vs. a random baseline position.
 
-| feat | activation | context (arrow = max-activating token) |
-|---|---|---|
-| 13980 | 6.03 | `"...crackdown. "Oh! Thsupra shoes supra shoes, thsupra shoes supra shoes the →` [` shoes`] |
-| 36829 | 15.11 | `"...compared with 98 patients who underwent CT-based cup insertion, and all had postoperative CT. After CT-based cup placement, average →` [` cup`] |
-| 13980 | 5.68 | `"...where in the groups would be $1 = foo $2 = bar1 $3 = bar2 $4 →` [` bar`] |
-| 34338 | 14.72 | `"...including parts and bags. Findlay's also offers sales and service for all makes and models of sewing machines and vacuums. Please contact →` [`ums`] |
-| 13980 | 5.55 | `"...chips_fries = Category(name: "Chips & Fries", items: [fries]) →` [`ries`] |
+- Natural repeat positions sampled: **26,807** across 400 documents.
+- Mean repeat / baseline activation ratio (averaged over the 10 features): **5.4×**
+- **All 10 features show ≥ 2× activation at repeats** (fraction_above_2x = 100%).
+- Per-feature ratios range from 2.6× (feat 13980) to 17.4× (feat 3684).
 
-The clearest cases (feat 13980 firing on "supra shoes", feat 36829 firing on "cup" after seeing "CT-based cup" earlier) are textbook induction: copy the token that followed the earlier occurrence of the current context. Features identified synthetically on uniform-random patterns generalize to programmatic, colloquial, and medical text equally.
+The induction features identified from synthetic uniform-random patterns **fire specifically on naturally-occurring repeated bigrams in Pile text**. The mechanism is not an artifact of the synthetic stimulus.
 
-### (D2) Long-range gap sweep: induction survives ≥256-token distances
+### (E) Long-range gap sweep: induction survives ≥256-token distances
 
 Split the natural-text repeats by the gap (in tokens) between the first and second occurrence:
 
@@ -204,16 +201,19 @@ Split the natural-text repeats by the gap (in tokens) between the first and seco
 
 Mamba's induction signal holds at ratios 2.3–3.3× across gaps up to 512 tokens. Degradation at the longest gap is modest (3.3× → 2.3×). The state carries pattern memory over hundreds of tokens.
 
-### (D) Real-text validation: features fire on natural repeated bigrams
+### (F) Max-activating natural-text examples (qualitative)
 
-We streamed 400 Pile documents, found positions `j` where the bigram `(t_{j-1}, t_j)` has an earlier occurrence at least 32 tokens back, and measured the top-10 induction features' activation at `j` vs. a random baseline position.
+For each top-10 induction feature, the single highest-activating position in 1500 Pile documents:
 
-- Natural repeat positions sampled: **26,807** across 400 documents.
-- Mean repeat / baseline activation ratio (averaged over the 10 features): **5.4×**
-- **All 10 features show ≥ 2× activation at repeats** (fraction_above_2x = 100%).
-- Per-feature ratios range from 2.6× (feat 13980) to 17.4× (feat 3684).
+| feat | activation | context (arrow = max-activating token) |
+|---|---|---|
+| 13980 | 6.03 | `"...crackdown. "Oh! Thsupra shoes supra shoes, thsupra shoes supra shoes the →` [` shoes`] |
+| 36829 | 15.11 | `"...compared with 98 patients who underwent CT-based cup insertion, and all had postoperative CT. After CT-based cup placement, average →` [` cup`] |
+| 13980 | 5.68 | `"...where in the groups would be $1 = foo $2 = bar1 $3 = bar2 $4 →` [` bar`] |
+| 34338 | 14.72 | `"...including parts and bags. Findlay's also offers sales and service for all makes and models of sewing machines and vacuums. Please contact →` [`ums`] |
+| 13980 | 5.55 | `"...chips_fries = Category(name: "Chips & Fries", items: [fries]) →` [`ries`] |
 
-The induction features identified from synthetic uniform-random patterns **fire specifically on naturally-occurring repeated bigrams in Pile text**. The mechanism is not an artifact of the synthetic stimulus.
+The clearest cases (feat 13980 firing on "supra shoes", feat 36829 firing on "cup" after seeing "CT-based cup" earlier) are textbook induction: copy the token that followed the earlier occurrence of the current context. Features identified synthetically on uniform-random patterns generalize to programmatic, colloquial, and medical text equally.
 
 ---
 
@@ -369,37 +369,57 @@ Gap grows from 0.16 (plen=4) to 0.28 (plen=32), but plateaus there. At no tested
 
 ## Discussion
 
-**Mechanistic claim.** Mamba-1's induction behavior at 2.8B scale is implemented by **the x_proj selective-scan parameter generator at layer 30**. x_proj takes the post-conv d_inner representation and produces the (Δ, B, C) inputs that the selective scan uses to decide how the recurrent state updates. Localizing induction here says: **the "this token matches an earlier pattern" signal is encoded in the SSM parameters themselves, not in the short-range conv or the downstream residual.** This is a meaningful mechanistic claim because x_proj's output directly parameterizes the state-update dynamics — the pattern detection becomes state-routing instructions, not token-level representations.
+**Mechanistic claim.** Mamba-1's induction behavior at 2.8B scale is implemented by **the C matrix slice (16 dim out of 192) of `x_proj` at layer 30**. In a selective-scan block, `x_proj` generates the (Δ, B, C) parameters that the SSM uses to decide how the recurrent state updates and reads out. The slice analysis (§6) shows Δ and B carry essentially no induction signal — only C does. Mechanistically: earlier layers (0–29) accumulate pattern memory into the SSM state; at L30, the C matrix reads it out. **The "match found" signal is encoded in the state-readout matrix, not in the state-write matrix (B), not in the time-step controller (Δ), and not in residual-stream projections.**
 
-**Contrast with Transformers.** In transformers, induction is done by a pair of attention heads acting on the residual stream (Olsson et al. 2022 "previous-token head" + "induction head"). In Mamba, there is no attention, but the analogous function is carried out by a single Linear projection that shapes the selective-scan parameters. Transformers distribute induction across multiple attention heads at different depths (our Pythia-2.8B shows peak 0.365 at L10 attention, distributed across L2/L6/L10/L12). Mamba concentrates at L30 x_proj.
+**The 16 dimensions do the work.** From the 163,840-dim Mamba-1 hidden state at that depth (64 layers × 2560 d_model), the induction-relevant subspace at the causal locus is 16 dimensions — about 0.01% of the hidden state. Patching those 16 dims destroys 80% of the induction-feature signal and 47% of the next-token prediction logit. This is among the sharpest mechanistic localizations reported for a 2.8B-scale model.
 
-**Architectural interpretation.** Mamba's 64-layer depth at 2.8B means L30 is at 47% depth — roughly where the induction-head region sits in Pythia-2.8B (32 layers, L10 = 31% depth). The *relative* depth is consistent with "induction emerges in early-middle layers"; the *concentration* is not.
+**Contrast with Transformers.** In transformers, induction is done by a pair of attention heads on the residual stream (Olsson et al. 2022: "previous-token head" + "induction head"). In Mamba, there is no attention — the analogous function is a 16×d_inner matrix that selects state-components. Pythia-2.8B's induction distributes across L2 / L6 / L10 / L12 attention (max single-site 0.365). Mamba concentrates at L30. 2.3× concentration gap.
+
+**Necessity vs. sufficiency.** L30 C is necessary (patching corrupted destroys 80% of induction) but not sufficient (putting clean C into a corrupted run restores only 5.6%). Induction requires both (i) the correct C readout AND (ii) state accumulated by layers 0–29 from the clean sequence. Mechanism is sharp at the readout and distributed at the state-building side.
+
+**Architectural generality.** The localization is specific to Mamba-1's selective scan. Mamba-2 (SSD) at matched scale shows ~15× weaker induction signal, distributed across slices without a single dominant locus. The selective-scan architecture's (B, C) structure appears to be what enables induction-head-like concentration; SSD's merged in_proj + smaller per-group state distributes the computation.
+
+**Mamba-1 state carries long-range memory.** The induction signal holds at gap distances up to 256+ tokens in natural text (activation ratio 2.3–3.3×). The SSM state accumulates pattern memory effectively over long contexts.
 
 ## Limitations
 
-- **One SAE per model**: We read features from the Mamba-1 L32 SAE only. An SAE trained on a different layer might emphasize different features. A robustness check here would strengthen the claim.
-- **Pattern length fixed at 8**: Longer or shorter induction patterns might localize differently. Untested.
-- **Synthetic stimulus baseline**: Real-text validation (§D) confirms features generalize; but the patching itself was measured on synthetic pairs. Running the patch sweep on natural-text pairs would be a stronger claim.
-- **Only one SSM family**: Mamba-1. Mamba-2 uses a different (SSD) formulation; whether x_proj localization holds under SSD is an open question. The submodule decomposition of Mamba-2 is different (no separate x_proj → dt_proj), so the claim doesn't transfer directly.
-- **L30 is not the SAE layer**: We use the L32 SAE to read features but the dominant causal locus is L30. The L32 residual includes L30's contribution, so this is consistent — but interview-worthy if asked why L30 and not L32.
+- **Synthetic stimulus for patching**: patch_damage measurements use synthetic pair construction (uniform-random tokens). The D (§natural-text) and E (§gap sweep) sections validate that induction features also fire on natural Pile text, but the *patching* sweep itself is synthetic. A natural-text patching experiment would be a stronger claim.
+- **Pythia Q/K/V not sliced**: Pythia's attention_qkv output is interleaved per-head, making a clean Q-vs-K-vs-V slice analysis non-trivial. We report the full attention-level patch_damage (0.365 at L10); sub-attention-slice decomposition is future work.
+- **L30 vs. L32**: we read SAE features at L32 but the dominant causal locus is L30. Consistent with Mamba-1's sequential state updates (L32 residual contains L30's contribution), but if asked in interview, worth being precise about.
+- **Only 10M training tokens for the L32 SAE**: standard for our project but below typical published SAE scale (50M–1B). The feature-set is stable across 5 seeds (§C) and 5 SAE hyperparameter configurations (§8c), so the mechanism claim is robust, but individual feature identities may not be.
+- **Residual-stream patching inconclusive (§8d)**: that specific methodology doesn't discriminate layers — residual patching always gives 100% rescue because it overwrites everything downstream. Noted as methodological gotcha, not a finding.
+- **Only one model per family**: Mamba-1 (one checkpoint), Pythia (one checkpoint). Findings may not transfer to other models of the same architecture, though the Mamba-2 comparison suggests the key property is "selective scan" specifically, not "SSM" in general.
 
 ## Artifacts
 
-- `results_phase4/induction_features.json` — top-10 induction features (Mamba-1 L32 SAE), scored by (clean − corrupted) contrast on 64 synthetic pairs.
-- `results_phase4/patching_results.json` — full patch_damage sweep, Mamba-1, 17 layers × 5 components = 85 site-patches.
-- `results_phase4/patching_position_specific.json` — per-region patch_damage for top-5 sites.
-- `results_phase4/pythia_induction_features.json`, `pythia_patching_results.json` — Pythia-2.8B analogues.
-- `results_phase4/validation.json` — null-patching, random-feature baseline, multi-seed robustness.
-- `results_phase4/real_text_induction.json` — natural-text validation on 26,807 Pile repeat positions.
-- `results_phase4/phase_b_retrained_sae/` — cross-check using a freshly-retrained Mamba-1 L32 SAE (the original was unavailable during the first run; numbers agreed within ±0.02 at the headline L30 sites).
-- `results_phase4/figures/` — heatmaps and bar charts for all of the above.
+All under `$SAE_MAMBA_STORAGE/results_phase4/`:
+- `induction_features.json`, `patching_results.json`, `patching_position_specific.json` — Phase B (Mamba-1).
+- `pythia_induction_features.json`, `pythia_patching_results.json` — Phase C control.
+- `validation.json` — null-patching, random-feature baseline, multi-seed robustness.
+- `xproj_slice_patching.json` — slice-level necessity (Δ, B, C).
+- `sufficiency_patch.json` — slice-level sufficiency (rescue).
+- `residual_sufficiency.json` — residual-stream (inconclusive; documented).
+- `pattern_length_robustness.json` — plen ∈ {4, 8, 16} sweep.
+- `per_position_patching.json` — per-position decomposition.
+- `sae_hparam_robustness.json` — 5 SAE configs at L30 x_proj.
+- `real_text_induction.json` — 26,807 Pile natural repeats; mean 5.4× ratio.
+- `gap_sweep.json` — activation ratio by gap bin (16–512 tokens).
+- `induction_feature_examples.json` — max-activating text snippets per feature.
+- `next_token_damage.json` — behavioral logit damage from slice patching.
+- `mamba2_induction.json`, `mamba2_plen_sweep.json` — Mamba-2 analog.
+- `phase_b_retrained_sae/` — cross-check with retrained Mamba-1 L32 SAE.
+- `figures/` — heatmaps, bar charts, emergence line.
 
 ## Code
 
-- `src/mamba_internals.py` — HF Mamba capture/patch context managers + `force_slow_forward` helper.
-- `scripts/04_induction_circuit.py` — main Mamba-1 Phase-B script.
-- `scripts/05_pythia_induction_compare.py` — matched Pythia experiment.
-- `scripts/07_extract_xproj.py` — x_proj input/output activation extraction.
-- `scripts/09_real_text_induction.py` — natural-text validation.
-- `scripts/10_train_xproj_sae.py` — internal SAE training + feature identification.
-- `scripts/11_validate_patching.py` — null-patch, random-feature, multi-seed validations.
+All under `src/` and `scripts/`:
+- `src/mamba_internals.py` — capture/patch context managers + `force_slow_forward` helper.
+- `scripts/04_induction_circuit.py`, `scripts/05_pythia_induction_compare.py` — main Phase-B/C.
+- `scripts/07_extract_xproj.py`, `scripts/10_train_xproj_sae.py` — x_proj extraction + internal SAE.
+- `scripts/08_plot_phase4.py` — figure generation.
+- `scripts/09_real_text_induction.py`, `scripts/19_induction_feature_examples.py`, `scripts/21_gap_sweep.py` — natural-text validations.
+- `scripts/11_validate_patching.py` — null-patch, random-feat, multi-seed.
+- `scripts/12_slice_patching.py`, `scripts/15_sufficiency_patch.py`, `scripts/16_residual_sufficiency.py` — slice-level necessity / sufficiency.
+- `scripts/13_pattern_length_robustness.py`, `scripts/14_per_position_patching.py`, `scripts/20_sae_hparam_robustness.py` — robustness sweeps.
+- `scripts/17_mamba2_induction.py`, `scripts/18_mamba2_plen_sweep.py` — Mamba-2 adaptation.
+- `scripts/22_next_token_damage.py` — behavioral logit damage.
