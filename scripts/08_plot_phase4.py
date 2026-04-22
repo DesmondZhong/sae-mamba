@@ -312,6 +312,61 @@ def mamba2_plen_plot(data, out):
     print(f"wrote {out}")
 
 
+def natural_vs_synthetic_bar(nat, syn_slice, out):
+    """Show that natural-text and synthetic patching give the same C-matrix localization."""
+    n = nat["results"]
+    s = syn_slice["results"]
+    slices = ["delta_pre", "B_matrix", "C_matrix", "full_xproj"]
+    syn_dam = [s[sl]["patch_damage"] for sl in slices]
+    nat_dam = [n[sl]["patch_damage"] for sl in slices]
+    fig, ax = plt.subplots(figsize=(8, 4))
+    y = np.arange(len(slices))
+    h = 0.35
+    ax.barh(y - h/2, syn_dam, h, color="#c03", label="synthetic induction pairs (±random tokens)")
+    ax.barh(y + h/2, nat_dam, h, color="#36c", label="natural Pile bigram repeats")
+    ax.set_yticks(y, labels=slices)
+    ax.set_xlabel("patch_damage")
+    ax.set_title("Natural-text patching replicates synthetic C-matrix localization")
+    ax.legend(loc="lower right")
+    ax.axvline(0, color="k", lw=0.5)
+    for i in range(len(slices)):
+        ax.text(syn_dam[i] + 0.01, y[i] - h/2, f"{syn_dam[i]:+.3f}", va="center", fontsize=9)
+        ax.text(nat_dam[i] + 0.01, y[i] + h/2, f"{nat_dam[i]:+.3f}", va="center", fontsize=9)
+    plt.tight_layout()
+    fig.savefig(out, dpi=140)
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
+def scaling_plot(m130, m370, out):
+    """Plot the Mamba-130M and Mamba-370M scaling sweeps (x_proj C by layer)."""
+    fig, axes = plt.subplots(1, 2, figsize=(13, 4.2))
+    for ax, d, title in [(axes[0], m130, "Mamba-130M (24 layers)"),
+                          (axes[1], m370, "Mamba-370M (48 layers)")]:
+        rows = [r for r in d["per_site"] if r["slice"] == "C_matrix"]
+        rows.sort(key=lambda r: r["layer"])
+        layers = [r["layer"] for r in rows]
+        vals = [r["logit_damage"] for r in rows]
+        ax.plot(layers, vals, "o-", color="#c03", linewidth=2, markersize=6)
+        ax.axhline(0, color="k", lw=0.5)
+        ax.set_xlabel("layer")
+        ax.set_ylabel("logit damage (C_matrix patch)")
+        ax.set_title(f"{title}  gap={d['gap']:.2f}")
+        ax.grid(alpha=0.3)
+        # Mark peak
+        if vals:
+            peak = max(vals)
+            peak_L = layers[vals.index(peak)]
+            ax.axvline(peak_L, color="#888", ls=":", lw=1)
+            ax.text(peak_L + 0.5, peak * 0.9, f"peak L{peak_L}\n{peak:+.3f}",
+                    fontsize=9, ha="left", va="top")
+    plt.suptitle("Scaling check: C-matrix patch damage by layer (logit metric)")
+    plt.tight_layout()
+    fig.savefig(out, dpi=140)
+    plt.close(fig)
+    print(f"wrote {out}")
+
+
 def main():
     m = load("patching_results.json")
     p = load("pythia_patching_results.json")
@@ -324,6 +379,9 @@ def main():
     gap_data = load("gap_sweep.json")
     ntd_data = load("next_token_damage.json")
     m2_plen = load("mamba2_plen_sweep.json")
+    nat_text = load("natural_text_patching.json")
+    scaling_130 = load("scaling_mamba130m.json")
+    scaling_370 = load("scaling_mamba370m.json")
 
     if m is None or p is None:
         print("ERROR: missing patching_results.json or pythia_patching_results.json")
@@ -356,6 +414,11 @@ def main():
         next_token_bar(ntd_data, FIGS / "next_token_damage.png")
     if m2_plen is not None:
         mamba2_plen_plot(m2_plen, FIGS / "mamba2_plen.png")
+    if nat_text is not None and slice_data is not None:
+        natural_vs_synthetic_bar(nat_text, slice_data,
+                                  FIGS / "natural_vs_synthetic.png")
+    if scaling_130 is not None and scaling_370 is not None:
+        scaling_plot(scaling_130, scaling_370, FIGS / "scaling_comparison.png")
 
 
 if __name__ == "__main__":

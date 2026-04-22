@@ -183,6 +183,18 @@ corrupted = [prefix 8] P(8) [mid 32] P'(8)    # second pattern differs</code></p
         <img src="figures/next_token_damage.png" alt="next-token damage">
         <figcaption>From SAE-feature activation (the proxy we've used for induction) to actual next-token logit: patching just the 16-dim C slice at L30 drops the model's next-token prediction logit by <strong>0.475 of the clean-vs-corrupted gap</strong> (4.86 nats). Δ_pre and B matrix: zero effect. 16 dims out of 163,840 cause 47.5% of the behavioral degradation.</figcaption>
     </figure>
+
+    <h3>Natural-text patching (kills "synthetic-only" concern)</h3>
+    <figure>
+        <img src="figures/natural_vs_synthetic.png" alt="natural vs synthetic">
+        <figcaption>Same patching experiment on 128 natural clean/corrupted pairs from Pile text (clean = original Pile document with a naturally occurring bigram repeat; corrupted = same text with 2nd-occurrence tokens replaced by random). <strong>C_matrix patch_damage = +0.831 on natural text, +0.800 on synthetic — within 4% of each other.</strong> Mechanism is not an artifact of synthetic patterns.</figcaption>
+    </figure>
+
+    <h3>Scaling check: Mamba-130M and Mamba-370M</h3>
+    <figure>
+        <img src="figures/scaling_comparison.png" alt="scaling">
+        <figcaption>Logit-based Phase-B variant (no SAE needed for smaller models). Mamba-130M shows a clean C-matrix peak at L15 with +1.64 logit damage (28% of the 1.85 gap) — same mechanism at 63% of depth. Mamba-370M shows a noisier pattern with peaks at L28 (+0.028) and L44 (+0.027); gap is 6.11 but max slice damage is only ~0.04, suggesting either more distributed processing at intermediate scale or logit-metric under-reporting on a highly-confident model.</figcaption>
+    </figure>
 </div>
 
 <!-- Pythia -->
