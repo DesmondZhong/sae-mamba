@@ -30,6 +30,9 @@
 | Mamba-370M scaling | weak, max +0.038 | no dominant locus at this intermediate scale — unresolved |
 | L30 internal → L32 SAE cross-layer linear R² | −1.63 | relationship is non-linear; selective scan non-linearity is essential |
 | Feature steering (additive) | null on semantic prompts | large perturbations revert to induction, but don't cleanly amplify it; calibration result |
+| **Specificity**: C-patching KL ratio on induction vs natural text | **~136×** | C is specific to induction, not a generic important direction |
+| **State patching** (clean h → corrupted run) | rescue ≈ 0 | memory (state h) is shared between runs; induction signal is in the C query, not h |
+| Pythia Q/K/V slice peak | L6 K = +0.315, L6 Q = +0.313 | Q/K symmetric; no single 16-dim locus; distributed across 80-dim head × 32 heads × 4 layers |
 
 ## Research Question
 
@@ -116,6 +119,12 @@ For the L30 top-4 sites, restricting the patch to different sequence regions:
 
 **L30 conv1d is different**: `ind_only=0.000, pre_ind_only=0.010, all=0.743`. This means conv1d carries general context that, when replaced by the corrupted context, makes the induction features diverge — but conv1d's information on the induction positions themselves isn't induction-specific. Consistent with `conv1d`'s job (short-range mixing): it carries recent context, not the long-range repetition signal.
 
+### 3b. Logit lens on the 16 C columns
+
+Projecting each of the 16 C-matrix rows at L30 through `out_proj → lm_head → vocab`: no clean semantic interpretation per-column. The top-activated tokens are scattered ("unicip", "Rouge", "Parkinson", "disappe", "Barcelona", etc.), without obvious token-class structure.
+
+This is consistent with the slice and linear-probe findings: C isn't a "token-level feature" that writes a specific word to the residual — it's an **abstract readout direction** whose meaning only emerges when multiplied with the state. A direct logit lens doesn't apply.
+
 ### 4. Pythia-2.8B distributes induction across multiple attention layers
 
 | Rank | Layer | Component | patch_damage |
@@ -132,6 +141,27 @@ For the L30 top-4 sites, restricting the patch to different sequence regions:
 | 9 | L8 | mlp_dense_h_to_4h | +0.151 |
 
 Pythia's maximum single-site patch_damage is **0.365 at L10 attention**, less than half of Mamba-1's L30 x_proj at 0.833. No single component dominates; the signal distributes across L2, L6, L10, L12 attention heads (MLPs contribute ≤0.15). The pairwise equality of `attention_qkv` and `attention_output` patches at each layer confirms these are expected to be coupled: the attention's downstream impact is fully determined by the input to Wo.
+
+### 4a. Pythia Q / K / V slice patching — symmetric Q-K dominance
+
+Split `attention.query_key_value` output into per-head Q, K, V slices. Top sites (across L2, L6, L10, L12):
+
+| Layer | Slice | patch_damage |
+|---|---|---|
+| L6 | K | **+0.315** |
+| L6 | Q | **+0.313** |
+| L12 | V | +0.292 |
+| L6 | QK | +0.288 |
+| L10 | full | +0.279 |
+| L2 | Q | +0.256 |
+
+Q and K at L6 give essentially equal damage (0.315 vs 0.313) — expected, since attention uses `Q·K^T` and breaking either destroys the match computation. V slices are significant at later layers (L12 V = 0.292). There's no single 16-dim-slice analog to Mamba's C matrix in Pythia; induction distributes across Q, K, and V at multiple layers, and within each layer across all 32 heads (80-dim head_dim × 32 heads).
+
+**Cross-architecture parallel**:
+- Mamba-1 concentrates the induction computation in a **16-dim C-matrix slice at one layer** (L30).
+- Pythia distributes it across Q, K, V (80-dim per head × 32 heads = 7,680 total) across 4 layers (L2, L6, L10, L12).
+
+Measured per-slice, Mamba's locus is 16 dims at 83% damage; Pythia's strongest is K at 80-dim per head at 32% damage.
 
 ### 5. Concentration gap: Mamba vs. Pythia
 
