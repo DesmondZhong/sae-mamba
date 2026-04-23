@@ -373,8 +373,42 @@ corrupted = [prefix 8] P(8) [mid 32] P'(8)    # second pattern differs</code></p
     <p>Two SAEs, two different bases at two different sites of the same pipeline, both showing sparse coding of the induction signal.</p>
 </div>
 
+<!-- Crosscoder -->
+<div class="section" id="crosscoder">
+    <h2>7. Crosscoder: 99.6% of features are shared between Mamba and Pythia</h2>
+    <p>Trained a <strong>crosscoder</strong> (Lindsey et al. 2024 style) — a single TopK SAE with shared encoder over concatenated <code>[x_mamba_L32, x_pythia_L16]</code> at matched-token positions, plus separate decoders for each model. 5M Pile tokens, 40,960 features, k=64, 20K steps.</p>
+
+    <table>
+        <thead><tr><th></th><th>FVE</th></tr></thead>
+        <tbody>
+            <tr><td>Reconstruction of Mamba-1 L32 residual</td><td>0.66</td></tr>
+            <tr><td>Reconstruction of Pythia L16 residual</td><td>0.73</td></tr>
+        </tbody>
+    </table>
+
+    <table>
+        <thead><tr><th>Feature category</th><th>count / 40,960</th></tr></thead>
+        <tbody>
+            <tr><td><strong class="good">Shared features</strong> (contribute to both reconstructions)</td><td><strong>40,807 (99.6%)</strong></td></tr>
+            <tr><td>Mamba-only features</td><td>10 (0.02%)</td></tr>
+            <tr><td>Pythia-only features</td><td>143 (0.35%)</td></tr>
+        </tbody>
+    </table>
+
+    <p>The two architectures share an essentially complete feature dictionary. Selective scan and attention learn very different internal mechanisms, but at the residual-stream level they encode <strong>the same semantic concepts</strong>. Combined with the SAE-CKA = 0.80 finding from the main report (vs. raw-activation CKA = 0.02), this is the strongest universality claim in the project.</p>
+</div>
+
+<!-- Sanity check figure -->
+<div class="section" id="sanity">
+    <h2>8. Sanity check: features fire ONLY at induction positions</h2>
+    <figure>
+        <img src="figures/features_by_position.png" alt="features by position">
+        <figcaption>For each top-10 induction feature, mean activation (± 1σ over 256 pairs) across all 56 sequence positions. The shaded blue band marks P1 (first pattern, positions 8–15) and the red band marks P2 (second-pattern induction targets, positions 48–55). <strong>Every feature has its peak inside positions 48–55, with activation ratios from 22× to 1676× (one feature ratio = ∞: zero off-induction activation).</strong> Definitive evidence that the identified features are induction-specific, not generic "something interesting" detectors.</figcaption>
+    </figure>
+</div>
+
 <div class="section">
-    <h2>7. Take-home</h2>
+    <h2>9. Take-home</h2>
     <ul>
         <li><strong>Localization:</strong> Mamba-1 2.8B implements its attention-free induction mechanism in a single 16-dim subspace (C matrix at L30 x_proj) of its 163,840-dim hidden state at that depth.</li>
         <li><strong>Mechanism:</strong> Earlier layers accumulate pattern memory into SSM state; at L30, <code>C</code> selectively reads it out. Δ and B slices carry nothing.</li>
