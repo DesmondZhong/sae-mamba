@@ -1,0 +1,155 @@
+{
+  "steer_feature": 33108,
+  "per_prompt": [
+    {
+      "prompt": "Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves",
+      "generations": [
+        {
+          "strength": -50.0,
+          "repetition_rate": 0.875,
+          "continuation": " Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves"
+        },
+        {
+          "strength": -20.0,
+          "repetition_rate": 0.875,
+          "continuation": " Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves"
+        },
+        {
+          "strength": -10.0,
+          "repetition_rate": 0.875,
+          "continuation": " Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves"
+        },
+        {
+          "strength": -5.0,
+          "repetition_rate": 0.875,
+          "continuation": " Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves"
+        },
+        {
+          "strength": 0.0,
+          "repetition_rate": 0.875,
+          "continuation": " Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves"
+        },
+        {
+          "strength": 5.0,
+          "repetition_rate": 0.875,
+          "continuation": " Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves"
+        },
+        {
+          "strength": 10.0,
+          "repetition_rate": 0.875,
+          "continuation": " Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves"
+        },
+        {
+          "strength": 20.0,
+          "repetition_rate": 0.875,
+          "continuation": " Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice. Alice loves"
+        },
+        {
+          "strength": 50.0,
+          "repetition_rate": 0.75,
+          "continuation": " Alice.\n\nAlice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice.\n\nAlice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice.\n\nAlice loves Bob. Bob loves Alice. Alice loves Bob. Bob loves Alice.\n"
+        }
+      ]
+    },
+    {
+      "prompt": "Python is a programming language that",
+      "generations": [
+        {
+          "strength": -50.0,
+          "repetition_rate": 0.5892857142857143,
+          "continuation": " is used for developing applications and scripts. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It"
+        },
+        {
+          "strength": -20.0,
+          "repetition_rate": 0.5892857142857143,
+          "continuation": " is used for developing applications and scripts. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It"
+        },
+        {
+          "strength": -10.0,
+          "repetition_rate": 0.5892857142857143,
+          "continuation": " is used for developing applications and scripts. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It"
+        },
+        {
+          "strength": -5.0,
+          "repetition_rate": 0.5892857142857143,
+          "continuation": " is used for developing applications and scripts. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It"
+        },
+        {
+          "strength": 0.0,
+          "repetition_rate": 0.5892857142857143,
+          "continuation": " is used for developing applications and scripts. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It"
+        },
+        {
+          "strength": 5.0,
+          "repetition_rate": 0.5892857142857143,
+          "continuation": " is used for developing applications and scripts. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It"
+        },
+        {
+          "strength": 10.0,
+          "repetition_rate": 0.5892857142857143,
+          "continuation": " is used for developing applications and scripts. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It"
+        },
+        {
+          "strength": 20.0,
+          "repetition_rate": 0.5892857142857143,
+          "continuation": " is used for developing applications and scripts. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It"
+        },
+        {
+          "strength": 50.0,
+          "repetition_rate": 0.5892857142857143,
+          "continuation": " is used for developing applications and scripts. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It is a high-level, general-purpose, interpreted, dynamic programming language. It"
+        }
+      ]
+    },
+    {
+      "prompt": "The code repeats every 4 tokens: foo bar baz qux foo bar baz qux foo bar baz qux foo",
+      "generations": [
+        {
+          "strength": -50.0,
+          "repetition_rate": 0.9107142857142857,
+          "continuation": " bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo"
+        },
+        {
+          "strength": -20.0,
+          "repetition_rate": 0.25,
+          "continuation": " bar baz qux\n\nA:\n\nYou can use a regex to match the pattern and then use a replace to remove the first 4 characters.\n\nvar str = \"foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz"
+        },
+        {
+          "strength": -10.0,
+          "repetition_rate": 0.25,
+          "continuation": " bar baz qux\n\nA:\n\nYou can use a regex to match the pattern and then use a substring to get the last 4 characters.\nvar str = \"foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz"
+        },
+        {
+          "strength": -5.0,
+          "repetition_rate": 0.25,
+          "continuation": " bar baz qux\n\nA:\n\nYou can use a regex to match the pattern and then use a substring to get the last 4 characters.\nvar str = \"foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz"
+        },
+        {
+          "strength": 0.0,
+          "repetition_rate": 0.0,
+          "continuation": " bar baz qux\n\nA:\n\nYou can use a regex to match the pattern and then use a counter to keep track of the number of matches.\nimport re\n\ndef count_matches(text):\n    counter = 0\n    for match in re.finditer"
+        },
+        {
+          "strength": 5.0,
+          "repetition_rate": 0.25,
+          "continuation": " bar baz qux\n\nA:\n\nYou can use a regex to match the pattern and then use a substring to get the last 4 characters.\nvar str = \"foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz"
+        },
+        {
+          "strength": 10.0,
+          "repetition_rate": 0.25,
+          "continuation": " bar baz qux\n\nA:\n\nYou can use a regex to match the pattern and then use a substring to get the last 4 characters.\nvar str = \"foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz"
+        },
+        {
+          "strength": 20.0,
+          "repetition_rate": 0.25,
+          "continuation": " bar baz qux\n\nA:\n\nYou can use a regex to match the pattern and then use a substring to get the last 4 characters.\nvar str = \"foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz"
+        },
+        {
+          "strength": 50.0,
+          "repetition_rate": 0.9107142857142857,
+          "continuation": " bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo bar baz qux foo"
+        }
+      ]
+    }
+  ]
+}

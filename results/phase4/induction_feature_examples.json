@@ -1,0 +1,454 @@
+{
+  "features": [
+    {
+      "feature": 15698,
+      "examples": [
+        {
+          "activation": 21.93997573852539,
+          "doc_idx": 1056,
+          "position": 211,
+          "token_id": 5485,
+          "max_token": " opened",
+          "context": " the button print only the report inside the SNF without anything outside that reports borders just as it does when the report is opened directly without using"
+        },
+        {
+          "activation": 19.003034591674805,
+          "doc_idx": 797,
+          "position": 199,
+          "token_id": 2813,
+          "max_token": " device",
+          "context": "  HP Photo and Document All-in-One Printers are designed for families and other home users who want a device capable of printing"
+        },
+        {
+          "activation": 17.79922103881836,
+          "doc_idx": 661,
+          "position": 170,
+          "token_id": 8328,
+          "max_token": "isters",
+          "context": "\u014dwa period (1926\u20131947)  Under the Sh\u014dwa Emperor  Spouse of the Prime Ministers of the State"
+        },
+        {
+          "activation": 17.59125518798828,
+          "doc_idx": 773,
+          "position": 178,
+          "token_id": 1263,
+          "max_token": " study",
+          "context": " flanked by Commissioners Jarvis McLamb, left, and Albert Kirby, talks about an invitation to a reads impact study announcement in Wayne"
+        },
+        {
+          "activation": 17.426340103149414,
+          "doc_idx": 661,
+          "position": 142,
+          "token_id": 8328,
+          "max_token": "isters",
+          "context": "\u014d period (1912\u20131926)  Under the Taish\u014d Emperor  Spouse of the Prime Ministers during the Sh"
+        }
+      ]
+    },
+    {
+      "feature": 79,
+      "examples": [
+        {
+          "activation": 22.330934524536133,
+          "doc_idx": 797,
+          "position": 214,
+          "token_id": 6627,
+          "max_token": " bright",
+          "context": " for families and other home users who want a device capable of printing everything from documents, email and web pages to rich, bright lab-quality"
+        },
+        {
+          "activation": 21.74309539794922,
+          "doc_idx": 1256,
+          "position": 195,
+          "token_id": 15593,
+          "max_token": "rea",
+          "context": " death of Sixto Alvarez in 1903. Some of Fray Mocho founders and main collaborators were Carlos Correa Luna, Spanish"
+        },
+        {
+          "activation": 21.176496505737305,
+          "doc_idx": 131,
+          "position": 76,
+          "token_id": 35261,
+          "max_token": "latest",
+          "context": " covered with a full swing protective cover for easy cleaning and lubrication.Senior Precision Rotary Microtome (latest Spencer 320 Type"
+        },
+        {
+          "activation": 20.93614959716797,
+          "doc_idx": 1428,
+          "position": 123,
+          "token_id": 16642,
+          "max_token": "ania",
+          "context": ", as the company was named at the time, acquired Mecel. When General Motors bought the Saab-Scania car operations in"
+        },
+        {
+          "activation": 20.62762451171875,
+          "doc_idx": 632,
+          "position": 221,
+          "token_id": 1940,
+          "max_token": "co",
+          "context": "inger declined to disclose details about the incinerator and did not return a phone call yesterday seeking comment. Ameresco Federal Solutions did"
+        }
+      ]
+    },
+    {
+      "feature": 22093,
+      "examples": [
+        {
+          "activation": 10.884906768798828,
+          "doc_idx": 1321,
+          "position": 151,
+          "token_id": 3071,
+          "max_token": "06",
+          "context": "ity: 97.06 %), Gracilibacillus thailandensis TP2-8(T) (97.06 %) and Gr"
+        },
+        {
+          "activation": 9.629549980163574,
+          "doc_idx": 435,
+          "position": 165,
+          "token_id": 2358,
+          "max_token": "68",
+          "context": "   SHERIDA STANLEY,                Plaintiff-Appellee,   v                                                                SC: 146898                         "
+        },
+        {
+          "activation": 9.110635757446289,
+          "doc_idx": 142,
+          "position": 109,
+          "token_id": 2787,
+          "max_token": "79",
+          "context": "?id=22297963](https://news.ycombinator.com/item?id=22297963) "
+        },
+        {
+          "activation": 8.655327796936035,
+          "doc_idx": 339,
+          "position": 224,
+          "token_id": 33333,
+          "max_token": "576",
+          "context": "ID_Account\" id=\"lock2d9b59f80\" mode=\"X\" associatedObjectId=\"7205763353798"
+        },
+        {
+          "activation": 8.366477012634277,
+          "doc_idx": 989,
+          "position": 121,
+          "token_id": 12730,
+          "max_token": "115",
+          "context": "48.45 663   2   1533+  521M+  0B     741M+  11560 11560"
+        }
+      ]
+    },
+    {
+      "feature": 9299,
+      "examples": [
+        {
+          "activation": 14.58607292175293,
+          "doc_idx": 781,
+          "position": 181,
+          "token_id": 12243,
+          "max_token": " byte",
+          "context": " DecimalProperty { get; set; }         public double DoubleProperty { get; set; }         public byte[] FixedLength"
+        },
+        {
+          "activation": 13.870281219482422,
+          "doc_idx": 1274,
+          "position": 221,
+          "token_id": 990,
+          "max_token": " end",
+          "context": "2.Searched_Field = 'Invoice #' || table1.Invoice  Match only at end with LIKE:"
+        },
+        {
+          "activation": 13.062761306762695,
+          "doc_idx": 661,
+          "position": 195,
+          "token_id": 2180,
+          "max_token": " period",
+          "context": " of the State of Japan (1947\u2013present)  Spouse of the Prime Ministers during the Sh\u014dwa period (1947\u2013"
+        },
+        {
+          "activation": 12.899948120117188,
+          "doc_idx": 249,
+          "position": 219,
+          "token_id": 1169,
+          "max_token": "ases",
+          "context": " will define and characterize members of the anion transporter gene family. AIM 3 will define the cellular distributions of carbonic anhydrases and anion transporters"
+        },
+        {
+          "activation": 12.6110200881958,
+          "doc_idx": 308,
+          "position": 116,
+          "token_id": 881,
+          "max_token": "type",
+          "context": "int mInputMethodSettingsCategoryTitle;   int mInputMethodSettingsCategoryTitleRes;   int mSubtypeEnabler"
+        }
+      ]
+    },
+    {
+      "feature": 13980,
+      "examples": [
+        {
+          "activation": 6.033108234405518,
+          "doc_idx": 1430,
+          "position": 50,
+          "token_id": 12682,
+          "max_token": " shoes",
+          "context": " out. The trial of the gun, crackdown. \"Oh! Thsupra shoes supra shoes, thsupra shoes supra shoes the"
+        },
+        {
+          "activation": 5.674680709838867,
+          "doc_idx": 1297,
+          "position": 58,
+          "token_id": 2534,
+          "max_token": " bar",
+          "context": "3}}  where in the groups would be  $1 = foo $2 = bar1 $3 = bar2 $4"
+        },
+        {
+          "activation": 5.552639961242676,
+          "doc_idx": 55,
+          "position": 152,
+          "token_id": 2246,
+          "max_token": "ries",
+          "context": "])     let chips_fries = Category(name: \"Chips & Fries\", items: [fries])     "
+        },
+        {
+          "activation": 5.544227123260498,
+          "doc_idx": 565,
+          "position": 117,
+          "token_id": 9900,
+          "max_token": "bet",
+          "context": "agerWeb REAL, FiveDimes REAL)')    \"\"\" Columns are: player betfairBack betfairLay"
+        },
+        {
+          "activation": 5.456463813781738,
+          "doc_idx": 1293,
+          "position": 194,
+          "token_id": 1959,
+          "max_token": " free",
+          "context": " Coconut Oil corn easy healthy gluten free egg featured Food Rock Star Friday Foodie Fix garlic GF Food Critic gluten free flour jal"
+        }
+      ]
+    },
+    {
+      "feature": 3684,
+      "examples": [
+        {
+          "activation": 14.477713584899902,
+          "doc_idx": 797,
+          "position": 215,
+          "token_id": 5188,
+          "max_token": " lab",
+          "context": " families and other home users who want a device capable of printing everything from documents, email and web pages to rich, bright lab-quality photos"
+        },
+        {
+          "activation": 12.978445053100586,
+          "doc_idx": 582,
+          "position": 222,
+          "token_id": 36580,
+          "max_token": " Angels",
+          "context": " Arista Records.  Track list  Side A: \"Stuck With You\"  Side B: \"No Angels\"  "
+        },
+        {
+          "activation": 12.801838874816895,
+          "doc_idx": 641,
+          "position": 131,
+          "token_id": 2561,
+          "max_token": " research",
+          "context": "beginning Fall 2015), there are four possible Fellow appointment areas:  How to Apply  Faculty (including research faculty) wishing"
+        },
+        {
+          "activation": 12.797371864318848,
+          "doc_idx": 797,
+          "position": 216,
+          "token_id": 14,
+          "max_token": "-",
+          "context": " and other home users who want a device capable of printing everything from documents, email and web pages to rich, bright lab-quality photos -"
+        },
+        {
+          "activation": 12.016156196594238,
+          "doc_idx": 797,
+          "position": 209,
+          "token_id": 4384,
+          "max_token": " web",
+          "context": "One Printers are designed for families and other home users who want a device capable of printing everything from documents, email and web pages to rich"
+        }
+      ]
+    },
+    {
+      "feature": 26292,
+      "examples": [
+        {
+          "activation": 13.80123519897461,
+          "doc_idx": 41,
+          "position": 156,
+          "token_id": 9020,
+          "max_token": "isting",
+          "context": " reauthorized by the democratically elected legislature since it was originally passed. This isn\u2019t a case of foisting anything upon the"
+        },
+        {
+          "activation": 13.715441703796387,
+          "doc_idx": 1402,
+          "position": 248,
+          "token_id": 796,
+          "max_token": "ade",
+          "context": " party. Sofia decides on a swan themed tea party with swan shaped cookies and cakes. Ruby and Jade come over to"
+        },
+        {
+          "activation": 12.665252685546875,
+          "doc_idx": 115,
+          "position": 123,
+          "token_id": 86,
+          "max_token": "u",
+          "context": " youtube, there is a paragraph which explains how Lord Narashima came from the pillar. Hiranyakashyapu pointed out at"
+        },
+        {
+          "activation": 12.10835075378418,
+          "doc_idx": 375,
+          "position": 207,
+          "token_id": 18980,
+          "max_token": "akh",
+          "context": ". From today, Faizabad district's name will be Ayodhya,\" he said.  Three lakh Diyas"
+        },
+        {
+          "activation": 12.058396339416504,
+          "doc_idx": 1305,
+          "position": 187,
+          "token_id": 430,
+          "max_token": "ort",
+          "context": " bar def foo():     return bar.baz.operation() class Quux(bar.baz.Splort): pass "
+        }
+      ]
+    },
+    {
+      "feature": 36829,
+      "examples": [
+        {
+          "activation": 15.113039016723633,
+          "doc_idx": 1335,
+          "position": 117,
+          "token_id": 5500,
+          "max_token": " cup",
+          "context": " group was compared with 98 patients who underwent CT-based cup insertion, and all had postoperative CT. After CT-based cup placement, average"
+        },
+        {
+          "activation": 14.076589584350586,
+          "doc_idx": 1349,
+          "position": 178,
+          "token_id": 1673,
+          "max_token": " field",
+          "context": "bus instead of Ethernet-based fieldbus. Or one has to pay extra fees in order to obtain the Ethernet-based fieldbus support."
+        },
+        {
+          "activation": 12.335250854492188,
+          "doc_idx": 1010,
+          "position": 129,
+          "token_id": 10624,
+          "max_token": "rams",
+          "context": " process running which is reading raw IP datagrams. My problem is that although the second process(reading raw datagrams) is working"
+        },
+        {
+          "activation": 12.068916320800781,
+          "doc_idx": 1023,
+          "position": 249,
+          "token_id": 20167,
+          "max_token": "Normal",
+          "context": "/normal or heavy duty cycle?  Cotton/Normal or Heavy Duty cycle,If you use Cotton/Normal or Heavy duty"
+        },
+        {
+          "activation": 11.847332000732422,
+          "doc_idx": 1488,
+          "position": 61,
+          "token_id": 42002,
+          "max_token": " proximate",
+          "context": " to maintain an indication of proximate access nodes, such as a neighbor relation table or another similar indication, and the indication of proximate access nodes can"
+        }
+      ]
+    },
+    {
+      "feature": 1580,
+      "examples": [
+        {
+          "activation": 16.999845504760742,
+          "doc_idx": 797,
+          "position": 173,
+          "token_id": 11990,
+          "max_token": " ease",
+          "context": " print right from your mobile device, and produce high-quality photos and everyday documents. Print, scan, and copy with ease.  "
+        },
+        {
+          "activation": 16.355871200561523,
+          "doc_idx": 865,
+          "position": 162,
+          "token_id": 1096,
+          "max_token": "ared",
+          "context": " the fall in risk appetite, the NZD has ended up one of the better performers as short-positions were likely pared.  "
+        },
+        {
+          "activation": 16.088638305664062,
+          "doc_idx": 1357,
+          "position": 252,
+          "token_id": 41139,
+          "max_token": " threaded",
+          "context": "[quote=oliveoil]The bolts that hold the crank arm on are 14 or 15mm and are regular right threaded. But you"
+        },
+        {
+          "activation": 15.768938064575195,
+          "doc_idx": 70,
+          "position": 252,
+          "token_id": 2564,
+          "max_token": " mind",
+          "context": "If we\u00b4re only gonna fall behindWe\u00b4ve almost got it rightBut almost wasn\u00b4t what I had in mind  You"
+        },
+        {
+          "activation": 15.719145774841309,
+          "doc_idx": 1491,
+          "position": 139,
+          "token_id": 1758,
+          "max_token": "ina",
+          "context": " film, also released by Paramount.   The film is based on the novel L'homme qui assasina (1906"
+        }
+      ]
+    },
+    {
+      "feature": 34338,
+      "examples": [
+        {
+          "activation": 17.325319290161133,
+          "doc_idx": 1344,
+          "position": 157,
+          "token_id": 18970,
+          "max_token": "kar",
+          "context": " other hand, they have singled out a street-smart young man by the Raj, and get him to take Shekar's place."
+        },
+        {
+          "activation": 14.717181205749512,
+          "doc_idx": 132,
+          "position": 77,
+          "token_id": 7640,
+          "max_token": "ums",
+          "context": "ums including parts and bags. Findlay's also offers sales and service for all makes and models of sewing machines and vacuums. Please contact"
+        },
+        {
+          "activation": 13.444131851196289,
+          "doc_idx": 1337,
+          "position": 197,
+          "token_id": 10820,
+          "max_token": " intake",
+          "context": " one case of perineal sepsis due to ileal pouch-anal anastomotic leakage, which was successfully treated with oral intake restriction, pa"
+        },
+        {
+          "activation": 12.310683250427246,
+          "doc_idx": 740,
+          "position": 96,
+          "token_id": 4355,
+          "max_token": "ida",
+          "context": ", his only weapon. He\u2019s fallen into a desperate situation. Meanwhile, Banba receives a message from Enokida. It\u2019"
+        },
+        {
+          "activation": 12.268779754638672,
+          "doc_idx": 55,
+          "position": 127,
+          "token_id": 35350,
+          "max_token": "shake",
+          "context": "ries\", carbs: 30)      let beverages = Category(name: \"Beverages\", items: [shake])     "
+        }
+      ]
+    }
+  ]
+}

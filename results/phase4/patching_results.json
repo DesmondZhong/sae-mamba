@@ -1,0 +1,699 @@
+{
+  "baseline_act": 3.4381179809570312,
+  "corrupted_act": 0.11482783406972885,
+  "total_effect": 3.3232901468873024,
+  "target_features": [
+    15698,
+    79,
+    22093,
+    9299,
+    13980,
+    3684,
+    26292,
+    36829,
+    1580,
+    34338
+  ],
+  "per_site": [
+    {
+      "layer": 2,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3820037841796875,
+      "patch_damage": 0.01688513319545759
+    },
+    {
+      "layer": 2,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3914523124694824,
+      "patch_damage": 0.01404200849909465
+    },
+    {
+      "layer": 2,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.443460702896118,
+      "patch_damage": -0.001607660391642618
+    },
+    {
+      "layer": 2,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4321794509887695,
+      "patch_damage": 0.0017869429709060913
+    },
+    {
+      "layer": 2,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3820037841796875,
+      "patch_damage": 0.01688513319545759
+    },
+    {
+      "layer": 4,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3221232891082764,
+      "patch_damage": 0.034903570474398404
+    },
+    {
+      "layer": 4,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3977184295654297,
+      "patch_damage": 0.012156492393371354
+    },
+    {
+      "layer": 4,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.437931537628174,
+      "patch_damage": 5.610203160621996e-05
+    },
+    {
+      "layer": 4,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.433544158935547,
+      "patch_damage": 0.0013762933175631709
+    },
+    {
+      "layer": 4,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3221232891082764,
+      "patch_damage": 0.034903570474398404
+    },
+    {
+      "layer": 6,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3446767330169678,
+      "patch_damage": 0.028117089934980077
+    },
+    {
+      "layer": 6,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.391118049621582,
+      "patch_damage": 0.01414259040230681
+    },
+    {
+      "layer": 6,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.440577268600464,
+      "patch_damage": -0.0007400159284123298
+    },
+    {
+      "layer": 6,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.429800271987915,
+      "patch_damage": 0.002502853678577166
+    },
+    {
+      "layer": 6,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3446767330169678,
+      "patch_damage": 0.028117089934980077
+    },
+    {
+      "layer": 8,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3497087955474854,
+      "patch_damage": 0.02660290901543838
+    },
+    {
+      "layer": 8,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3367857933044434,
+      "patch_damage": 0.030491525919727147
+    },
+    {
+      "layer": 8,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.428593635559082,
+      "patch_damage": 0.0028659385659931536
+    },
+    {
+      "layer": 8,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4359774589538574,
+      "patch_damage": 0.000644097237545993
+    },
+    {
+      "layer": 8,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3497087955474854,
+      "patch_damage": 0.02660290901543838
+    },
+    {
+      "layer": 10,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.2220637798309326,
+      "patch_damage": 0.06501213904794367
+    },
+    {
+      "layer": 10,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.2789766788482666,
+      "patch_damage": 0.04788667106235711
+    },
+    {
+      "layer": 10,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.2832608222961426,
+      "patch_damage": 0.04659754394479598
+    },
+    {
+      "layer": 10,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.441129446029663,
+      "patch_damage": -0.0009061697713792505
+    },
+    {
+      "layer": 10,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.2220637798309326,
+      "patch_damage": 0.06501213904794367
+    },
+    {
+      "layer": 12,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.35605525970459,
+      "patch_damage": 0.024693215947245495
+    },
+    {
+      "layer": 12,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.379847288131714,
+      "patch_damage": 0.01753403712880608
+    },
+    {
+      "layer": 12,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.43276309967041,
+      "patch_damage": 0.0016113192197908521
+    },
+    {
+      "layer": 12,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.437540292739868,
+      "patch_damage": 0.00017383020790529002
+    },
+    {
+      "layer": 12,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.35605525970459,
+      "patch_damage": 0.024693215947245495
+    },
+    {
+      "layer": 14,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.400916337966919,
+      "patch_damage": 0.011194220590385884
+    },
+    {
+      "layer": 14,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3745391368865967,
+      "patch_damage": 0.019131294969831125
+    },
+    {
+      "layer": 14,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.435593843460083,
+      "patch_damage": 0.0007595296785363193
+    },
+    {
+      "layer": 14,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4316864013671875,
+      "patch_damage": 0.001935304865230525
+    },
+    {
+      "layer": 14,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.400916337966919,
+      "patch_damage": 0.011194220590385884
+    },
+    {
+      "layer": 16,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4225761890411377,
+      "patch_damage": 0.004676628048998488
+    },
+    {
+      "layer": 16,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4531219005584717,
+      "patch_damage": -0.00451477870973549
+    },
+    {
+      "layer": 16,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4274516105651855,
+      "patch_damage": 0.0032095814450134874
+    },
+    {
+      "layer": 16,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4191551208496094,
+      "patch_damage": 0.005706050109763439
+    },
+    {
+      "layer": 16,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4225761890411377,
+      "patch_damage": 0.004676628048998488
+    },
+    {
+      "layer": 18,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.412973165512085,
+      "patch_damage": 0.007566241385362549
+    },
+    {
+      "layer": 18,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3637471199035645,
+      "patch_damage": 0.022378684305709773
+    },
+    {
+      "layer": 18,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4019579887390137,
+      "patch_damage": 0.010880780979020455
+    },
+    {
+      "layer": 18,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.451321601867676,
+      "patch_damage": -0.003973056918611606
+    },
+    {
+      "layer": 18,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.412973165512085,
+      "patch_damage": 0.007566241385362549
+    },
+    {
+      "layer": 20,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.351992130279541,
+      "patch_damage": 0.02591583848258283
+    },
+    {
+      "layer": 20,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3887829780578613,
+      "patch_damage": 0.014845228890224549
+    },
+    {
+      "layer": 20,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4492897987365723,
+      "patch_damage": -0.003361673909214602
+    },
+    {
+      "layer": 20,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4448606967926025,
+      "patch_damage": -0.00202892782078834
+    },
+    {
+      "layer": 20,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.351992130279541,
+      "patch_damage": 0.02591583848258283
+    },
+    {
+      "layer": 22,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3623852729797363,
+      "patch_damage": 0.022788473058311998
+    },
+    {
+      "layer": 22,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.395686626434326,
+      "patch_damage": 0.01276787540276847
+    },
+    {
+      "layer": 22,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4167556762695312,
+      "patch_damage": 0.006428058864348163
+    },
+    {
+      "layer": 22,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.435271739959717,
+      "patch_damage": 0.0008564527536003563
+    },
+    {
+      "layer": 22,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.3623852729797363,
+      "patch_damage": 0.022788473058311998
+    },
+    {
+      "layer": 24,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.286159038543701,
+      "patch_damage": 0.04572545149440521
+    },
+    {
+      "layer": 24,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.344728946685791,
+      "patch_damage": 0.028101378496461216
+    },
+    {
+      "layer": 24,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4477458000183105,
+      "patch_damage": -0.0028970744761172007
+    },
+    {
+      "layer": 24,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.437964916229248,
+      "patch_damage": 4.6058189630659996e-05
+    },
+    {
+      "layer": 24,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.286159038543701,
+      "patch_damage": 0.04572545149440521
+    },
+    {
+      "layer": 26,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.02154541015625,
+      "patch_damage": 0.1253494435900988
+    },
+    {
+      "layer": 26,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.388558864593506,
+      "patch_damage": 0.014912666114917483
+    },
+    {
+      "layer": 26,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.4330995082855225,
+      "patch_damage": 0.0015100916410230036
+    },
+    {
+      "layer": 26,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.433384418487549,
+      "patch_damage": 0.0014243602755888984
+    },
+    {
+      "layer": 26,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.02154541015625,
+      "patch_damage": 0.1253494435900988
+    },
+    {
+      "layer": 28,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 2.7926554679870605,
+      "patch_damage": 0.19422394206973803
+    },
+    {
+      "layer": 28,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.038475513458252,
+      "patch_damage": 0.12025506345664605
+    },
+    {
+      "layer": 28,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 2.819956064224243,
+      "patch_damage": 0.1860090119762121
+    },
+    {
+      "layer": 28,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.427955150604248,
+      "patch_damage": 0.0030580629146396143
+    },
+    {
+      "layer": 28,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 2.7926554679870605,
+      "patch_damage": 0.19422394206973803
+    },
+    {
+      "layer": 30,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 1.285662055015564,
+      "patch_damage": 0.6476882338899975
+    },
+    {
+      "layer": 30,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 0.9700498580932617,
+      "patch_damage": 0.742658032785804
+    },
+    {
+      "layer": 30,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 0.6695382595062256,
+      "patch_damage": 0.8330839617010101
+    },
+    {
+      "layer": 30,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.43039608001709,
+      "patch_damage": 0.0023235710993136927
+    },
+    {
+      "layer": 30,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 1.285662055015564,
+      "patch_damage": 0.6476882338899975
+    },
+    {
+      "layer": 31,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 2.570641040802002,
+      "patch_damage": 0.261029552585872
+    },
+    {
+      "layer": 31,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.7546164989471436,
+      "patch_damage": -0.09523649877112139
+    },
+    {
+      "layer": 31,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.38411545753479,
+      "patch_damage": 0.016249716707047557
+    },
+    {
+      "layer": 31,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.429732322692871,
+      "patch_damage": 0.002523300071170298
+    },
+    {
+      "layer": 31,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 2.570641040802002,
+      "patch_damage": 0.261029552585872
+    },
+    {
+      "layer": 32,
+      "component": "in_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 2.3303000926971436,
+      "patch_damage": 0.33334973453867833
+    },
+    {
+      "layer": 32,
+      "component": "conv1d",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.1150450706481934,
+      "patch_damage": 0.09721477693166158
+    },
+    {
+      "layer": 32,
+      "component": "x_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.249197244644165,
+      "patch_damage": 0.05684749990602389
+    },
+    {
+      "layer": 32,
+      "component": "dt_proj",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 3.261307954788208,
+      "patch_damage": 0.05320330707038301
+    },
+    {
+      "layer": 32,
+      "component": "out_proj_in",
+      "baseline_act": 3.4381179809570312,
+      "corrupted_act": 0.11482783406972885,
+      "patched_act": 2.3303000926971436,
+      "patch_damage": 0.33334973453867833
+    }
+  ]
+}

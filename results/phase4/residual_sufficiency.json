@@ -1,0 +1,58 @@
+{
+  "baseline_act": 3.327275037765503,
+  "corrupted_act": 0.10126159340143204,
+  "gap": 3.226013444364071,
+  "n_pairs": 128,
+  "layers_tested": [
+    16,
+    24,
+    28,
+    29,
+    30,
+    31
+  ],
+  "results": {
+    "L16": {
+      "layer": 16,
+      "rescue_all_positions": 1.0,
+      "rescue_ind_positions_only": 1.0,
+      "rescued_all_act": 3.327275037765503,
+      "rescued_ind_act": 3.327275037765503
+    },
+    "L24": {
+      "layer": 24,
+      "rescue_all_positions": 1.0,
+      "rescue_ind_positions_only": 1.0,
+      "rescued_all_act": 3.327275037765503,
+      "rescued_ind_act": 3.327275037765503
+    },
+    "L28": {
+      "layer": 28,
+      "rescue_all_positions": 1.0,
+      "rescue_ind_positions_only": 1.0,
+      "rescued_all_act": 3.327275037765503,
+      "rescued_ind_act": 3.327275037765503
+    },
+    "L29": {
+      "layer": 29,
+      "rescue_all_positions": 1.0,
+      "rescue_ind_positions_only": 1.0,
+      "rescued_all_act": 3.327275037765503,
+      "rescued_ind_act": 3.327275037765503
+    },
+    "L30": {
+      "layer": 30,
+      "rescue_all_positions": 1.0,
+      "rescue_ind_positions_only": 1.0,
+      "rescued_all_act": 3.327275037765503,
+      "rescued_ind_act": 3.327275037765503
+    },
+    "L31": {
+      "layer": 31,
+      "rescue_all_positions": 1.0,
+      "rescue_ind_positions_only": 1.0,
+      "rescued_all_act": 3.327275037765503,
+      "rescued_ind_act": 3.327275037765503
+    }
+  }
+}

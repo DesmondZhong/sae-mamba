@@ -1,0 +1,341 @@
+{
+  "layer": 30,
+  "reading_layer": 32,
+  "sequence_layout": {
+    "prefix": [
+      0,
+      8
+    ],
+    "P1_first_pattern": [
+      8,
+      16
+    ],
+    "mid_filler": [
+      16,
+      48
+    ],
+    "P2_induction": [
+      48,
+      56
+    ]
+  },
+  "n_pairs": 64,
+  "baseline_act": 3.329310655593872,
+  "corrupted_act": 0.09283097088336945,
+  "per_position": [
+    {
+      "position": 0,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 1,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 2,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 3,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 4,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 5,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 6,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 7,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 8,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 9,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 10,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 11,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 12,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 13,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 14,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 15,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 16,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 17,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 18,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 19,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 20,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 21,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 22,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 23,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 24,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 25,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 26,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 27,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 28,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 29,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 30,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 31,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 32,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 33,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 34,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 35,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 36,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 37,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 38,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 39,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 40,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 41,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 42,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 43,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 44,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 45,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 46,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 47,
+      "patched_act": 3.329310655593872,
+      "patch_damage": 0.0
+    },
+    {
+      "position": 48,
+      "patched_act": 3.0226101875305176,
+      "patch_damage": 0.0947636005602761
+    },
+    {
+      "position": 49,
+      "patched_act": 2.9468917846679688,
+      "patch_damage": 0.11815889737621199
+    },
+    {
+      "position": 50,
+      "patched_act": 2.89780592918396,
+      "patch_damage": 0.13332533136184643
+    },
+    {
+      "position": 51,
+      "patched_act": 2.9030187129974365,
+      "patch_damage": 0.1317146974876089
+    },
+    {
+      "position": 52,
+      "patched_act": 2.9136908054351807,
+      "patch_damage": 0.12841725907384083
+    },
+    {
+      "position": 53,
+      "patched_act": 2.9235737323760986,
+      "patch_damage": 0.12536365518823456
+    },
+    {
+      "position": 54,
+      "patched_act": 2.945683717727661,
+      "patch_damage": 0.11853216310255499
+    },
+    {
+      "position": 55,
+      "patched_act": 3.0623655319213867,
+      "patch_damage": 0.08248008629053483
+    }
+  ],
+  "region_stats": {
+    "prefix": {
+      "start": 0,
+      "end": 8,
+      "n": 8,
+      "mean": 0.0,
+      "max": 0.0,
+      "sum": 0.0
+    },
+    "P1_first_pattern": {
+      "start": 8,
+      "end": 16,
+      "n": 8,
+      "mean": 0.0,
+      "max": 0.0,
+      "sum": 0.0
+    },
+    "mid_filler": {
+      "start": 16,
+      "end": 48,
+      "n": 32,
+      "mean": 0.0,
+      "max": 0.0,
+      "sum": 0.0
+    },
+    "P2_induction": {
+      "start": 48,
+      "end": 56,
+      "n": 8,
+      "mean": 0.11659446130513858,
+      "max": 0.13332533136184643,
+      "sum": 0.9327556904411086
+    }
+  }
+}

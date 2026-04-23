@@ -1,0 +1,66 @@
+{
+  "layer": 30,
+  "reading_layer": 32,
+  "dt_rank": 160,
+  "state_size": 16,
+  "n_pairs": 128,
+  "baseline_act": 3.327275037765503,
+  "corrupted_act": 0.10126160830259323,
+  "results": {
+    "full_xproj": {
+      "slice": [
+        0,
+        192
+      ],
+      "dim": 192,
+      "baseline_act": 3.327275037765503,
+      "corrupted_act": 0.10126160830259323,
+      "patched_act": 0.7340556979179382,
+      "patch_damage": 0.8038464180477087
+    },
+    "delta_pre": {
+      "slice": [
+        0,
+        160
+      ],
+      "dim": 160,
+      "baseline_act": 3.327275037765503,
+      "corrupted_act": 0.10126160830259323,
+      "patched_act": 3.289354085922241,
+      "patch_damage": 0.011754740850404621
+    },
+    "B_matrix": {
+      "slice": [
+        160,
+        176
+      ],
+      "dim": 16,
+      "baseline_act": 3.327275037765503,
+      "corrupted_act": 0.10126160830259323,
+      "patched_act": 3.321734666824341,
+      "patch_damage": 0.0017174047976868945
+    },
+    "C_matrix": {
+      "slice": [
+        176,
+        192
+      ],
+      "dim": 16,
+      "baseline_act": 3.327275037765503,
+      "corrupted_act": 0.10126160830259323,
+      "patched_act": 0.7458511590957642,
+      "patch_damage": 0.8001900596859924
+    },
+    "B_and_C": {
+      "slice": [
+        160,
+        192
+      ],
+      "dim": 32,
+      "baseline_act": 3.327275037765503,
+      "corrupted_act": 0.10126160830259323,
+      "patched_act": 0.7425529360771179,
+      "patch_damage": 0.8012124432224415
+    }
+  }
+}

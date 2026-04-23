@@ -1,0 +1,36 @@
+{
+  "n_pairs": 512,
+  "n_positions_per_class": 4096,
+  "results": {
+    "C_matrix_out": {
+      "dim": 16,
+      "accuracy_mean": 0.5747075445062022,
+      "accuracy_std": 0.004733301592716221
+    },
+    "B_matrix_out": {
+      "dim": 16,
+      "accuracy_mean": 0.5412591137423352,
+      "accuracy_std": 0.010880843760877187
+    },
+    "delta_pre_out": {
+      "dim": 160,
+      "accuracy_mean": 0.9774167666785116,
+      "accuracy_std": 0.00380401192050929
+    },
+    "full_xproj_out": {
+      "dim": 192,
+      "accuracy_mean": 0.9777825455677804,
+      "accuracy_std": 0.005890836286105567
+    },
+    "xproj_input": {
+      "dim": 5120,
+      "accuracy_mean": 0.9857171165895998,
+      "accuracy_std": 0.005160431642844115
+    },
+    "random_16dim_from_xproj_input": {
+      "dim": 16,
+      "accuracy_mean": 0.8353299198936783,
+      "accuracy_std": 0.011550133471706988
+    }
+  }
+}

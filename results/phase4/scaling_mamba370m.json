@@ -1,0 +1,630 @@
+{
+  "model": "state-spaces/mamba-370m-hf",
+  "n_layers": 48,
+  "d_model": 1024,
+  "dt_rank": 64,
+  "state_size": 16,
+  "n_pairs": 128,
+  "clean_mean_logit": 14.112405776977539,
+  "corrupted_mean_logit": 8.000192642211914,
+  "gap": 6.112213134765625,
+  "layers_tested": [
+    0,
+    4,
+    8,
+    12,
+    16,
+    20,
+    22,
+    24,
+    26,
+    28,
+    30,
+    32,
+    36,
+    40,
+    44
+  ],
+  "per_site": [
+    {
+      "layer": 0,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 13.974066734313965,
+      "logit_damage": 0.022633216416606317
+    },
+    {
+      "layer": 0,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.067462921142578,
+      "logit_damage": 0.007352959532665904
+    },
+    {
+      "layer": 0,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.063199996948242,
+      "logit_damage": 0.008050403175474896
+    },
+    {
+      "layer": 0,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 13.982067108154297,
+      "logit_damage": 0.021324300371969973
+    },
+    {
+      "layer": 4,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.083039283752441,
+      "logit_damage": 0.004804559752352944
+    },
+    {
+      "layer": 4,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.101325988769531,
+      "logit_damage": 0.001812729360661014
+    },
+    {
+      "layer": 4,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.093231201171875,
+      "logit_damage": 0.003137092143695286
+    },
+    {
+      "layer": 4,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.091541290283203,
+      "logit_damage": 0.0034135731582495277
+    },
+    {
+      "layer": 8,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.106470108032227,
+      "logit_damage": 0.0009711161594727624
+    },
+    {
+      "layer": 8,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.10596752166748,
+      "logit_damage": 0.0010533427366002934
+    },
+    {
+      "layer": 8,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.105305671691895,
+      "logit_damage": 0.0011616259330453627
+    },
+    {
+      "layer": 8,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.106764793395996,
+      "logit_damage": 0.000922903612352366
+    },
+    {
+      "layer": 12,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.068506240844727,
+      "logit_damage": 0.007182265271987398
+    },
+    {
+      "layer": 12,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.09707260131836,
+      "logit_damage": 0.002508612726864201
+    },
+    {
+      "layer": 12,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.093132972717285,
+      "logit_damage": 0.003153162992735381
+    },
+    {
+      "layer": 12,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.101235389709473,
+      "logit_damage": 0.0018275519884165536
+    },
+    {
+      "layer": 16,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.126808166503906,
+      "logit_damage": -0.0023563297301345543
+    },
+    {
+      "layer": 16,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.130492210388184,
+      "logit_damage": -0.0029590645829693507
+    },
+    {
+      "layer": 16,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.109431266784668,
+      "logit_damage": 0.0004866502733604783
+    },
+    {
+      "layer": 16,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.107397079467773,
+      "logit_damage": 0.0008194572733853933
+    },
+    {
+      "layer": 20,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.126460075378418,
+      "logit_damage": -0.0022993796340216033
+    },
+    {
+      "layer": 20,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.12000846862793,
+      "logit_damage": -0.0012438525101730047
+    },
+    {
+      "layer": 20,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.110990524291992,
+      "logit_damage": 0.00023154504830613654
+    },
+    {
+      "layer": 20,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.114471435546875,
+      "logit_damage": -0.0003379559128242615
+    },
+    {
+      "layer": 22,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.107410430908203,
+      "logit_damage": 0.0008172728861371992
+    },
+    {
+      "layer": 22,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.082046508789062,
+      "logit_damage": 0.004966984547020492
+    },
+    {
+      "layer": 22,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.10986328125,
+      "logit_damage": 0.0004159697431160847
+    },
+    {
+      "layer": 22,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.115079879760742,
+      "logit_damage": -0.0004375015602766652
+    },
+    {
+      "layer": 24,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.119613647460938,
+      "logit_damage": -0.0011792570586912632
+    },
+    {
+      "layer": 24,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.096271514892578,
+      "logit_damage": 0.0026396759617545174
+    },
+    {
+      "layer": 24,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.117815971374512,
+      "logit_damage": -0.0008851449184912319
+    },
+    {
+      "layer": 24,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.118328094482422,
+      "logit_damage": -0.0009689317722245683
+    },
+    {
+      "layer": 26,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.081157684326172,
+      "logit_damage": 0.005112402326684529
+    },
+    {
+      "layer": 26,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.088531494140625,
+      "logit_damage": 0.003905996455051519
+    },
+    {
+      "layer": 26,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.124985694885254,
+      "logit_damage": -0.0020581608707592736
+    },
+    {
+      "layer": 26,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.08989143371582,
+      "logit_damage": 0.003683501011059187
+    },
+    {
+      "layer": 28,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 13.943512916564941,
+      "logit_damage": 0.02763203060638586
+    },
+    {
+      "layer": 28,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.104177474975586,
+      "logit_damage": 0.0013462066555158803
+    },
+    {
+      "layer": 28,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.103811264038086,
+      "logit_damage": 0.0014061212771799836
+    },
+    {
+      "layer": 28,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 13.943660736083984,
+      "logit_damage": 0.027607846318995377
+    },
+    {
+      "layer": 30,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.002130508422852,
+      "logit_damage": 0.01804179044861076
+    },
+    {
+      "layer": 30,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.103716850280762,
+      "logit_damage": 0.001421568015577801
+    },
+    {
+      "layer": 30,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.12208080291748,
+      "logit_damage": -0.0015829006166212523
+    },
+    {
+      "layer": 30,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.022851943969727,
+      "logit_damage": 0.014651621439448759
+    },
+    {
+      "layer": 32,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.016914367675781,
+      "logit_damage": 0.01562304965424266
+    },
+    {
+      "layer": 32,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.109106063842773,
+      "logit_damage": 0.0005398557056195408
+    },
+    {
+      "layer": 32,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.10954475402832,
+      "logit_damage": 0.0004680829817510501
+    },
+    {
+      "layer": 32,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.017549514770508,
+      "logit_damage": 0.015519135232293979
+    },
+    {
+      "layer": 36,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 14.195849418640137,
+      "logit_damage": -0.013651952218089125
+    },
+    {
+      "layer": 36,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.227103233337402,
+      "logit_damage": -0.01876529071073718
+    },
+    {
+      "layer": 36,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.14338207244873,
+      "logit_damage": -0.005067934443418132
+    },
+    {
+      "layer": 36,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.117879867553711,
+      "logit_damage": -0.0008955987717502722
+    },
+    {
+      "layer": 40,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 13.893695831298828,
+      "logit_damage": 0.03578244751229498
+    },
+    {
+      "layer": 40,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 13.990337371826172,
+      "logit_damage": 0.01997122849938837
+    },
+    {
+      "layer": 40,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.111333847045898,
+      "logit_damage": 0.00017537509049603273
+    },
+    {
+      "layer": 40,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 14.075315475463867,
+      "logit_damage": 0.006068227775420043
+    },
+    {
+      "layer": 44,
+      "slice": "full_xproj",
+      "slice_range": [
+        0,
+        96
+      ],
+      "patched_mean_logit": 13.879270553588867,
+      "logit_damage": 0.03814252190628353
+    },
+    {
+      "layer": 44,
+      "slice": "delta_pre",
+      "slice_range": [
+        0,
+        64
+      ],
+      "patched_mean_logit": 14.142065048217773,
+      "logit_damage": -0.004852460244151979
+    },
+    {
+      "layer": 44,
+      "slice": "B_matrix",
+      "slice_range": [
+        64,
+        80
+      ],
+      "patched_mean_logit": 14.065003395080566,
+      "logit_damage": 0.007755354869311226
+    },
+    {
+      "layer": 44,
+      "slice": "C_matrix",
+      "slice_range": [
+        80,
+        96
+      ],
+      "patched_mean_logit": 13.947855949401855,
+      "logit_damage": 0.026921480640087925
+    }
+  ]
+}

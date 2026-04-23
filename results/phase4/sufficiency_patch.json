@@ -1,0 +1,32 @@
+{
+  "baseline_act": 3.327275037765503,
+  "corrupted_act": 0.10126159340143204,
+  "gap": 3.226013444364071,
+  "n_pairs": 128,
+  "sufficiency": {
+    "full_xproj": {
+      "slice": [
+        0,
+        192
+      ],
+      "rescued_act": 0.28328099846839905,
+      "rescue_fraction": 0.05642239507245688
+    },
+    "C_matrix": {
+      "slice": [
+        176,
+        192
+      ],
+      "rescued_act": 0.28073933720588684,
+      "rescue_fraction": 0.05563453063656851
+    },
+    "B_and_C": {
+      "slice": [
+        160,
+        192
+      ],
+      "rescued_act": 0.28237754106521606,
+      "rescue_fraction": 0.05614234124789476
+    }
+  }
+}

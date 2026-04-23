@@ -1,0 +1,18 @@
+{
+  "induction": {
+    "n": 128,
+    "kl_patched_vs_clean": 1.9317137002944946,
+    "kl_corrupted_vs_clean": 5.572892397642136,
+    "ce_clean": 3.5549559593200684,
+    "ce_corrupted": 11.983515739440918,
+    "ce_patched": 7.382368564605713
+  },
+  "natural": {
+    "n": 128,
+    "kl_patched_vs_clean": 0.014223306713735355,
+    "ce_clean": 2.0565390586853027,
+    "ce_patched": 2.06992506980896,
+    "ce_increase": 0.013386011123657227
+  },
+  "induction_to_natural_kl_ratio": 135.81326334115056
+}

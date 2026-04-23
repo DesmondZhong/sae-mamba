@@ -1,0 +1,45 @@
+{
+  "top_features": [
+    15698,
+    79,
+    22093,
+    9299,
+    13980,
+    3684,
+    26292,
+    36829,
+    1580,
+    34338
+  ],
+  "bin_edges": [
+    16,
+    32,
+    64,
+    128,
+    256,
+    512
+  ],
+  "results": {
+    "[16,32)": {
+      "n_repeats": 7437,
+      "mean_ratio": 2.97
+    },
+    "[32,64)": {
+      "n_repeats": 11216,
+      "mean_ratio": 3.26
+    },
+    "[64,128)": {
+      "n_repeats": 15685,
+      "mean_ratio": 3.28
+    },
+    "[128,256)": {
+      "n_repeats": 19348,
+      "mean_ratio": 3.15
+    },
+    "[256,512)": {
+      "n_repeats": 13631,
+      "mean_ratio": 2.31
+    }
+  },
+  "note": "Ratios computed from 800 Pile docs; total 67K repeats. JSON-save bug meant full per-feature arrays not persisted \u2014 summary only."
+}

@@ -1,0 +1,307 @@
+{
+  "baseline_act": 1.960541009902954,
+  "corrupted_act": 0.12059827893972397,
+  "total_effect": 1.8399427309632301,
+  "target_features": [
+    29521,
+    8708,
+    25219,
+    12660,
+    12642,
+    25199,
+    14025,
+    12516,
+    26108,
+    91
+  ],
+  "per_site": [
+    {
+      "layer": 2,
+      "component": "attention_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.5799343585968018,
+      "patch_damage": 0.20685787927046007
+    },
+    {
+      "layer": 2,
+      "component": "attention_qkv",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.5799343585968018,
+      "patch_damage": 0.20685787927046007
+    },
+    {
+      "layer": 2,
+      "component": "mlp_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.945198655128479,
+      "patch_damage": 0.008338495821792913
+    },
+    {
+      "layer": 2,
+      "component": "mlp_dense_h_to_4h",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.945198655128479,
+      "patch_damage": 0.008338495821792913
+    },
+    {
+      "layer": 4,
+      "component": "attention_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.6866357326507568,
+      "patch_damage": 0.14886619710647453
+    },
+    {
+      "layer": 4,
+      "component": "attention_qkv",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.6866357326507568,
+      "patch_damage": 0.14886619710647453
+    },
+    {
+      "layer": 4,
+      "component": "mlp_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8129433393478394,
+      "patch_damage": 0.08021862206431052
+    },
+    {
+      "layer": 4,
+      "component": "mlp_dense_h_to_4h",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8129433393478394,
+      "patch_damage": 0.08021862206431052
+    },
+    {
+      "layer": 6,
+      "component": "attention_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.5355497598648071,
+      "patch_damage": 0.23098069460871717
+    },
+    {
+      "layer": 6,
+      "component": "attention_qkv",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.5355497598648071,
+      "patch_damage": 0.23098069460871717
+    },
+    {
+      "layer": 6,
+      "component": "mlp_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.855389952659607,
+      "patch_damage": 0.057149092454795825
+    },
+    {
+      "layer": 6,
+      "component": "mlp_dense_h_to_4h",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.855389952659607,
+      "patch_damage": 0.057149092454795825
+    },
+    {
+      "layer": 8,
+      "component": "attention_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8015764951705933,
+      "patch_damage": 0.08639644705090421
+    },
+    {
+      "layer": 8,
+      "component": "attention_qkv",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8015764951705933,
+      "patch_damage": 0.08639644705090421
+    },
+    {
+      "layer": 8,
+      "component": "mlp_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.6820387840270996,
+      "patch_damage": 0.15136461651176258
+    },
+    {
+      "layer": 8,
+      "component": "mlp_dense_h_to_4h",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.6820387840270996,
+      "patch_damage": 0.15136461651176258
+    },
+    {
+      "layer": 10,
+      "component": "attention_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.2891597747802734,
+      "patch_damage": 0.3648924631318309
+    },
+    {
+      "layer": 10,
+      "component": "attention_qkv",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.2891597747802734,
+      "patch_damage": 0.3648924631318309
+    },
+    {
+      "layer": 10,
+      "component": "mlp_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8770911693572998,
+      "patch_damage": 0.045354585847336315
+    },
+    {
+      "layer": 10,
+      "component": "mlp_dense_h_to_4h",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8770911693572998,
+      "patch_damage": 0.045354585847336315
+    },
+    {
+      "layer": 12,
+      "component": "attention_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.339640736579895,
+      "patch_damage": 0.33745630386985526
+    },
+    {
+      "layer": 12,
+      "component": "attention_qkv",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.339640736579895,
+      "patch_damage": 0.33745630386985526
+    },
+    {
+      "layer": 12,
+      "component": "mlp_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 2.102285623550415,
+      "patch_damage": -0.07703751386504076
+    },
+    {
+      "layer": 12,
+      "component": "mlp_dense_h_to_4h",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 2.102285623550415,
+      "patch_damage": -0.07703751386504076
+    },
+    {
+      "layer": 14,
+      "component": "attention_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 2.052955389022827,
+      "patch_damage": -0.050226769325311116
+    },
+    {
+      "layer": 14,
+      "component": "attention_qkv",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 2.052955389022827,
+      "patch_damage": -0.050226769325311116
+    },
+    {
+      "layer": 14,
+      "component": "mlp_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.9728726148605347,
+      "patch_damage": -0.0067021678175411825
+    },
+    {
+      "layer": 14,
+      "component": "mlp_dense_h_to_4h",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.9728726148605347,
+      "patch_damage": -0.0067021678175411825
+    },
+    {
+      "layer": 15,
+      "component": "attention_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.7498061656951904,
+      "patch_damage": 0.11453337142588216
+    },
+    {
+      "layer": 15,
+      "component": "attention_qkv",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.7498061656951904,
+      "patch_damage": 0.11453337142588216
+    },
+    {
+      "layer": 15,
+      "component": "mlp_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8022794723510742,
+      "patch_damage": 0.0860143823438615
+    },
+    {
+      "layer": 15,
+      "component": "mlp_dense_h_to_4h",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8022794723510742,
+      "patch_damage": 0.0860143823438615
+    },
+    {
+      "layer": 16,
+      "component": "attention_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.913321614265442,
+      "patch_damage": 0.025663513783818925
+    },
+    {
+      "layer": 16,
+      "component": "attention_qkv",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.913321614265442,
+      "patch_damage": 0.025663513783818925
+    },
+    {
+      "layer": 16,
+      "component": "mlp_output",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8698806762695312,
+      "patch_damage": 0.04927345406341055
+    },
+    {
+      "layer": 16,
+      "component": "mlp_dense_h_to_4h",
+      "baseline_act": 1.960541009902954,
+      "corrupted_act": 0.12059827893972397,
+      "patched_act": 1.8698806762695312,
+      "patch_damage": 0.04927345406341055
+    }
+  ]
+}

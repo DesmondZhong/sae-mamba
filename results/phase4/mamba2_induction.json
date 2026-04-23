@@ -1,0 +1,1256 @@
+{
+  "model": "state-spaces/mamba2-2.7b",
+  "mid_layer": 32,
+  "n_pairs": 64,
+  "layers_tested": [
+    0,
+    8,
+    16,
+    24,
+    28,
+    30,
+    31,
+    32,
+    33,
+    34,
+    36,
+    40,
+    48,
+    56
+  ],
+  "slice_specs": {
+    "z_gate": [
+      0,
+      5120
+    ],
+    "x_stream": [
+      5120,
+      10240
+    ],
+    "B_matrix": [
+      10240,
+      10368
+    ],
+    "C_matrix": [
+      10368,
+      10496
+    ],
+    "dt_step": [
+      10496,
+      10576
+    ],
+    "B_and_C": [
+      10240,
+      10496
+    ],
+    "full": [
+      0,
+      10576
+    ]
+  },
+  "top_induction_features": [
+    35045,
+    37382,
+    11385,
+    1066,
+    8362,
+    29948,
+    5082,
+    34119,
+    18333,
+    10175
+  ],
+  "top_induction_scores": [
+    0.3762611150741577,
+    0.3231162428855896,
+    0.2529875934123993,
+    0.21507371962070465,
+    0.20227307081222534,
+    0.19378477334976196,
+    0.18781332671642303,
+    0.16254930198192596,
+    0.14552542567253113,
+    0.1449567973613739
+  ],
+  "baseline_act": 0.47289401292800903,
+  "corrupted_act": 0.25245991349220276,
+  "gap": 0.22043409943580627,
+  "per_site": [
+    {
+      "layer": 0,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.24904704093933105,
+      "patch_damage": 1.0154825072963158
+    },
+    {
+      "layer": 0,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4710976779460907,
+      "patch_damage": 0.008149079414283
+    },
+    {
+      "layer": 0,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4729307293891907,
+      "patch_damage": -0.00016656434406292497
+    },
+    {
+      "layer": 0,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47250720858573914,
+      "patch_damage": 0.0017547391409038493
+    },
+    {
+      "layer": 0,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4729732573032379,
+      "patch_damage": -0.00035949236271393126
+    },
+    {
+      "layer": 0,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47231826186180115,
+      "patch_damage": 0.002611896560838378
+    },
+    {
+      "layer": 0,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.2500697076320648,
+      "patch_damage": 1.010843176560503
+    },
+    {
+      "layer": 8,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.45305386185646057,
+      "patch_damage": 0.09000490905140657
+    },
+    {
+      "layer": 8,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47746434807777405,
+      "patch_damage": -0.020733340084236662
+    },
+    {
+      "layer": 8,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4731109142303467,
+      "patch_damage": -0.0009839734546188694
+    },
+    {
+      "layer": 8,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4674375653266907,
+      "patch_damage": 0.0247531920663997
+    },
+    {
+      "layer": 8,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4725837707519531,
+      "patch_damage": 0.001407414627999759
+    },
+    {
+      "layer": 8,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4678025245666504,
+      "patch_damage": 0.023097553302280027
+    },
+    {
+      "layer": 8,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4643732011318207,
+      "patch_damage": 0.03865469007742939
+    },
+    {
+      "layer": 16,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4508625566959381,
+      "patch_damage": 0.09994577194934773
+    },
+    {
+      "layer": 16,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4557631015777588,
+      "patch_damage": 0.07771443435519387
+    },
+    {
+      "layer": 16,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47191354632377625,
+      "patch_damage": 0.004447889898805402
+    },
+    {
+      "layer": 16,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47252869606018066,
+      "patch_damage": 0.0016572611440942575
+    },
+    {
+      "layer": 16,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47343093156814575,
+      "patch_damage": -0.0024357331352586886
+    },
+    {
+      "layer": 16,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47155800461769104,
+      "patch_damage": 0.006060805990259488
+    },
+    {
+      "layer": 16,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.45640259981155396,
+      "patch_damage": 0.074813348563876
+    },
+    {
+      "layer": 24,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.46311816573143005,
+      "patch_damage": 0.044348162201764296
+    },
+    {
+      "layer": 24,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47297826409339905,
+      "patch_damage": -0.0003822056823588049
+    },
+    {
+      "layer": 24,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4741387367248535,
+      "patch_damage": -0.005646693501732747
+    },
+    {
+      "layer": 24,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47435107827186584,
+      "patch_damage": -0.00660998161167492
+    },
+    {
+      "layer": 24,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4720430374145508,
+      "patch_damage": 0.0038604531496546635
+    },
+    {
+      "layer": 24,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47435685992240906,
+      "patch_damage": -0.006636210087931582
+    },
+    {
+      "layer": 24,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.48276254534721375,
+      "patch_damage": -0.044768629011858296
+    },
+    {
+      "layer": 28,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.44627076387405396,
+      "patch_damage": 0.12077645483206267
+    },
+    {
+      "layer": 28,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.49603667855262756,
+      "patch_damage": -0.10498677692721503
+    },
+    {
+      "layer": 28,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4790884554386139,
+      "patch_damage": -0.028101108342399428
+    },
+    {
+      "layer": 28,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4738909900188446,
+      "patch_damage": -0.004522789774301206
+    },
+    {
+      "layer": 28,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47113487124443054,
+      "patch_damage": 0.007980351896920479
+    },
+    {
+      "layer": 28,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4698318541049957,
+      "patch_damage": 0.013891493334519445
+    },
+    {
+      "layer": 28,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4401654899120331,
+      "patch_damage": 0.14847304976745213
+    },
+    {
+      "layer": 30,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4755719304084778,
+      "patch_damage": -0.012148381250100648
+    },
+    {
+      "layer": 30,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4827350676059723,
+      "patch_damage": -0.04464397615047355
+    },
+    {
+      "layer": 30,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4735676944255829,
+      "patch_damage": -0.00305615827722705
+    },
+    {
+      "layer": 30,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47359487414360046,
+      "patch_damage": -0.003179459155299824
+    },
+    {
+      "layer": 30,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47176048159599304,
+      "patch_damage": 0.005142268527951077
+    },
+    {
+      "layer": 30,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4729313552379608,
+      "patch_damage": -0.00016940350901850643
+    },
+    {
+      "layer": 30,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.48575565218925476,
+      "patch_damage": -0.058346867812941294
+    },
+    {
+      "layer": 31,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4719836413860321,
+      "patch_damage": 0.00412990342377606
+    },
+    {
+      "layer": 31,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4844459593296051,
+      "patch_damage": -0.05240544194914887
+    },
+    {
+      "layer": 31,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47488099336624146,
+      "patch_damage": -0.00901394313909698
+    },
+    {
+      "layer": 31,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4759802520275116,
+      "patch_damage": -0.014000733586145175
+    },
+    {
+      "layer": 31,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4724498391151428,
+      "patch_damage": 0.0020149959285022945
+    },
+    {
+      "layer": 31,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4748280644416809,
+      "patch_damage": -0.008773830902850444
+    },
+    {
+      "layer": 31,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.45729947090148926,
+      "patch_damage": 0.07074468998414263
+    },
+    {
+      "layer": 32,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.34319430589675903,
+      "patch_damage": 0.5883831374692576
+    },
+    {
+      "layer": 32,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.3954937756061554,
+      "patch_damage": 0.35112642517630877
+    },
+    {
+      "layer": 32,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4288979172706604,
+      "patch_damage": 0.19958842924010023
+    },
+    {
+      "layer": 32,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.430223673582077,
+      "patch_damage": 0.1935741314757804
+    },
+    {
+      "layer": 32,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.48887282609939575,
+      "patch_damage": -0.07248793726689273
+    },
+    {
+      "layer": 32,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.4573725759983063,
+      "patch_damage": 0.07041304847766006
+    },
+    {
+      "layer": 32,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.25245991349220276,
+      "patch_damage": 1.0
+    },
+    {
+      "layer": 33,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 33,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 33,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 33,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 33,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 33,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 33,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 34,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 34,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 34,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 34,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 34,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 34,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 34,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 36,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 36,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 36,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 36,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 36,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 36,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 36,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 40,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 40,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 40,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 40,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 40,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 40,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 40,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 48,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 48,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 48,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 48,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 48,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 48,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 48,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 56,
+      "slice": "z_gate",
+      "slice_range": [
+        0,
+        5120
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 56,
+      "slice": "x_stream",
+      "slice_range": [
+        5120,
+        10240
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 56,
+      "slice": "B_matrix",
+      "slice_range": [
+        10240,
+        10368
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 56,
+      "slice": "C_matrix",
+      "slice_range": [
+        10368,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 56,
+      "slice": "dt_step",
+      "slice_range": [
+        10496,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 56,
+      "slice": "B_and_C",
+      "slice_range": [
+        10240,
+        10496
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    },
+    {
+      "layer": 56,
+      "slice": "full",
+      "slice_range": [
+        0,
+        10576
+      ],
+      "baseline_act": 0.47289401292800903,
+      "corrupted_act": 0.25245991349220276,
+      "patched_act": 0.47289401292800903,
+      "patch_damage": 0.0
+    }
+  ]
+}

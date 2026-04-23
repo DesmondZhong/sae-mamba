@@ -1,0 +1,26 @@
+{
+  "n_pairs": 128,
+  "baseline_act": 3.327275037765503,
+  "corrupted_act": 0.10126160830259323,
+  "gap": 3.2260134294629097,
+  "A_clean_state_ind_positions_into_corr": {
+    "positions": [
+      48,
+      56
+    ],
+    "rescued_act": 0.10302301496267319,
+    "rescue_fraction": 0.0005460010314877108
+  },
+  "B_clean_state_all_positions_into_corr": {
+    "rescued_act": 0.10302301496267319,
+    "rescue_fraction": 0.0005460010314877108
+  },
+  "C_corrupted_state_ind_positions_into_clean": {
+    "patched_act": 3.2932732105255127,
+    "patch_damage": 0.01053989017201673
+  },
+  "D_clean_state_position_47_into_corr": {
+    "rescued_act": 0.10126160830259323,
+    "rescue_fraction": 0.0
+  }
+}

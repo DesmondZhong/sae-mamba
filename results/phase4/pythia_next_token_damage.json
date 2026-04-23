@@ -1,0 +1,97 @@
+{
+  "model": "EleutherAI/pythia-2.8b",
+  "n_pairs": 256,
+  "baseline_logit": 9.5546875,
+  "corrupted_logit": 0.35498046875,
+  "gap": 9.19970703125,
+  "per_layer_slice": {
+    "L2": {
+      "Q": {
+        "patched_mean": 8.640625,
+        "damage": 0.09935778355713598
+      },
+      "K": {
+        "patched_mean": 9.546875,
+        "damage": 0.0008492118252746428
+      },
+      "V": {
+        "patched_mean": 9.5390625,
+        "damage": 0.0016984236505492856
+      },
+      "QK": {
+        "patched_mean": 8.7734375,
+        "damage": 0.08492118252746672
+      },
+      "full": {
+        "patched_mean": 8.6796875,
+        "damage": 0.09511172443076266
+      }
+    },
+    "L6": {
+      "Q": {
+        "patched_mean": 8.25,
+        "damage": 0.14181837482086934
+      },
+      "K": {
+        "patched_mean": 8.3671875,
+        "damage": 0.12908019744174937
+      },
+      "V": {
+        "patched_mean": 9.53125,
+        "damage": 0.0025476354758240394
+      },
+      "QK": {
+        "patched_mean": 8.3984375,
+        "damage": 0.12568335014065068
+      },
+      "full": {
+        "patched_mean": 8.9453125,
+        "damage": 0.06623852237142402
+      }
+    },
+    "L10": {
+      "Q": {
+        "patched_mean": 9.09375,
+        "damage": 0.05010349769120537
+      },
+      "K": {
+        "patched_mean": 9.265625,
+        "damage": 0.03142083753516267
+      },
+      "V": {
+        "patched_mean": 8.9453125,
+        "damage": 0.06623852237142402
+      },
+      "QK": {
+        "patched_mean": 8.7265625,
+        "damage": 0.09001645347911469
+      },
+      "full": {
+        "patched_mean": 8.5078125,
+        "damage": 0.11379438458680535
+      }
+    },
+    "L12": {
+      "Q": {
+        "patched_mean": 9.4453125,
+        "damage": 0.011888965553845332
+      },
+      "K": {
+        "patched_mean": 9.296875,
+        "damage": 0.02802399023406399
+      },
+      "V": {
+        "patched_mean": 8.59375,
+        "damage": 0.10445305450878406
+      },
+      "QK": {
+        "patched_mean": 8.96875,
+        "damage": 0.06369088689559999
+      },
+      "full": {
+        "patched_mean": 8.3359375,
+        "damage": 0.13247704474284805
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "clean_mean_logit": 27.067821502685547,
+  "corrupted_mean_logit": 16.839323043823242,
+  "gap": 10.228498458862305,
+  "n_pairs": 256,
+  "per_slice": {
+    "full_xproj": {
+      "slice": [
+        0,
+        192
+      ],
+      "patched_mean_logit": 22.212055206298828,
+      "next_token_damage": 0.47472914190836335
+    },
+    "delta_pre": {
+      "slice": [
+        0,
+        160
+      ],
+      "patched_mean_logit": 27.077606201171875,
+      "next_token_damage": -0.000956611424998588
+    },
+    "B_matrix": {
+      "slice": [
+        160,
+        176
+      ],
+      "patched_mean_logit": 27.068201065063477,
+      "next_token_damage": -3.7108318435619125e-05
+    },
+    "C_matrix": {
+      "slice": [
+        176,
+        192
+      ],
+      "patched_mean_logit": 22.206623077392578,
+      "next_token_damage": 0.4752602197521052
+    },
+    "B_and_C": {
+      "slice": [
+        160,
+        192
+      ],
+      "patched_mean_logit": 22.203821182250977,
+      "next_token_damage": 0.4755341500022656
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "n_pairs": 128,
+  "baseline_act": 0.10264121741056442,
+  "corrupted_act": 0.010358678176999092,
+  "gap": 0.09228253923356533,
+  "results": {
+    "full_xproj": {
+      "slice": [
+        0,
+        192
+      ],
+      "patched_act": 0.02784094773232937,
+      "patch_damage": 0.8105571248848822
+    },
+    "delta_pre": {
+      "slice": [
+        0,
+        160
+      ],
+      "patched_act": 0.10938787460327148,
+      "patch_damage": -0.07310870776573886
+    },
+    "B_matrix": {
+      "slice": [
+        160,
+        176
+      ],
+      "patched_act": 0.10446935892105103,
+      "patch_damage": -0.019810264494994234
+    },
+    "C_matrix": {
+      "slice": [
+        176,
+        192
+      ],
+      "patched_act": 0.02600276470184326,
+      "patch_damage": 0.8304762021637778
+    }
+  }
+}

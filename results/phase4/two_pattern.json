@@ -1,0 +1,27 @@
+{
+  "n_pairs": 128,
+  "results_per_target": {
+    "ind1_P1_second": {
+      "positions": [
+        56,
+        64
+      ],
+      "baseline": 3.264641523361206,
+      "corrupted": 0.10797426849603653,
+      "gap": 3.1566672548651695,
+      "patch_damage_full_xproj": 0.8215626207402453,
+      "patch_damage_C_matrix": 0.8210477802096379
+    },
+    "ind2_P2_second": {
+      "positions": [
+        80,
+        88
+      ],
+      "baseline": 3.450014591217041,
+      "corrupted": 0.1321878284215927,
+      "gap": 3.3178267627954483,
+      "patch_damage_full_xproj": 0.8416973326763845,
+      "patch_damage_C_matrix": 0.836514799303148
+    }
+  }
+}

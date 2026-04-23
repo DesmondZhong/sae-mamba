@@ -1,0 +1,456 @@
+{
+  "layer": 30,
+  "site": "x_proj input",
+  "features": [
+    {
+      "feature": 33108,
+      "examples": [
+        {
+          "activation": 23.322866439819336,
+          "doc_idx": 1430,
+          "position": 128,
+          "token_id": 12682,
+          "max_token": " shoes",
+          "context": " seems to be scared silly. Tai chi god figure was down oppression, judge gun again blasting, the whole body supra shoes the essence and"
+        },
+        {
+          "activation": 22.80978775024414,
+          "doc_idx": 1430,
+          "position": 120,
+          "token_id": 969,
+          "max_token": " again",
+          "context": " supra shoes in a state of dull, seems to be scared silly. Tai chi god figure was down oppression, judge gun again blasting,"
+        },
+        {
+          "activation": 21.48366355895996,
+          "doc_idx": 606,
+          "position": 76,
+          "token_id": 352,
+          "max_token": " it",
+          "context": " is a afterwards cardiac one, lint is distant. The where can i get nureflex in australia of it well recalls to"
+        },
+        {
+          "activation": 20.675920486450195,
+          "doc_idx": 938,
+          "position": 161,
+          "token_id": 2676,
+          "max_token": "rr",
+          "context": " is prob of picking 1 r and 1 t when two letters picked without replacement from bbrbtbrrbbrrbrrrrrrt?"
+        },
+        {
+          "activation": 20.65943717956543,
+          "doc_idx": 428,
+          "position": 67,
+          "token_id": 69,
+          "max_token": "d",
+          "context": " 13 Let y(o) = -12*o - 47. Let r(d) = -12*d - 46."
+        }
+      ]
+    },
+    {
+      "feature": 2230,
+      "examples": [
+        {
+          "activation": 23.107711791992188,
+          "doc_idx": 378,
+          "position": 255,
+          "token_id": 4061,
+          "max_token": "SC",
+          "context": "db.runSql('UPDATE office SET name = \\'Office of Brail and Southern Cone (WHA/BSC"
+        },
+        {
+          "activation": 21.535764694213867,
+          "doc_idx": 865,
+          "position": 77,
+          "token_id": 268,
+          "max_token": " p",
+          "context": " Treasury yields are flat to down slightly; NZD has ended up one of the better performers as short-positions were likely pared; the"
+        },
+        {
+          "activation": 20.81978416442871,
+          "doc_idx": 378,
+          "position": 253,
+          "token_id": 16,
+          "max_token": "/",
+          "context": "     db.runSql('UPDATE office SET name = \\'Office of Brail and Southern Cone (WHA/BSC"
+        },
+        {
+          "activation": 20.61038589477539,
+          "doc_idx": 378,
+          "position": 247,
+          "token_id": 10586,
+          "max_token": " Southern",
+          "context": "  return Promise.all([     db.runSql('UPDATE office SET name = \\'Office of Brail and Southern Cone ("
+        },
+        {
+          "activation": 19.491424560546875,
+          "doc_idx": 865,
+          "position": 76,
+          "token_id": 2779,
+          "max_token": " likely",
+          "context": "year Treasury yields are flat to down slightly; NZD has ended up one of the better performers as short-positions were likely pared;"
+        }
+      ]
+    },
+    {
+      "feature": 18334,
+      "examples": [
+        {
+          "activation": 14.026347160339355,
+          "doc_idx": 1199,
+          "position": 41,
+          "token_id": 14,
+          "max_token": "-",
+          "context": "www.nytimes.com/2015/11/08/opinion/sunday/in-5-minutes-he-lets"
+        },
+        {
+          "activation": 13.843527793884277,
+          "doc_idx": 1388,
+          "position": 24,
+          "token_id": 18847,
+          "max_token": " Language",
+          "context": "A TV icon, Mr Body Language and a police officer walked into a conference...  A TV icon, Mr Body Language and a police"
+        },
+        {
+          "activation": 13.44473934173584,
+          "doc_idx": 310,
+          "position": 46,
+          "token_id": 3394,
+          "max_token": " events",
+          "context": " without jQuery?  I am wondering if there is a way to get a list of the currently addedtostage events in JavaScript without"
+        },
+        {
+          "activation": 13.344045639038086,
+          "doc_idx": 759,
+          "position": 44,
+          "token_id": 4584,
+          "max_token": "aker",
+          "context": " First Win over Penn is a Record Breaker  Fordham\u2019s First Win over Penn is a Record Breaker  ("
+        },
+        {
+          "activation": 13.33542251586914,
+          "doc_idx": 1199,
+          "position": 42,
+          "token_id": 248,
+          "max_token": "he",
+          "context": ".nytimes.com/2015/11/08/opinion/sunday/in-5-minutes-he-lets-"
+        }
+      ]
+    },
+    {
+      "feature": 16064,
+      "examples": [
+        {
+          "activation": 27.583932876586914,
+          "doc_idx": 42,
+          "position": 192,
+          "token_id": 6576,
+          "max_token": " apparatus",
+          "context": " background technology of the present invention will be explained. FIG. 10 is a block diagram showing one example of a motor drive apparatus controlling a typical"
+        },
+        {
+          "activation": 26.073083877563477,
+          "doc_idx": 1215,
+          "position": 118,
+          "token_id": 1163,
+          "max_token": " :",
+          "context": " role of creating engine resources used for rendering and physicalizing out of the Designer::Model instance. class ModelCompiler : public _i"
+        },
+        {
+          "activation": 25.809093475341797,
+          "doc_idx": 45,
+          "position": 101,
+          "token_id": 22196,
+          "max_token": "Join",
+          "context": "SUME_NONNULL_BEGIN  #pragma mark - API Object  /// /// The `SharedFolderJoinPolicy` union"
+        },
+        {
+          "activation": 25.718158721923828,
+          "doc_idx": 45,
+          "position": 103,
+          "token_id": 65,
+          "max_token": "`",
+          "context": "_NONNULL_BEGIN  #pragma mark - API Object  /// /// The `SharedFolderJoinPolicy` union. "
+        },
+        {
+          "activation": 25.33124351501465,
+          "doc_idx": 273,
+          "position": 122,
+          "token_id": 8725,
+          "max_token": " extends",
+          "context": ";  /**  * Created by Ho on 2014/7/4.  */ public class WeatherTodayModel extends BaseModel {"
+        }
+      ]
+    },
+    {
+      "feature": 5252,
+      "examples": [
+        {
+          "activation": 16.168107986450195,
+          "doc_idx": 1141,
+          "position": 129,
+          "token_id": 3406,
+          "max_token": "rapy",
+          "context": " a curative treatment of locally advanced tumors is still discussed: in combination with external beam radiotherapy, it seems that brachytherapy increased the rate"
+        },
+        {
+          "activation": 13.869854927062988,
+          "doc_idx": 597,
+          "position": 126,
+          "token_id": 2308,
+          "max_token": " levels",
+          "context": " phosphokinase levels that are normally used to assess muscle pathology in man did not correlate with serum alpha-tocopherol levels in either the"
+        },
+        {
+          "activation": 13.252678871154785,
+          "doc_idx": 1141,
+          "position": 130,
+          "token_id": 2559,
+          "max_token": " increased",
+          "context": " curative treatment of locally advanced tumors is still discussed: in combination with external beam radiotherapy, it seems that brachytherapy increased the rate of"
+        },
+        {
+          "activation": 12.980506896972656,
+          "doc_idx": 801,
+          "position": 222,
+          "token_id": 420,
+          "max_token": "ment",
+          "context": "nectady Gazette described how the Tory Cave, one of the limestone caves to be found in the escarpment, routinely had"
+        },
+        {
+          "activation": 12.750253677368164,
+          "doc_idx": 1428,
+          "position": 153,
+          "token_id": 3395,
+          "max_token": " became",
+          "context": "ecel followed with it. In 1997 General Motors created the company  Delphi Automotive Systems and subsequently Mecel became a wholly owned"
+        }
+      ]
+    },
+    {
+      "feature": 28090,
+      "examples": [
+        {
+          "activation": 17.98545265197754,
+          "doc_idx": 1430,
+          "position": 223,
+          "token_id": 12682,
+          "max_token": " shoes",
+          "context": ", the whole people fell to the ground, into the tall man of authority, but now he's all hsupra shoes majesty,"
+        },
+        {
+          "activation": 17.188934326171875,
+          "doc_idx": 606,
+          "position": 66,
+          "token_id": 891,
+          "max_token": " i",
+          "context": " of the tissue6 of disease. As the preacher is a afterwards cardiac one, lint is distant. The where can i get nure"
+        },
+        {
+          "activation": 16.52857208251953,
+          "doc_idx": 606,
+          "position": 126,
+          "token_id": 7911,
+          "max_token": " prices",
+          "context": " impossible house ounces for one gods' paroxysm, sl. This is like saying that fome nureflex prices in canada"
+        },
+        {
+          "activation": 15.351935386657715,
+          "doc_idx": 1430,
+          "position": 128,
+          "token_id": 12682,
+          "max_token": " shoes",
+          "context": " seems to be scared silly. Tai chi god figure was down oppression, judge gun again blasting, the whole body supra shoes the essence and"
+        },
+        {
+          "activation": 15.173426628112793,
+          "doc_idx": 1430,
+          "position": 43,
+          "token_id": 12682,
+          "max_token": " shoes",
+          "context": " from above gold j \u012b shoot out. The trial of the gun, crackdown. \"Oh! Thsupra shoes supra shoes,"
+        }
+      ]
+    },
+    {
+      "feature": 35328,
+      "examples": [
+        {
+          "activation": 14.638286590576172,
+          "doc_idx": 524,
+          "position": 226,
+          "token_id": 14753,
+          "max_token": " fond",
+          "context": " of only ten associations to be recognised during the 2017 International and European Association [...]  We here at WebsEdge have fond memories of Dr"
+        },
+        {
+          "activation": 13.909420013427734,
+          "doc_idx": 400,
+          "position": 51,
+          "token_id": 13,
+          "max_token": ",",
+          "context": " finance expert, consumer advocate and author of Money Girl\u2019s Smart Moves to Grow Rich. As insuranceQuotes spokesperson, she has been"
+        },
+        {
+          "activation": 13.765682220458984,
+          "doc_idx": 1396,
+          "position": 245,
+          "token_id": 187,
+          "max_token": "\n",
+          "context": " pretzels and cheese, listened to some nice mellow music.....it was a perfect night for FNSI.  These fabrics"
+        },
+        {
+          "activation": 13.746513366699219,
+          "doc_idx": 374,
+          "position": 233,
+          "token_id": 11752,
+          "max_token": "Under",
+          "context": " External links Stone surfaces, photos of various surface treatments Palowy Stone, photos of stone flaming Understanding Flagstone"
+        },
+        {
+          "activation": 13.716344833374023,
+          "doc_idx": 1420,
+          "position": 250,
+          "token_id": 253,
+          "max_token": " the",
+          "context": " outside of the spaced-apart housings 240 and 244, and included a portion 248 extending at a right angle to the first member 208"
+        }
+      ]
+    },
+    {
+      "feature": 40652,
+      "examples": [
+        {
+          "activation": 29.283151626586914,
+          "doc_idx": 727,
+          "position": 251,
+          "token_id": 1206,
+          "max_token": "tr",
+          "context": " probabilistic classifications. The GTS subjects did not differ from the control subjects in performance of either the pursuit rotor or mirror-tracing tasks,"
+        },
+        {
+          "activation": 28.6777286529541,
+          "doc_idx": 31,
+          "position": 194,
+          "token_id": 2795,
+          "max_token": "OP",
+          "context": ". Thereafter, over the next 21 h, the intake of the SAL-DMNL group returned to control levels. TROP treatment enhanced the"
+        },
+        {
+          "activation": 27.5389347076416,
+          "doc_idx": 930,
+          "position": 209,
+          "token_id": 7500,
+          "max_token": " TR",
+          "context": " -'references.bib' title: |     LOW-COMPLEXITY AND RELIABLE TRANSFORMS"
+        },
+        {
+          "activation": 27.038877487182617,
+          "doc_idx": 1391,
+          "position": 204,
+          "token_id": 423,
+          "max_token": "end",
+          "context": ".  I tend to be a bit outspoken when it comes to social justice issues. When I say \"tend to\" and"
+        },
+        {
+          "activation": 24.63916015625,
+          "doc_idx": 199,
+          "position": 185,
+          "token_id": 49513,
+          "max_token": "tetra",
+          "context": " results in rats, the present in vitro study was designed to evaluate the effects of 2, 3, 5, 4'-tetrahydroxystil"
+        }
+      ]
+    },
+    {
+      "feature": 10942,
+      "examples": [
+        {
+          "activation": 26.21219253540039,
+          "doc_idx": 797,
+          "position": 253,
+          "token_id": 1327,
+          "max_token": " non",
+          "context": "Dynamic security enabled printer. Intended to be used with cartridges using only HP original electronic circuitry. Cartridges with modified or non-HP"
+        },
+        {
+          "activation": 24.144161224365234,
+          "doc_idx": 242,
+          "position": 250,
+          "token_id": 47,
+          "max_token": "N",
+          "context": " OP, and aminopeptidase I activity may be attributed to the pepD-, pepB-, pepN-, and p"
+        },
+        {
+          "activation": 23.148345947265625,
+          "doc_idx": 573,
+          "position": 226,
+          "token_id": 82,
+          "max_token": "q",
+          "context": ".a.84 param84) {}      public final void azd()   {     nq localnq"
+        },
+        {
+          "activation": 22.646934509277344,
+          "doc_idx": 797,
+          "position": 254,
+          "token_id": 14,
+          "max_token": "-",
+          "context": " security enabled printer. Intended to be used with cartridges using only HP original electronic circuitry. Cartridges with modified or non-HP"
+        },
+        {
+          "activation": 21.588388442993164,
+          "doc_idx": 1193,
+          "position": 247,
+          "token_id": 5472,
+          "max_token": "IB",
+          "context": " RDM dynamics propagate into significant qualitative discrepancies in the transport behavior. Similarly, beyond the strict nonadiabatic limit NIBA's prediction"
+        }
+      ]
+    },
+    {
+      "feature": 5794,
+      "examples": [
+        {
+          "activation": 24.235328674316406,
+          "doc_idx": 1235,
+          "position": 251,
+          "token_id": 700,
+          "max_token": "hat",
+          "context": " to provide context when they ask questions here on ELL.  And, yes, I would guess the word \"hating\" here"
+        },
+        {
+          "activation": 23.28426742553711,
+          "doc_idx": 348,
+          "position": 188,
+          "token_id": 3288,
+          "max_token": "oo",
+          "context": " a response, or trackback from your own site.  4 Responses to \u201cOh, Boo-Hoo, Hillary\u201d"
+        },
+        {
+          "activation": 23.23750114440918,
+          "doc_idx": 493,
+          "position": 249,
+          "token_id": 41,
+          "max_token": "H",
+          "context": ".Con.ABS where A.STG_ABS == STG && A.DT_ABS.Hour == Hour"
+        },
+        {
+          "activation": 22.622034072875977,
+          "doc_idx": 1235,
+          "position": 252,
+          "token_id": 272,
+          "max_token": "ing",
+          "context": " provide context when they ask questions here on ELL.  And, yes, I would guess the word \"hating\" here refers"
+        },
+        {
+          "activation": 22.462413787841797,
+          "doc_idx": 1351,
+          "position": 178,
+          "token_id": 41,
+          "max_token": "H",
+          "context": "Amir Haji-Akbari' - 'Robert M. Ziff' bibliography: - 'HajiAkb"
+        }
+      ]
+    }
+  ]
+}
