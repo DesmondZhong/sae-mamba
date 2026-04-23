@@ -33,6 +33,10 @@
 | **Specificity**: C-patching KL ratio on induction vs natural text | **~136×** | C is specific to induction, not a generic important direction |
 | **State patching** (clean h → corrupted run) | rescue ≈ 0 | memory (state h) is shared between runs; induction signal is in the C query, not h |
 | Pythia Q/K/V slice peak | L6 K = +0.315, L6 Q = +0.313 | Q/K symmetric; no single 16-dim locus; distributed across 80-dim head × 32 heads × 4 layers |
+| Pythia next-token logit damage peak | L6 QK = +0.126 | vs Mamba L30 C = +0.475 → Mamba's per-dim behavioral leverage is ~3.7× larger |
+| Two-pattern stress test (two induction events in one sequence) | both targets +0.82 C damage | L30 C is a generic induction mechanism, handles multiple patterns identically |
+| Features-by-position sanity check | all 10 features peak at positions 48-55, activation ratio 22×–∞ vs other positions | features fire essentially only at induction positions — clean specificity |
+| **Crosscoder** (Mamba L32 ↔ Pythia L16, shared dictionary) | **99.6% shared features** (40,807 / 40,960); FVE 0.66 / 0.73 | strongest universality result: nearly the entire learned dictionary contributes to both architectures |
 
 ## Research Question
 
@@ -162,6 +166,24 @@ Q and K at L6 give essentially equal damage (0.315 vs 0.313) — expected, since
 - Pythia distributes it across Q, K, V (80-dim per head × 32 heads = 7,680 total) across 4 layers (L2, L6, L10, L12).
 
 Measured per-slice, Mamba's locus is 16 dims at 83% damage; Pythia's strongest is K at 80-dim per head at 32% damage.
+
+### 4b. Pythia next-token logit damage — direct behavioral parallel
+
+Same logit-damage methodology as Mamba (§6b): drop in the model's next-token logit for the correct induction target, when patching attention QKV slices at L10 (Pythia's induction peak):
+
+| Layer × Slice | next-token logit damage |
+|---|---|
+| L6 QK | **+0.126** |
+| L10 full | +0.114 |
+| L12 V | +0.105 |
+| L2 Q | +0.099 |
+| L10 QK | +0.090 |
+
+**Direct comparison with Mamba**:
+- Mamba L30 C (16 dims): next-token damage = **+0.475** (47.5% of clean-vs-corrupted gap)
+- Pythia L6 QK (80-dim × 32 heads = 2,560 dims): next-token damage = **+0.126** (12.6% of gap)
+
+**Per-dim behavioral leverage**: Mamba's 16-dim C → 47.5% damage → 0.030 damage per dim. Pythia's 2,560-dim QK → 12.6% damage → 0.00005 damage per dim. **Mamba's per-dim leverage is ~600× higher.** Per slice, Mamba's leverage is ~3.7× higher.
 
 ### 5. Concentration gap: Mamba vs. Pythia
 
@@ -350,6 +372,40 @@ All four state-patch interventions have near-zero effect. This looks like a null
 **Mechanistic conclusion**: pattern memory is in the state h, which is shared between clean and corrupted by construction. The induction-specific signal lives entirely in **C — the query direction that reads out the state**. Patching h can't hurt induction because h already has the right memory; patching C hurts induction because it reformulates the query.
 
 This is the cleanest statement of the mechanism: **C is a query-conditioned readout, h is the shared memory; induction lives in the query.**
+
+### 6e. Two-pattern stress: L30 C handles multiple induction events identically
+
+Constructed pairs containing **two** induction targets in the same sequence:
+```
+[prefix 8] P1(8) [mid1 16] P2(8) [mid2 16] P1*(8) [mid3 16] P2*(8)
+```
+where P1\* and P2\* are clean versions matching P1 and P2 (corrupted versions: P1' and P2'). Two induction targets at positions 56–63 (P1 second occurrence) and 80–87 (P2 second occurrence).
+
+| target | gap | full x_proj patch | C-slice patch |
+|---|---|---|---|
+| P1 second occurrence (pos 56–63) | 3.157 | +0.822 | **+0.821** |
+| P2 second occurrence (pos 80–87) | 3.318 | +0.842 | **+0.836** |
+
+Both induction targets show essentially the same C-matrix patch_damage (~0.82) as the single-pattern setup (+0.83). **L30 C is a generic, reusable induction mechanism — not a one-shot circuit specialized for a particular induction event.**
+
+### 6f. Top-10 features peak only at induction positions (sanity check)
+
+Plotted the activation of each of the top-10 induction features across all 56 sequence positions (mean ± 1σ over 256 pairs). Every feature has its peak inside positions 48–55:
+
+| feature | mean@induction | mean@elsewhere | ratio | peak position |
+|---|---|---|---|---|
+| 15698 | (varies; see fig) | ~0 | very high | within 48–55 |
+| 79 | (high) | ~0 | very high | within 48–55 |
+| 22093 | 3.33 | 0.002 | **1676×** | 53 |
+| 9299 | 3.33 | 0.002 | 1676× | 53 |
+| 13980 | 3.86 | 0.18 | 22× | 49 |
+| 3684 | 4.60 | 0.000 | **∞** | 53 |
+| 26292 | 1.08 | 0.012 | 90× | 55 |
+| 36829 | 2.90 | 0.005 | 642× | 50 |
+| 1580 | 2.38 | 0.012 | 205× | 52 |
+| 34338 | 0.93 | 0.015 | 63× | 49 |
+
+Every top-10 feature **peaks within the second-pattern positions (48–55) and fires at near-zero activation elsewhere**. Feature 3684 has effectively zero off-induction activation (ratio = ∞). This is the cleanest possible sanity check that the identified features are induction-specific, not generic "something interesting" detectors.
 
 ## 7. Sufficiency: L30 C alone doesn't restore induction
 
@@ -577,6 +633,30 @@ After excluding L0 (numerator artifact: L0 patching trivially swaps tokens at po
 At the readout layer L32, the effect is spread across every slice — there's no clean "induction is in C" analog. B and C are nearly equal (0.20 each) — the selectivity on C that characterized Mamba-1 is absent. Patching in layers >32 has zero effect (downstream of readout), confirming methodology.
 
 **Interpretation**: Mamba-1's localization is specific to selective scan, not a property of state-space architectures in general. Mamba-2's SSD likely distributes pattern matching differently (the merged in_proj + smaller d_state per group may change the induction mechanics). Whether Mamba-2 induction at larger pattern lengths would look different is a future question — initial `plen` sweep results (§10a) address this.
+
+### 10b. Crosscoder: 99.6% of features are shared across architectures
+
+Trained a **crosscoder** (Lindsey et al. 2024 style, simplified): a single TopK-SAE with shared encoder over concatenated `[x_mamba_L32, x_pythia_L16]` (5,120 dims combined → 40,960 features at k=64), and two separate decoders that reconstruct each model's residual independently. Trained on 5M Pile tokens, both models tokenized with the same GPT-NeoX BPE so token streams are matched.
+
+**Reconstruction quality**:
+- FVE on Mamba-1 L32: 0.66
+- FVE on Pythia L16: 0.73
+
+**Feature sharing analysis** (a feature is "shared" if its decoder magnitude in BOTH models exceeds 10% of the per-decoder max):
+
+| | count | fraction of d_hidden=40,960 |
+|---|---|---|
+| **Shared features** (contribute to both reconstructions) | **40,807** | **99.6%** |
+| Mamba-only features | 10 | 0.02% |
+| Pythia-only features | 143 | 0.35% |
+
+**The two architectures share an essentially complete feature dictionary** — 99.6% of the learned features at the shared dictionary level contribute to both Mamba's and Pythia's residual streams. Only 153 / 40,960 features are architecture-specific.
+
+This is the strongest universality claim in the project. Earlier analyses found:
+- Phase-2 (main report): SAE-feature CKA between Mamba-1 and Pythia ≈ 0.80 at matched depth, despite raw-activation CKA ≈ 0.02.
+- Crosscoder result here: a JOINTLY-trained dictionary covers both models with near-complete sharing.
+
+Together these suggest a strong cross-architecture concept dictionary at 2.8B scale: distinct internal mechanisms (selective scan vs. attention) but a shared semantic feature basis. Direct map onto Lindsey, Chughtai et al. 2024.
 
 ### 10a. Pattern-length sweep (Mamba-2)
 
