@@ -39,6 +39,21 @@ COMPONENT_MODULES = {
 ALL_COMPONENTS = list(COMPONENT_MODULES.keys())
 
 
+def force_slow_forward(model):
+    """Replace each MambaMixer's forward with slow_forward so hooks fire.
+
+    HF Mamba-1's default `forward` dispatches to `cuda_kernels_forward`, which
+    calls `causal_conv1d_fn(x, self.conv1d.weight, self.conv1d.bias, ...)`
+    directly instead of `self.conv1d(x)` — forward hooks on the Conv1d module
+    therefore do not fire. `slow_forward` uses `self.conv1d(x)`, so hooks work.
+    Slower per-call but fine for small-batch capture/patch sweeps.
+    """
+    import types
+    for layer in model.backbone.layers:
+        mixer = layer.mixer
+        mixer.forward = types.MethodType(type(mixer).slow_forward, mixer)
+
+
 class MambaInternalCapture:
     """Context manager that captures internal mixer activations.
 

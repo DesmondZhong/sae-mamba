@@ -25,7 +25,7 @@ MODELS = {
 N_TOKENS = 10_000_000
 SEQ_LEN = 512
 DATASET = "pile"
-STORAGE = Path("/mnt/storage/desmond/excuse")
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/mnt/storage/desmond/excuse"))
 ACTS_DIR = STORAGE / "activations"
 
 
@@ -58,25 +58,34 @@ def main():
     torch.save(sequences[:1000], ACTS_DIR / f"{model_key}_sequences.pt")
 
     layer_indices = get_layer_indices(model_info["n_layers"])
+    layers_env = os.environ.get("LAYERS")
+    if layers_env:
+        layer_indices = [int(x) for x in layers_env.split(",") if x.strip()]
     batch_size = 8 if "mamba2" not in model_key else 2
+    batch_env = os.environ.get("BATCH_SIZE")
+    if batch_env:
+        batch_size = int(batch_env)
     print(f"[{model_key}] Layers: {layer_indices}, batch_size={batch_size}")
 
-    # Extract ONE layer at a time → save to NAS → free RAM
-    for layer_idx in layer_indices:
-        save_path = model_dir / f"layer_{layer_idx}.pt"
-        if save_path.exists():
-            print(f"  [{model_key}] Layer {layer_idx}: exists, skip")
-            continue
+    # Single forward pass, hook all requested layers at once — 9x faster than per-layer.
+    pending = [l for l in layer_indices
+               if not (model_dir / f"layer_{l}.pt").exists()]
+    for l in layer_indices:
+        if l not in pending:
+            print(f"  [{model_key}] Layer {l}: exists, skip")
 
-        print(f"  [{model_key}] Extracting layer {layer_idx}...")
-        acts = extract_residual_stream(model, sequences, [layer_idx],
+    if pending:
+        print(f"  [{model_key}] Extracting {len(pending)} layers in one forward: {pending}")
+        acts = extract_residual_stream(model, sequences, pending,
                                        device, batch_size=batch_size)
-
-        torch.save(acts[layer_idx], save_path)
-        size_gb = acts[layer_idx].numel() * 4 / 1e9
-        print(f"  [{model_key}] Layer {layer_idx}: {acts[layer_idx].shape} "
-              f"({size_gb:.1f}GB) saved")
-
+        for layer_idx in list(acts.keys()):
+            save_path = model_dir / f"layer_{layer_idx}.pt"
+            torch.save(acts[layer_idx], save_path)
+            size_gb = acts[layer_idx].numel() * 4 / 1e9
+            print(f"  [{model_key}] Layer {layer_idx}: {acts[layer_idx].shape} "
+                  f"({size_gb:.1f}GB) saved")
+            del acts[layer_idx]
+            gc.collect()
         del acts
         gc.collect()
         torch.cuda.empty_cache()

@@ -53,3 +53,11 @@ python scripts/05_pythia_induction_compare.py --layers 2 4 6 8 10 12 14 15 16
 
 Results land in `$SAE_MAMBA_STORAGE/results_phase4/`
 (default: `/mnt/storage/desmond/excuse/results_phase4/`).
+
+### Headline Phase-4 finding
+
+**Mamba-1's induction circuit localizes to the 16-dimensional `C` matrix of `x_proj` at layer 30**. Patching this single 16-dim slice (out of 40,960 SAE features at L32, or 163,840 hidden dims at depth 30) destroys 80% of the induction-feature signal and drops next-token logit by 47.5%. See [`report_phase4.md`](report_phase4.md) for the full story — slice-level necessity (`Δ=+0.01, B=+0.00, C=+0.80`), sufficiency asymmetry (necessary but not sufficient), linear-probe representation-vs-computation distinction, cross-layer emergence (L28→L30), pattern-length and SAE-hyperparameter robustness, natural-text generalization (5.4× activation ratio, induction surviving 256+ token gaps), and a Mamba-2 comparison showing SSD has ~15× weaker induction.
+
+Interactive dashboard: [`web/index_phase4.html`](web/index_phase4.html).
+
+Extended Phase-4 scripts (`scripts/07_...` through `scripts/24_...`): slice patching, sufficiency test, per-position patching, pattern-length sweep, SAE hparam sweep, next-token damage, real-text validation, natural-text gap sweep, internal SAE training + feature-example dump at L28 and L30, Mamba-2 adapter, linear probe.

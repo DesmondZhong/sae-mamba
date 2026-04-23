@@ -22,7 +22,7 @@ MODELS = {
     "pythia_2.8b": {"d_model": 2560},
 }
 
-STORAGE = Path("/mnt/storage/desmond/excuse")
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/mnt/storage/desmond/excuse"))
 ACTS_DIR = STORAGE / "activations"
 CKPT_DIR = STORAGE / "checkpoints_normed"
 RESULTS_DIR = STORAGE / "results_normed"
@@ -59,27 +59,34 @@ def main():
     print(f"[Train] {run_key} (d_hidden={d_hidden}, K={k})")
     start = time.time()
 
-    activations = torch.load(acts_path, map_location="cpu", weights_only=True)
+    # mmap the activation cache so we don't pull the full ~100 GB tensor into RAM.
+    activations = torch.load(acts_path, map_location="cpu", weights_only=True, mmap=True)
 
-    # Normalize: subtract mean, divide by std (per-dimension)
-    act_mean = activations.mean(dim=0, keepdim=True)
-    act_std = activations.std(dim=0, keepdim=True).clamp(min=1e-6)
-    activations_normed = (activations - act_mean) / act_std
+    # Compute normalization stats from a 500K-row sample (per-dim mean/std).
+    # Avoids materializing a full-size normalized copy.
+    sample = activations[:500_000].float()
+    act_mean = sample.mean(dim=0, keepdim=True)
+    act_std = sample.std(dim=0, keepdim=True).clamp(min=1e-6)
 
-    print(f"  Pre-norm:  mean={activations.mean():.4f}, std={activations.std():.4f}, "
-          f"norm={activations.norm(dim=-1).mean():.2f}")
-    print(f"  Post-norm: mean={activations_normed.mean():.4f}, std={activations_normed.std():.4f}, "
-          f"norm={activations_normed.norm(dim=-1).mean():.2f}")
-
-    del activations
+    normed_sample = (sample - act_mean) / act_std
+    print(f"  Pre-norm (500K sample):  mean={sample.mean():.4f}, std={sample.std():.4f}, "
+          f"norm={sample.norm(dim=-1).mean():.2f}")
+    print(f"  Post-norm (500K sample): mean={normed_sample.mean():.4f}, std={normed_sample.std():.4f}, "
+          f"norm={normed_sample.norm(dim=-1).mean():.2f}")
+    del sample, normed_sample
 
     sae, history, summary = train_sae(
-        activations_normed, d_hidden, sae_type=SAE_TYPE, k=k,
+        activations, d_hidden, sae_type=SAE_TYPE, k=k,
         n_steps=SAE_STEPS, batch_size=SAE_BATCH, lr=SAE_LR,
         device=device, save_path=ckpt_path,
+        act_mean=act_mean, act_std=act_std,
     )
 
-    stats = compute_feature_stats(sae, activations_normed, device)
+    # compute_feature_stats expects pre-normalized inputs; feed it a normalized
+    # 500K-row slice (small, ~5 GB fp32) rather than the full cache.
+    stats_sample = (activations[:500_000].float() - act_mean) / act_std
+    stats = compute_feature_stats(sae, stats_sample, device)
+    del stats_sample
     stats.update(summary)
     stats["model_key"] = model_key
     stats["layer"] = layer_idx
@@ -100,7 +107,7 @@ def main():
     print(f"[Done] {run_key}: FVE={summary['final_fve']:.4f} L0={summary['final_l0']:.1f} "
           f"dead={summary['final_dead_features']} ({elapsed/60:.1f}min)")
 
-    del sae, activations_normed
+    del sae, activations
     gc.collect()
     torch.cuda.empty_cache()
 
