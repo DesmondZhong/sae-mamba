@@ -6,18 +6,18 @@
 <title>Phase 4: Induction-Circuit Localization in Mamba-1 2.8B</title>
 <style>
 :root {
-    --bg: #0d1117;
-    --surface: #161b22;
-    --surface2: #21262d;
-    --border: #30363d;
-    --text: #e6edf3;
-    --text-dim: #8b949e;
-    --accent: #58a6ff;
-    --mamba1: #ff6b6b;
-    --mamba2: #ffd93d;
-    --pythia: #6bcb77;
-    --good: #3fb950;
-    --bad: #f85149;
+    --bg: #ffffff;
+    --surface: #f6f8fa;
+    --surface2: #eaeef2;
+    --border: #d0d7de;
+    --text: #1f2328;
+    --text-dim: #656d76;
+    --accent: #0969da;
+    --mamba1: #d1242f;
+    --mamba2: #bf8700;
+    --pythia: #1a7f37;
+    --good: #1a7f37;
+    --bad: #cf222e;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { background: var(--bg); color: var(--text);
@@ -43,7 +43,7 @@ h3 { color: var(--text); margin: 18px 0 8px; font-size: 17px; }
 p { margin: 10px 0; }
 code { background: var(--surface2); padding: 1px 6px; border-radius: 3px;
     font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
-    font-size: 14px; color: #d2a8ff; }
+    font-size: 14px; color: #6639ba; }
 pre code { display: block; padding: 12px; overflow-x: auto; font-size: 13px; }
 figure { margin: 16px 0; text-align: center; }
 figure img { max-width: 100%; border-radius: 4px; background: white; padding: 6px;
@@ -59,9 +59,9 @@ tr:last-child td { border-bottom: none; }
 .dim { color: var(--text-dim); }
 .badge { display: inline-block; padding: 2px 8px; border-radius: 4px;
     font-size: 12px; font-weight: 600; margin-right: 4px; }
-.badge-m1 { background: rgba(255, 107, 107, 0.15); color: var(--mamba1); }
-.badge-m2 { background: rgba(255, 217, 61, 0.15); color: var(--mamba2); }
-.badge-py { background: rgba(107, 203, 119, 0.15); color: var(--pythia); }
+.badge-m1 { background: rgba(209, 36, 47, 0.10); color: var(--mamba1); }
+.badge-m2 { background: rgba(191, 135, 0, 0.13); color: var(--mamba2); }
+.badge-py { background: rgba(26, 127, 55, 0.10); color: var(--pythia); }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 ul { padding-left: 24px; margin: 8px 0; }
