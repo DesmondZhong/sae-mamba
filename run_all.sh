@@ -2,7 +2,7 @@
 set -e
 cd /root/sae-mamba
 
-STORAGE="/mnt/storage/desmond/excuse"
+STORAGE="/path/to/storage"
 LOGDIR="$STORAGE/logs"
 mkdir -p "$LOGDIR"
 

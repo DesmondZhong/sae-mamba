@@ -14,7 +14,7 @@ from pathlib import Path
 from src.sae import create_sae
 from src.activation_cache import get_model_and_tokenizer, _get_layers
 
-STORAGE = Path("/mnt/storage/desmond/excuse")
+STORAGE = Path("/path/to/storage")
 ACTS_DIR = STORAGE / "activations"
 CKPT_DIR = STORAGE / "checkpoints_normed"
 RESULTS = STORAGE / "results_steering_demo"

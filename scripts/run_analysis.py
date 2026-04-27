@@ -24,7 +24,7 @@ MODELS = {
     "pythia_2.8b": {"name": "EleutherAI/pythia-2.8b", "n_layers": 32, "d_model": 2560},
 }
 
-STORAGE = Path("/mnt/storage/desmond/excuse")
+STORAGE = Path("/path/to/storage")
 ACTS_DIR = STORAGE / "activations"
 CKPT_DIR = STORAGE / "checkpoints"
 RESULTS_DIR = STORAGE / "results"

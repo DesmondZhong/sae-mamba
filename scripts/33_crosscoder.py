@@ -33,7 +33,7 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/workspace/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 CKPT_DIR = STORAGE / "checkpoints_normed"
 ACTS_DIR = STORAGE / "activations"
 CC_DIR = ACTS_DIR / "crosscoder"

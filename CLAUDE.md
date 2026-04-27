@@ -4,7 +4,7 @@
 - **CPU RAM: 2.0 TiB, no swap.** Generous but finite — a single badly-written run *can* still OOM, and there is no swap to soak a spike.
 - **GPUs: 4× H100 80 GB HBM3.**
 - **Disk: 1.5 TB on `/workspace`.** Activation dumps go here.
-- `$SAE_MAMBA_STORAGE` (default `/mnt/storage/desmond/excuse/`) is the canonical results root; keep large intermediate files under it or under `/workspace`.
+- `$SAE_MAMBA_STORAGE` (default `/path/to/storage/`) is the canonical results root; keep large intermediate files under it or under `/workspace`.
 
 > **User has explicitly said they cannot afford CPU OOM.** Treat CPU RAM as a hard constraint, not a soft one. Budget and measure *before* launching any long run — a crash that loses 2 hours of H100 time is worse than 15 minutes spent sizing the run.
 

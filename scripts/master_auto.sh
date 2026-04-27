@@ -2,7 +2,7 @@
 # Master automation: wait for training → validate → phase 2 analysis → rebuild viz
 set -e
 cd /root/sae-mamba
-STORAGE="/mnt/storage/desmond/excuse"
+STORAGE="/path/to/storage"
 LOGDIR="$STORAGE/logs"
 
 echo "$(date) === MASTER AUTO START ==="

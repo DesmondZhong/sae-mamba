@@ -21,7 +21,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/workspace/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 RESULTS = STORAGE / "results_phase4"
 FIGS = RESULTS / "figures"
 FIGS.mkdir(parents=True, exist_ok=True)

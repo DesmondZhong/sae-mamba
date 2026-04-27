@@ -18,7 +18,7 @@ from tqdm import tqdm
 from src.activation_cache import get_model_and_tokenizer
 from src.sae import create_sae
 
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/workspace/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 CKPT_DIR = STORAGE / "checkpoints_normed"
 RESULTS_DIR = STORAGE / "results_phase4"
 

@@ -27,7 +27,7 @@ from src.train_sae import train_sae
 from src.sae import create_sae
 from src.activation_cache import get_model_and_tokenizer
 
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/workspace/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 ACTS_DIR = STORAGE / "activations" / "mamba1_2.8b"
 CKPT_DIR = STORAGE / "checkpoints_normed"
 CKPT_DIR.mkdir(parents=True, exist_ok=True)

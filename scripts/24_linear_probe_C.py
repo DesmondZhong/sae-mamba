@@ -27,7 +27,7 @@ from sklearn.model_selection import cross_val_score
 
 from src.activation_cache import get_model_and_tokenizer
 
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/workspace/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 RESULTS_DIR = STORAGE / "results_phase4"
 
 MODEL_NAME = "state-spaces/mamba-2.8b-hf"

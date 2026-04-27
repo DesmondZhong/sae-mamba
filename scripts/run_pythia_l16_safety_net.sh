@@ -7,7 +7,7 @@ set -u
 cd "$(dirname "$0")/.."
 
 : "${GPU:=1}"
-: "${SAE_MAMBA_STORAGE:=/workspace/excuse}"
+: "${SAE_MAMBA_STORAGE:=/path/to/storage}"
 : "${HF_HOME:=/workspace/hf_cache}"
 : "${LOG_DIR:=/workspace/logs}"
 export SAE_MAMBA_STORAGE HF_HOME HF_HUB_CACHE="$HF_HOME" TRANSFORMERS_CACHE="$HF_HOME"

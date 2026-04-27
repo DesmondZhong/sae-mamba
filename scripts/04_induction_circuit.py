@@ -44,7 +44,7 @@ from src.mamba_internals import (
 )
 from src.sae import create_sae
 
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/mnt/storage/desmond/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 CKPT_DIR = STORAGE / "checkpoints_normed"
 ACTS_DIR = STORAGE / "activations"
 RESULTS_DIR = STORAGE / "results_phase4"

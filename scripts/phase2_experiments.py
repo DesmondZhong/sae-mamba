@@ -34,7 +34,7 @@ import numpy as np
 from pathlib import Path
 from collections import defaultdict
 
-STORAGE = Path("/mnt/storage/desmond/excuse")
+STORAGE = Path("/path/to/storage")
 ACTS_DIR = STORAGE / "activations"
 CKPT_DIR = STORAGE / "checkpoints_normed"
 RESULTS_DIR = STORAGE / "results_normed"

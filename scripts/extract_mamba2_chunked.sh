@@ -5,7 +5,7 @@
 # Usage: bash scripts/extract_mamba2_chunked.sh
 set -u
 cd "$(dirname "$0")/.."
-: "${SAE_MAMBA_STORAGE:=/workspace/excuse}"
+: "${SAE_MAMBA_STORAGE:=/path/to/storage}"
 export SAE_MAMBA_STORAGE
 : "${HF_HOME:=/workspace/hf_cache}"
 export HF_HOME

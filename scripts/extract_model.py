@@ -25,7 +25,7 @@ MODELS = {
 N_TOKENS = 10_000_000
 SEQ_LEN = 512
 DATASET = "pile"
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/mnt/storage/desmond/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 ACTS_DIR = STORAGE / "activations"
 
 

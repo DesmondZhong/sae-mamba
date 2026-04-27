@@ -52,7 +52,7 @@ python scripts/05_pythia_induction_compare.py --layers 2 4 6 8 10 12 14 15 16
 ```
 
 Results land in `$SAE_MAMBA_STORAGE/results_phase4/`
-(default: `/mnt/storage/desmond/excuse/results_phase4/`).
+(default: `/path/to/storage/results_phase4/`).
 
 ### Headline Phase-4 finding
 

@@ -22,7 +22,7 @@ MODELS = {
     "pythia_2.8b": {"d_model": 2560},
 }
 
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/mnt/storage/desmond/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 ACTS_DIR = STORAGE / "activations"
 CKPT_DIR = STORAGE / "checkpoints_normed"
 RESULTS_DIR = STORAGE / "results_normed"

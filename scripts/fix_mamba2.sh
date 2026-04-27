@@ -4,7 +4,7 @@
 set -e
 cd /root/sae-mamba
 
-STORAGE="/mnt/storage/desmond/excuse"
+STORAGE="/path/to/storage"
 LOGDIR="$STORAGE/logs"
 
 echo "=== $(date) Re-extracting Mamba-2 with fixed hooks ==="

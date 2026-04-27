@@ -61,7 +61,7 @@ def main():
     parser.add_argument("--gpus", type=int, nargs="+", default=[0, 1, 2, 3],
                         help="GPU indices to use.")
     parser.add_argument("--storage", default=os.environ.get("SAE_MAMBA_STORAGE",
-                                                            "/workspace/excuse"))
+                                                            "/path/to/storage"))
     parser.add_argument("--log_dir", default="/workspace/logs")
     args = parser.parse_args()
 

@@ -30,7 +30,7 @@ MODEL_NAME = "state-spaces/mamba-2.8b-hf"
 SEQ_LEN = 512
 DATASET = "pile"
 
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/workspace/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 ACTS_DIR = STORAGE / "activations" / "mamba1_2.8b"
 ACTS_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -34,7 +34,7 @@ from src.activation_cache import get_model_and_tokenizer
 from src.mamba_internals import force_slow_forward
 from src.sae import create_sae
 
-STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/workspace/excuse"))
+STORAGE = Path(os.environ.get("SAE_MAMBA_STORAGE", "/path/to/storage"))
 CKPT_DIR = STORAGE / "checkpoints_normed"
 ACTS_DIR = STORAGE / "activations"
 RESULTS_DIR = STORAGE / "results_phase4"

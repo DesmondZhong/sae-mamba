@@ -212,11 +212,11 @@ For SSM understanding:
 ## Artifacts
 
 - `web/index_2.8b.html`: Interactive dashboard with all charts (~256 KB; embeds slim summary stats and feature browser data)
-- `/mnt/storage/desmond/excuse/checkpoints_normed/`: 24 normalized SAE checkpoints (Mamba-1 + Pythia, layer/K/expansion sweeps)
-- `/mnt/storage/desmond/excuse/checkpoints/`: 36 unnormalized SAE checkpoints (Mamba-1 + Mamba-2 + Pythia)
-- `/mnt/storage/desmond/excuse/results/`: All summary JSONs (CKA, baselines, downstream, comprehensive_results.json)
-- `/mnt/storage/desmond/excuse/results_phase2/`: Feature geometry analyses
-- `/mnt/storage/desmond/excuse/results_phase3/`: Causal experiments (steering, induction)
+- `/path/to/storage/checkpoints_normed/`: 24 normalized SAE checkpoints (Mamba-1 + Pythia, layer/K/expansion sweeps)
+- `/path/to/storage/checkpoints/`: 36 unnormalized SAE checkpoints (Mamba-1 + Mamba-2 + Pythia)
+- `/path/to/storage/results/`: All summary JSONs (CKA, baselines, downstream, comprehensive_results.json)
+- `/path/to/storage/results_phase2/`: Feature geometry analyses
+- `/path/to/storage/results_phase3/`: Causal experiments (steering, induction)
 
 ## Code
 

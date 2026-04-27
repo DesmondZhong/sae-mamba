@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import json
 from pathlib import Path
 
-STORAGE = Path("/mnt/storage/desmond/excuse")
+STORAGE = Path("/path/to/storage")
 RESULTS_DIR = STORAGE / "results"
 WEB_DIR = Path("/root/sae-mamba/web")
 WEB_DIR.mkdir(exist_ok=True)

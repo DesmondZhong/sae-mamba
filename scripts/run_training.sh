@@ -3,7 +3,7 @@
 set -e
 cd /root/sae-mamba
 
-LOGDIR="/mnt/storage/desmond/excuse/logs"
+LOGDIR="/path/to/storage/logs"
 mkdir -p "$LOGDIR"
 
 # Build job list
@@ -55,7 +55,7 @@ while [ $IDX -lt $TOTAL ]; do
         RUNKEY="${M}_L${L}_x${E}_k${K}"
 
         # Skip if checkpoint already exists
-        if [ -f "/mnt/storage/desmond/excuse/checkpoints/${RUNKEY}.pt" ]; then
+        if [ -f "/path/to/storage/checkpoints/${RUNKEY}.pt" ]; then
             echo "  [Skip] $RUNKEY"
             continue
         fi
@@ -78,4 +78,4 @@ done
 
 echo ""
 echo "ALL SAE TRAINING COMPLETE!"
-echo "Checkpoints: $(ls /mnt/storage/desmond/excuse/checkpoints/*.pt 2>/dev/null | wc -l)"
+echo "Checkpoints: $(ls /path/to/storage/checkpoints/*.pt 2>/dev/null | wc -l)"
