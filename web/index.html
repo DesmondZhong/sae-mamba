@@ -189,7 +189,7 @@ nav a:hover { text-decoration: underline; }
     <p>Root cause: Pythia's per-dimension activation variance grows 55&times; from L0 (0.13) to L28 (7.2); Mamba's grows much less. The SAE encoder's learned bias never converges at those Pythia scales. PCA at matching dimensionality explains &gt;80% of variance on the same activations, so they <em>are</em> decomposable &mdash; the SAE training just diverges.</p>
     <div class="callout warn">
         <h4>Implication for the field</h4>
-        <p>Cross-architecture SAE studies must normalize or per-layer FVE comparisons are confounded by activation scale. Earlier published transformer-SAE middle-layer results that did not normalize may be unreliable.</p>
+        <p>Cross-architecture SAE comparisons need a consistent activation-scaling protocol &mdash; without one, per-layer FVE differences are confounded by activation-variance differences rather than reflecting representational structure. The Pythia divergence here makes that confound concrete: the same architecture trains cleanly with normalization and diverges without it, on identical activations.</p>
     </div>
     <p>After normalization, all three architectures achieve FVE in the same 0.63&ndash;0.97 range with similar U-shaped layer curves. <strong>Sparse decomposability is architecture-insensitive; what differs is how features are <em>used</em>.</strong></p>
 
@@ -295,7 +295,7 @@ nav a:hover { text-decoration: underline; }
     <table>
         <thead><tr><th>Slice</th><th>Dim</th><th>patch_damage</th><th>Next-token logit damage</th></tr></thead>
         <tbody>
-            <tr><td>full x_proj</td><td>192</td><td>+0.833</td><td>+0.475</td></tr>
+            <tr><td>full x_proj</td><td>192</td><td>+0.804</td><td>+0.475</td></tr>
             <tr><td>&Delta;_pre</td><td>160</td><td class="dim">+0.012</td><td class="dim">0.000</td></tr>
             <tr><td>B</td><td>16</td><td class="dim">+0.002</td><td class="dim">0.000</td></tr>
             <tr><td class="good"><strong>C</strong></td><td class="good"><strong>16</strong></td><td class="good"><strong>+0.800</strong></td><td class="good"><strong>+0.475</strong></td></tr>
@@ -306,7 +306,7 @@ nav a:hover { text-decoration: underline; }
         <figcaption>Red = necessity (patch corrupted&rarr;clean). Blue = sufficiency (patch clean&rarr;corrupted). The entire induction necessity concentrates in C (99.6% of the full-x_proj effect); sufficiency is only 5.6% &mdash; C is necessary but not sufficient (memory is in the state h that layers 0&ndash;29 built).</figcaption>
     </figure>
 
-    <p><strong>Mechanistic reading.</strong> Selective scan runs \( h_{t+1} = \bar{A}(\Delta)\, h_t + B\, x_t \) and \( y_t = C\, h_t \). Induction requires <em>reading</em> the accumulated state, not writing to it &mdash; the match signal is encoded in the product \( C\,h \). Earlier layers write pattern memory into \(h\); at L30, \(C\) becomes a query that selects which state-component to project back to residual. The slice carrying the signal is 16 of 192 dims of L30's <code>x_proj</code> output (8.3%), or equivalently 16 of 2560 residual dims at that one layer (0.6%).</p>
+    <p><strong>Mechanistic reading.</strong> Selective scan runs \( h_{t+1} = \bar{A}(\Delta)\, h_t + B\, x_t \) and \( y_t = C\, h_t \). Induction requires <em>reading</em> the accumulated state, not writing to it &mdash; the match signal is encoded in the product \( C\,h \). Earlier layers write pattern memory into \(h\); at L30, \(C\) becomes a query that selects which state-component to project back to residual. The slice carrying the signal is 16 of 192 dims of L30's <code>x_proj</code> output (8.3%).</p>
 
     <div class="callout warn">
         <h4>&#9888; This isn't just "smaller slice = bigger effect"</h4>
@@ -371,7 +371,7 @@ nav a:hover { text-decoration: underline; }
         </tbody>
     </table>
     <p>Splitting Pythia's attention.qkv into per-head Q / K / V: L6 K = +0.315, L6 Q = +0.313 (symmetric, as expected &mdash; breaking either destroys the Q&middot;K<sup>T</sup> match). No single 16-dim slice carries the bulk of the signal; the largest sites are 0.365 (L10 attention) and 0.315 (L6 K), with the rest of the heatmap below ~0.30. The localization is qualitatively distributed across multiple middle attention layers rather than concentrated in one.</p>
-    <p><strong>Transformers distribute; Mamba-1 concentrates. This contradicts the architecture-level feature-geometry finding above (Mamba distributes features, Pythia concentrates them) &mdash; and intentionally so: for <em>this specific circuit</em>, the pattern reverses, because Mamba has no general-purpose routing operation and is forced to exploit its one 16-dim state-readout.</strong></p>
+    <p><strong>For this specific circuit at this scale, Pythia distributes and Mamba-1 concentrates.</strong> This is the opposite of the architecture-level feature-geometry finding above (Mamba distributes features more uniformly, Pythia concentrates them) &mdash; and that reversal is the point. Mamba has no general-purpose routing operation, so the induction circuit is forced through its one 16-dim state-readout; Pythia has many attention heads available and uses several. The "Pythia distributes" observation is one model's pattern, not a claim about transformers in general.</p>
 </div>
 
 <!-- MAMBA-2 -->
