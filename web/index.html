@@ -97,7 +97,9 @@ nav a:hover { text-decoration: underline; }
     <a href="#cross-arch">Feature geometry</a>
     <a href="#induction">Induction circuit</a>
     <a href="#defense">Rep. vs computation</a>
+    <a href="#pythia">Pythia control</a>
     <a href="#mamba2">Mamba-2 control</a>
+    <a href="#crosscoder">Crosscoder</a>
     <a href="#validation">Validation</a>
     <a href="#takehome">Take-home</a>
 </nav>
@@ -226,6 +228,17 @@ corrupted: [prefix 8] P(8) [mid 32] P'(8) &nbsp; (different second pattern)</div
         <figcaption>Of 85 sites, 83 are causally inert (patch_damage &lt; 0.2). A vertical stripe at L30 dominates: <strong>x_proj = 0.833</strong>, conv1d = 0.743, in_proj / out_proj_in = 0.648. First crosses 0.5 at L30 after a sharp L28 &rarr; L30 transition (0.19 &rarr; 0.83).</figcaption>
     </figure>
 
+    <div class="grid">
+        <figure>
+            <img src="figures/emergence_line.png" alt="cross-layer emergence">
+            <figcaption><strong>Cross-layer emergence.</strong> <code>x_proj</code> patch_damage by layer. ~0 through L26, jumps to 0.19 at L28, then 0.83 at L30 &mdash; the induction computation emerges sharply between L28 and L30. L31/L32 contribute &le; 0.06.</figcaption>
+        </figure>
+        <figure>
+            <img src="figures/position_specific_bar.png" alt="position-specific patching">
+            <figcaption><strong>Position-specific patching.</strong> Restricting the patch to <em>induction positions</em> (48&ndash;55) alone reproduces the full damage for <code>x_proj</code>, <code>in_proj</code>, and <code>out_proj_in</code>; restricting to <em>pre-induction positions</em> gives 0.00. L30 is induction-specific, not generic. (<code>conv1d</code> is the exception &mdash; it carries short-range context.)</figcaption>
+        </figure>
+    </div>
+
     <h3>2c. Inside x_proj: the entire signal is in the 16-dim C matrix</h3>
     <p>Mamba-1's <code>x_proj</code> is a <code>Linear(5120 &rarr; 192)</code> that produces:</p>
     <ul>
@@ -254,6 +267,17 @@ corrupted: [prefix 8] P(8) [mid 32] P'(8) &nbsp; (different second pattern)</div
         <h4>&#9888; This isn't just "smaller slice = bigger effect"</h4>
         <p>&Delta;_pre is <strong>160 dims</strong> &mdash; 10&times; larger than C &mdash; from the same submodule output at the same layer, and gives +0.012 damage (noise floor). If sharpness were a structural artifact of patching a small-dim slice, &Delta; would show an intermediate signal and B (also 16 dims) would look like C. Instead: only C is causal. The Mamba-2 cross-architecture control below makes this airtight.</p>
     </div>
+
+    <h3>2d. Scaling: the C-matrix locus reproduces below 2.8B</h3>
+    <figure>
+        <img src="figures/scaling_comparison.png" alt="scaling to 130M and 370M">
+        <figcaption>Logit-based variant of the patching protocol (no SAE needed) on smaller Mamba-1 models. <strong>Mamba-130M</strong> shows a clean C-matrix peak at <strong>L15 with +1.64 logit damage</strong> (28% of the 1.85 clean&minus;corrupted gap) &mdash; same mechanism at 63% of relative depth. Mamba-370M shows a noisier, more distributed pattern with peaks at L28 / L44 and weaker per-slice damage; possibly a partial-induction regime, possibly logit-metric under-reporting on a more confident model. The 2.8B C-matrix locus is therefore not n=1.</figcaption>
+    </figure>
+
+    <h3>2e. End-to-end picture: a second SAE on the pre-x_proj representation</h3>
+    <p>Trained a second TopK SAE <em>inside</em> L30, on the <code>x_proj</code> input (d_inner = 5120; 8&times; expansion, K=64). Scoring every internal feature by <code>(clean &minus; corrupted)</code> at induction positions yields <strong>~10 sparse features in the d_inner space that fire on pattern matches</strong>. Three of them (features 2230, 18334, 5252) fire at activation 3&ndash;8 on clean and <strong>&lt; 0.002 on corrupted</strong> &mdash; dedicated induction detectors in the pre-readout space.</p>
+    <p>Comparing the same SAE recipe at L28 vs L30 (where <code>x_proj</code> patch_damage jumps from 0.19 to 0.83): top feature score grows 27% but the 2nd through 4th features grow 3&ndash;4&times; (L28 ranks 2&ndash;4: 1.97/1.76/1.56; L30: 7.65/6.34/6.32). The induction circuit isn't fully formed at L28; by L30 a small bank of dedicated features is in place.</p>
+    <p>Putting it together &mdash; layers 0&ndash;29 accumulate pattern memory in the SSM state <code>h</code>; at L30 a small set of pre-x_proj features fire on matched patterns; those features project through the 16 rows of <code>C</code>; selective scan <code>y = C&middot;h</code> reads the matched component out to residual; L32 has a separate set of "induction-complete" features. Two SAEs at two sites of the same pipeline both recover sparse coding of the same circuit.</p>
 </div>
 
 <!-- DEFENSE: REP vs COMP -->
@@ -327,7 +351,7 @@ corrupted: [prefix 8] P(8) [mid 32] P'(8) &nbsp; (different second pattern)</div
 
     <div class="callout warn">
         <h4>Caveat &mdash; SAE coverage on Mamba-2</h4>
-        <p>The Mamba-2 SAE was not multi-seed-validated the way Mamba-1 was (&sect;6 D), so a residual concern is that the small clean&minus;corrupted gap on Mamba-2 partly reflects the SAE failing to capture induction features rather than Mamba-2 doing less induction. Two reasons to think this isn't the whole story: (1) the per-slice patching shape (B and C indistinguishable; signal spread across z/x/B/C) is independent of absolute gap magnitude &mdash; even within the small gap that does exist, no concentration emerges; (2) Arora et al. <em>Zoology</em> shows SSD-Mamba-2 underperforms selective-scan Mamba-1 on in-context recall <em>behaviorally</em> &mdash; same conclusion via a methodology that doesn't depend on SAE quality.</p>
+        <p>The Mamba-2 SAE was not multi-seed-validated the way Mamba-1 was (&sect;7 D), so a residual concern is that the small clean&minus;corrupted gap on Mamba-2 partly reflects the SAE failing to capture induction features rather than Mamba-2 doing less induction. Two reasons to think this isn't the whole story: (1) the per-slice patching shape (B and C indistinguishable; signal spread across z/x/B/C) is independent of absolute gap magnitude &mdash; even within the small gap that does exist, no concentration emerges; (2) Arora et al. <em>Zoology</em> shows SSD-Mamba-2 underperforms selective-scan Mamba-1 on in-context recall <em>behaviorally</em> &mdash; same conclusion via a methodology that doesn't depend on SAE quality.</p>
     </div>
 
     <div class="callout key">
@@ -337,9 +361,34 @@ corrupted: [prefix 8] P(8) [mid 32] P'(8) &nbsp; (different second pattern)</div
     </div>
 </div>
 
+<!-- CROSSCODER -->
+<div class="section" id="crosscoder">
+    <h2>6. Crosscoder: 99.6% of features are shared between Mamba and Pythia</h2>
+    <p>Trained a <strong>crosscoder</strong> (Lindsey et al. 2024 style) &mdash; a single TopK SAE with a shared encoder over concatenated <code>[x_mamba_L32, x_pythia_L16]</code> at matched-token positions, with separate decoders for each model. 5M Pile tokens, 40,960 features, K=64, 20K steps. A feature is "shared" if both decoders give it non-trivial weight; otherwise model-specific.</p>
+    <table>
+        <thead><tr><th></th><th>FVE</th></tr></thead>
+        <tbody>
+            <tr><td>Reconstruction of Mamba-1 L32 residual</td><td>0.66</td></tr>
+            <tr><td>Reconstruction of Pythia L16 residual</td><td>0.73</td></tr>
+        </tbody>
+    </table>
+    <table>
+        <thead><tr><th>Feature category</th><th>count / 40,960</th></tr></thead>
+        <tbody>
+            <tr><td><strong class="good">Shared features</strong> (contribute to both reconstructions)</td><td><strong>40,807 (99.6%)</strong></td></tr>
+            <tr><td>Mamba-only features</td><td>10 (0.02%)</td></tr>
+            <tr><td>Pythia-only features</td><td>143 (0.35%)</td></tr>
+        </tbody>
+    </table>
+    <div class="callout key">
+        <h4>The universality reading</h4>
+        <p>At the residual-stream level, Mamba-1 and Pythia encode an essentially complete shared dictionary of semantic concepts. The architectural difference (selective scan vs. attention) shows up in <em>how</em> features are routed and read out (&sect;1, &sect;2, &sect;4) but <em>not</em> in <em>which</em> features get represented. Combined with the SAE-CKA = 0.80 across architectures (vs. raw-activation CKA &asymp; 0.02 at the same depth), this is the strongest universality signal in the project.</p>
+    </div>
+</div>
+
 <!-- VALIDATION -->
 <div class="section" id="validation">
-    <h2>6. Validation: survives pressure testing</h2>
+    <h2>7. Validation: survives pressure testing</h2>
 
     <div class="grid">
         <div>
@@ -380,17 +429,25 @@ corrupted: [prefix 8] P(8) [mid 32] P'(8) &nbsp; (different second pattern)</div
         </tbody>
     </table>
     <p class="caption">Features identified from uniform-random synthetic patterns fire exactly on natural induction events in Pile text &mdash; repeated tokens, reused names, template-matching. Verifies semantic grounding.</p>
+
+    <h3>H. Position specificity</h3>
+    <figure>
+        <img src="figures/features_by_position.png" alt="features by position">
+        <figcaption>For each top-10 induction feature, mean activation (&plusmn;1&sigma; over 256 pairs) at every sequence position. Blue band = first pattern (positions 8&ndash;15); red band = second-pattern induction targets (positions 48&ndash;55). <strong>Every feature has its peak inside positions 48&ndash;55, with activation ratios from 22&times; to 1676&times; vs. off-induction positions</strong> (one feature: ratio = &infin;, zero off-induction activation). The features are induction-specific, not generic "something interesting" detectors.</figcaption>
+    </figure>
 </div>
 
 <!-- TAKE-HOME -->
 <div class="section" id="takehome">
-    <h2>7. Take-home</h2>
+    <h2>8. Take-home</h2>
     <ul>
         <li><strong>Sparse decomposability transfers to SSMs.</strong> With normalization, Mamba-1, Mamba-2, and Pythia reach FVE in the same 0.63&ndash;0.97 range. Whether SSM activations are sparsely decomposable is no longer an open question.</li>
         <li><strong>Architecture-level feature geometry differs sharply.</strong> At middle relative depth, Pythia packs 8&times; more variance into its dominant features (PR); each Pythia feature has 1.75&times; more single-feature causal leverage. Per-layer comparison; the gap goes opposite the naive depth-burden prediction so it is not a layer-count artifact.</li>
         <li><strong>Mamba-1 does attention-free induction in 16 dimensions.</strong> The L30 C-matrix slice &mdash; 8% of <code>x_proj</code>'s output at L30 &mdash; carries 80% of induction-feature signal and 47.5% of next-token logit, an unusually concentrated mechanistic localization at this scale.</li>
         <li><strong>Representation &ne; computation.</strong> A linear probe says the information is in &Delta; (97.7%); patching says the causal machinery is in C (57.5% decodable but 80% causal). Methodological cautionary tale for the broader literature.</li>
         <li><strong>Specificity to selective scan, not to SSMs.</strong> Mamba-2 (SSD) shows 15&times; weaker induction with B and C causally indistinguishable; converges with Arora et al. "Zoology" behaviorally. The C-matrix locus is a property of selective scan in particular.</li>
+        <li><strong>The C-matrix locus reproduces below 2.8B.</strong> Mamba-130M shows the same C-matrix peak at L15 (28% of the clean&minus;corrupted gap). Not n=1.</li>
+        <li><strong>Universality at the feature level.</strong> A crosscoder over Mamba-1 L32 and Pythia L16 finds <strong>99.6% shared features</strong> (40,807/40,960). Architectures differ in <em>how</em> features are routed and read out, not in <em>which</em> concepts get encoded.</li>
         <li><strong>Productive reversal.</strong> Architecture-level feature geometry: Mamba distributes, Pythia concentrates. For the specific induction circuit, the pattern reverses: Mamba concentrates into 16 dims at one layer; Pythia spreads the signal across multiple middle attention layers (max single-site 0.365). Articulating <em>why</em> (Mamba lacks a general routing operation and is forced onto its one 16-dim state-readout) sharpens the contrast rather than undermining it.</li>
     </ul>
 </div>
