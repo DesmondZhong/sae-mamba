@@ -2,6 +2,8 @@
 
 A controlled cross-architecture study at 2.8B parameter scale, plus a mechanistic localization of the attention-free induction circuit in Mamba-1.
 
+**🔗 Live writeup with figures: [sae-mamba.desmondzhong.com](https://sae-mamba.desmondzhong.com/)**
+
 We trained TopK sparse autoencoders on residual-stream activations from **Mamba-1 2.8B**, **Mamba-2 2.7B**, and **Pythia-2.8B** — all pretrained on The Pile, matched on parameter count and `d_model = 2560` — and used them to (1) compare feature geometry across architectures and (2) reverse-engineer where Mamba performs induction without attention.
 
 ---
@@ -20,7 +22,7 @@ Two further findings worth flagging:
 
 - **Universality at the feature level.** A crosscoder over Mamba-1 L32 and Pythia L16 finds **99.6% of features are shared** between the two models (40,807 of 40,960). Architectures differ in how features are routed and read out, not in which concepts get encoded.
 
-Full writeup with figures: open `web/index.html` in a browser.
+Full writeup with figures: **[sae-mamba.desmondzhong.com](https://sae-mamba.desmondzhong.com/)**.
 
 ---
 
@@ -30,9 +32,8 @@ Full writeup with figures: open `web/index.html` in a browser.
 src/                    SAE training, activation caching, Mamba mixer-internals patcher
 scripts/01_..03_*.py    Original cross-architecture sweep at 130M-370M (early-stage exploration)
 scripts/04_..36_*.py    2.8B-scale experiments: induction localization, controls, validation
-web/index.html          Main writeup (start here)
+web/index.html          Main writeup (source for the live site)
 web/index_2.8b.html     Extended dashboard for the 2.8B sweep
-report_2.8b.md          Companion report
 CLAUDE.md               Hardware budget + OOM hazards (read before launching long runs)
 ```
 
