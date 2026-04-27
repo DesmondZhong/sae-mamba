@@ -120,7 +120,6 @@ nav a:hover { text-decoration: underline; }
     <a href="#defense">Rep. vs computation</a>
     <a href="#pythia">Pythia control</a>
     <a href="#mamba2">Mamba-2 control</a>
-    <a href="#crosscoder">Crosscoder</a>
     <a href="#validation">Validation</a>
     <a href="#takehome">Take-home</a>
 </nav>
@@ -397,7 +396,7 @@ nav a:hover { text-decoration: underline; }
 
     <div class="callout warn">
         <h4>Caveat &mdash; SAE coverage on Mamba-2</h4>
-        <p>The Mamba-2 SAE was not multi-seed-validated the way Mamba-1 was (&sect;7 D), so a residual concern is that the small clean&minus;corrupted gap on Mamba-2 partly reflects the SAE failing to capture induction features rather than Mamba-2 doing less induction. Two reasons to think this isn't the whole story: (1) the per-slice patching shape (B and C indistinguishable; signal spread across z/x/B/C) is independent of absolute gap magnitude &mdash; even within the small gap that does exist, no concentration emerges; (2) Arora et al. (2023) show SSD-Mamba-2 underperforms selective-scan Mamba-1 on in-context recall <em>behaviorally</em> &mdash; same conclusion via a methodology that doesn't depend on SAE quality.</p>
+        <p>The Mamba-2 SAE was not multi-seed-validated the way Mamba-1 was (&sect;6 D), so a residual concern is that the small clean&minus;corrupted gap on Mamba-2 partly reflects the SAE failing to capture induction features rather than Mamba-2 doing less induction. Two reasons to think this isn't the whole story: (1) the per-slice patching shape (B and C indistinguishable; signal spread across z/x/B/C) is independent of absolute gap magnitude &mdash; even within the small gap that does exist, no concentration emerges; (2) Arora et al. (2023) show SSD-Mamba-2 underperforms selective-scan Mamba-1 on in-context recall <em>behaviorally</em> &mdash; same conclusion via a methodology that doesn't depend on SAE quality.</p>
     </div>
 
     <div class="callout key">
@@ -407,34 +406,9 @@ nav a:hover { text-decoration: underline; }
     </div>
 </div>
 
-<!-- CROSSCODER -->
-<div class="section" id="crosscoder">
-    <h2>6. Crosscoder: 99.6% of features are shared between Mamba and Pythia</h2>
-    <p>Trained a <strong>crosscoder</strong> in the style of Lindsey et al. (2024) &mdash; a single TopK SAE with a shared encoder over concatenated <code>[x_mamba_L32, x_pythia_L16]</code> at matched-token positions, with separate decoders for each model. 5M Pile tokens, 40,960 features, K=64, 20K steps. A feature is "shared" if both decoders give it non-trivial weight; otherwise model-specific.</p>
-    <table>
-        <thead><tr><th></th><th>FVE</th></tr></thead>
-        <tbody>
-            <tr><td>Reconstruction of Mamba-1 L32 residual</td><td>0.66</td></tr>
-            <tr><td>Reconstruction of Pythia L16 residual</td><td>0.73</td></tr>
-        </tbody>
-    </table>
-    <table>
-        <thead><tr><th>Feature category</th><th>count / 40,960</th></tr></thead>
-        <tbody>
-            <tr><td><strong class="good">Shared features</strong> (contribute to both reconstructions)</td><td><strong>40,807 (99.6%)</strong></td></tr>
-            <tr><td>Mamba-only features</td><td>10 (0.02%)</td></tr>
-            <tr><td>Pythia-only features</td><td>143 (0.35%)</td></tr>
-        </tbody>
-    </table>
-    <div class="callout key">
-        <h4>The universality reading</h4>
-        <p>At the residual-stream level, Mamba-1 and Pythia encode an essentially complete shared dictionary of semantic concepts. The architectural difference (selective scan vs. attention) shows up in <em>how</em> features are routed and read out (&sect;1, &sect;2, &sect;4) but <em>not</em> in <em>which</em> features get represented. Combined with the SAE-CKA = 0.80 across architectures (vs. raw-activation CKA &asymp; 0.02 at the same depth), this is the strongest universality signal in the project.</p>
-    </div>
-</div>
-
 <!-- VALIDATION -->
 <div class="section" id="validation">
-    <h2>7. Validation: survives pressure testing</h2>
+    <h2>6. Validation: survives pressure testing</h2>
 
     <div class="grid">
         <div>
@@ -485,7 +459,7 @@ nav a:hover { text-decoration: underline; }
 
 <!-- TAKE-HOME -->
 <div class="section" id="takehome">
-    <h2>8. Take-home</h2>
+    <h2>7. Take-home</h2>
     <ul>
         <li><strong>Sparse decomposability transfers to SSMs.</strong> With normalization, Mamba-1, Mamba-2, and Pythia reach FVE in the same 0.63&ndash;0.97 range. Whether SSM activations are sparsely decomposable is no longer an open question.</li>
         <li><strong>Architecture-level feature geometry differs sharply.</strong> At middle relative depth, Pythia packs 8&times; more variance into its dominant features (PR); each Pythia feature has 1.75&times; more single-feature causal leverage. Per-layer comparison; the gap goes opposite the naive depth-burden prediction so it is not a layer-count artifact.</li>
@@ -493,7 +467,6 @@ nav a:hover { text-decoration: underline; }
         <li><strong>Representation &ne; computation.</strong> A linear probe says the information is in &Delta; (97.7%); patching says the causal machinery is in C (57.5% decodable but 80% causal). Methodological cautionary tale for the broader literature.</li>
         <li><strong>Specificity to selective scan, not to SSMs.</strong> Mamba-2 (SSD) shows 15&times; weaker induction with B and C causally indistinguishable; converges with Arora et al. (2023) behaviorally. The C-matrix locus is a property of selective scan in particular.</li>
         <li><strong>The C-matrix locus reproduces below 2.8B.</strong> Mamba-130M shows the same C-matrix peak at L15 (28% of the clean&minus;corrupted gap). Not n=1.</li>
-        <li><strong>Universality at the feature level.</strong> A crosscoder over Mamba-1 L32 and Pythia L16 finds <strong>99.6% shared features</strong> (40,807/40,960). Architectures differ in <em>how</em> features are routed and read out, not in <em>which</em> concepts get encoded.</li>
         <li><strong>Productive reversal.</strong> Architecture-level feature geometry: Mamba distributes, Pythia concentrates. For the specific induction circuit, the pattern reverses: Mamba concentrates into 16 dims at one layer; Pythia spreads the signal across multiple middle attention layers (max single-site 0.365). Articulating <em>why</em> (Mamba lacks a general routing operation and is forced onto its one 16-dim state-readout) sharpens the contrast rather than undermining it.</li>
     </ul>
 </div>
