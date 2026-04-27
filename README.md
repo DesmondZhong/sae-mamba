@@ -2,8 +2,6 @@
 
 A controlled cross-architecture study at 2.8B parameter scale, plus a mechanistic localization of the attention-free induction circuit in Mamba-1.
 
-**🔗 Live writeup with figures: [sae-mamba.desmondzhong.com](https://sae-mamba.desmondzhong.com/)**
-
 We trained TopK sparse autoencoders on residual-stream activations from **Mamba-1 2.8B**, **Mamba-2 2.7B**, and **Pythia-2.8B** — all pretrained on The Pile, matched on parameter count and `d_model = 2560` — and used them to (1) compare feature geometry across architectures and (2) reverse-engineer where Mamba performs induction without attention.
 
 ---
